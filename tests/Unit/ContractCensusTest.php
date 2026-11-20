@@ -71,6 +71,78 @@ final class ContractCensusTest extends TestCase
 		'LICENSE_SEAT_REVOKED',
 	];
 
+	/**
+	 * Spec §10.1 column inventory (verbatim names; spec shorthand expanded
+	 * to the shipped column names — deviations are commented inline).
+	 * A column added in a migration but absent here fails the census:
+	 * either revert the column or log a §D spec amendment.
+	 */
+	private const SPEC_COLUMNS = [
+		'exp_claims' => ['id', 'claim_no', 'user_id', 'title', 'purpose',
+			'status', 'currency', 'total_minor', 'reimbursable_total_minor',
+			'nonreimbursable_total_minor', 'org_total_minor', 'fx_rate',
+			'chain_id', 'chain_snapshot', 'current_step', 'cost_center_id',
+			'pc_customer_id', 'pc_project_id', 'azc_trip_id', 'period_id',
+			'submitted_at', 'decided_at', 'decided_by', 'decision_note',
+			'settled_at', 'settled_by', 'settlement_ref', 'batch_id',
+			'version', 'created_at', 'updated_at', 'request_key',
+			// F22 billed marker (Version1001) — §D amendment pending:
+			// ExpBillableReadFacade needs a durable invoiced stamp.
+			'billed_at', 'billed_ref'],
+		'exp_claim_lines' => ['id', 'claim_id', 'line_type', 'occurred_on',
+			'category_id', 'merchant', 'description', 'amount_minor',
+			'tax_minor', 'tax_rate', 'foreign_amount_minor',
+			'foreign_currency', 'foreign_fx', 'distance_km', 'days',
+			'quantity', 'rate_id', 'rate_code', 'rate_minor', 'rate_name',
+			'justification', 'reimbursable', 'distance_source',
+			'route_file_id', 'source_app', 'source_ref', 'attendees',
+			'occasion', 'tip_minor', 'policy_flags', 'sort', 'created_at',
+			'updated_at'],
+		'exp_claim_allocations' => ['id', 'line_id', 'cost_center_id',
+			'share_percent', 'amount_minor', 'pc_project_id'],
+		'exp_attachments' => ['id', 'claim_id', 'line_id', 'inbox', 'file_id',
+			'name', 'mime', 'size', 'sha256', 'uploaded_by', 'created_at'],
+		'exp_categories' => ['id', 'code', 'name', 'receipt_required',
+			// spec names just_threshold_minor/just_min_len; shipped names are
+			// unambiguous — §D amendment recommended over renaming columns.
+			'justification_threshold_minor', 'justification_min_length',
+			'default_amount_minor', 'requires_attendees', 'max_amount_minor',
+			'max_is_hard', 'allow_lines', 'active', 'sort', 'deleted'],
+		'exp_cost_centers' => ['id', 'code', 'name', 'parent_id',
+			'azc_team_id', 'budget_minor', 'currency', 'active', 'deleted'],
+		'exp_rate_entries' => ['id', 'rate_type', 'code', 'name', 'currency',
+			'rate_minor', 'effective_from', 'active', 'created_by',
+			'created_at'],
+		'exp_chains' => ['id', 'name', 'active', 'min_total_minor',
+			'category_id', 'sort'],
+		'exp_chain_steps' => ['id', 'chain_id', 'step_no', 'step_type',
+			'group_id', 'user_id'],
+		'exp_fx_rates' => ['id', 'currency', 'rate', 'effective_from',
+			'created_by', 'created_at'],
+		'exp_manager_map' => ['id', 'user_id', 'manager_uids', 'created_by',
+			'created_at', 'updated_at'],
+		'exp_step_decisions' => ['id', 'claim_id', 'step_no', 'decided_by',
+			'decision', 'note', 'created_at'],
+		'exp_claim_events' => ['id', 'claim_id', 'seq', 'actor', 'event',
+			'from_status', 'to_status', 'payload', 'payload_hash',
+			'prev_hash', 'entry_hash', 'tombstoned', 'created_at'],
+		'exp_delegates' => ['id', 'manager_uid', 'delegate_uid', 'valid_from',
+			'valid_to', 'created_by', 'created_at', 'revoked_at'],
+		'exp_periods' => ['id', 'name', 'start_on', 'end_on', 'status',
+			'closed_by', 'closed_at', 'reopen_reason'],
+		'exp_settlement_batches' => ['id', 'created_by', 'created_at',
+			'format', 'row_count', 'file_hash', 'period_id'],
+		'exp_settlement_rows' => ['id', 'batch_id', 'claim_id', 'paid_ref',
+			'paid_at'],
+		'exp_mobile_seats' => ['id', 'user_id', 'assigned_by', 'assigned_at'],
+		'exp_idempotency' => ['key', 'user_id', 'claim_id', 'created_at'],
+		'exp_audit_log' => ['id', 'actor', 'action', 'payload', 'created_at'],
+		'exp_notification_log' => ['id', 'dedupe_key', 'event', 'claim_id',
+			'recipient', 'channel', 'created_at'],
+		// D-01: per-org yearly claim_no sequence allocator.
+		'exp_claim_counters' => ['year', 'next_seq'],
+	];
+
 	public function testSchemaInventoryFourWayAgreement(): void
 	{
 		$migrationTables = $this->migrationTables();
@@ -96,6 +168,29 @@ final class ContractCensusTest extends TestCase
 			'UninstallDropTables::TABLES drifted — orphan tables after uninstall');
 		$this->assertSame($spec, $sortedManifest,
 			'TransferManifest tables() drifted — unclassified app table');
+	}
+
+	/**
+	 * Column-level census: migration schema vs spec §10.1 inventory —
+	 * a column added or silently dropped without a spec amendment is drift.
+	 */
+	public function testSchemaColumnInventoryMatchesSpec(): void
+	{
+		$actual = $this->migrationColumns();
+		$specKeys = array_keys(self::SPEC_COLUMNS);
+		sort($specKeys);
+		$actualKeys = array_keys($actual);
+		sort($actualKeys);
+		$this->assertSame($specKeys, $actualKeys,
+			'table set drifted from §10.1');
+		foreach (self::SPEC_COLUMNS as $table => $cols) {
+			$expected = $cols;
+			sort($expected);
+			$got = $actual[$table];
+			sort($got);
+			$this->assertSame($expected, $got,
+				"{$table} columns drifted from §10.1 — log a §D amendment or revert the migration delta");
+		}
 	}
 
 	/**
@@ -146,6 +241,46 @@ final class ContractCensusTest extends TestCase
 			$this->assertSame($expectedClass, $spec['class'],
 				"settings key {$key} class mismatch: registry {$class} vs manifest {$spec['class']}");
 		}
+	}
+
+	/**
+	 * §10.7 census: every spec settings key is either a REGISTRY row or a
+	 * documented alternate home. No appconfig key may exist outside this
+	 * census (invisible config = config drift).
+	 */
+	public function testSettingsKeysMatchSpecInventory(): void
+	{
+		// Spec §10.7 keys that live in SettingsService::REGISTRY verbatim.
+		$specRegistry = [
+			'org_currency', 'enable_mileage_claims', 'allow_route_evidence',
+			'allow_self_approve', 'attachment_max_mb',
+			'attachment_max_per_claim_mb', 'attachment_max_files',
+			'inbox_purge_days', 'retention_years', 'digest_cadence',
+			'export_async_rows', 'mc_coexistence_mode', 'license_key',
+			'license_offline_grace_h', 'digest_last_run', 'export_job_state',
+		];
+		foreach ($specRegistry as $key) {
+			$this->assertArrayHasKey($key, SettingsService::REGISTRY,
+				"§10.7 key {$key} missing from REGISTRY");
+		}
+		// Mirrored access-door keys live in AccessControlService (§3.4).
+		foreach (['access_restriction_enabled', 'access_allowed_user_ids',
+			'access_allowed_group_ids', 'app_admin_user_ids'] as $key) {
+			$this->assertContains($key, [
+				\OCA\ExpenseCheck\Service\AccessControlService::KEY_ACCESS_RESTRICTION,
+				\OCA\ExpenseCheck\Service\AccessControlService::KEY_ACCESS_ALLOWED_USER_IDS,
+				\OCA\ExpenseCheck\Service\AccessControlService::KEY_ACCESS_ALLOWED_GROUP_IDS,
+				\OCA\ExpenseCheck\Service\AccessControlService::KEY_APP_ADMINS,
+			], "access-door key {$key} homeless");
+		}
+		// D-05: seat_assignments ships as the exp_mobile_seats table, not
+		// an appconfig blob — it must NOT reappear as a settings key.
+		$this->assertArrayNotHasKey('seat_assignments', SettingsService::REGISTRY);
+		// Reverse direction: no undocumented registry keys either.
+		$documented = array_merge($specRegistry, ['journal_version']); // chain format version, internal
+		$this->assertSame([], array_values(array_diff(
+			array_keys(SettingsService::REGISTRY), $documented)),
+			'REGISTRY keys without a §10.7 row — spec amend or remove');
 	}
 
 	public function testEmittedErrorCodesInDictionary(): void
