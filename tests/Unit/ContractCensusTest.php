@@ -98,6 +98,44 @@ final class ContractCensusTest extends TestCase
 			'TransferManifest tables() drifted — unclassified app table');
 	}
 
+	/**
+	 * Every schema column must have a matching camelCase property on the
+	 * mapped entity — QBMapper::fromRow fatals otherwise (the billed_at
+	 * bug class: column added, entity property forgotten).
+	 */
+	public function testEntitySchemaParity(): void
+	{
+		$dbDir = \dirname(__DIR__, 2) . '/lib/Db';
+		$columns = $this->migrationColumns();
+		$checked = 0;
+		foreach (glob($dbDir . '/*Mapper.php') ?: [] as $mapperFile) {
+			$src = (string)file_get_contents($mapperFile);
+			if (!preg_match("/const TABLE = '([a-z0-9_]+)'/", $src, $tm)
+				|| !preg_match('/self::TABLE, (\w+)::class/', $src, $em)) {
+				continue;
+			}
+			$table = $tm[1];
+			$entityClass = 'OCA\\ExpenseCheck\\Db\\' . $em[1];
+			if (!class_exists($entityClass)) {
+				$this->fail("{$mapperFile} maps nonexistent entity {$entityClass}");
+			}
+			$entitySrc = (string)file_get_contents(
+				$dbDir . '/' . $em[1] . '.php');
+			foreach ($columns[$table] ?? [] as $col) {
+				if ($col === 'id') {
+					continue; // inherited from OCP\AppFramework\Db\Entity
+				}
+				$prop = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $col))));
+				$this->assertMatchesRegularExpression(
+					'/protected \??\S+ \$' . preg_quote($prop, '/') . '\b/',
+					$entitySrc,
+					"{$table}.{$col} has no {$entityClass}::\${$prop} — entity/schema drift");
+			}
+			$checked++;
+		}
+		$this->assertGreaterThan(10, $checked, 'entity census sanity — too few mappers parsed');
+	}
+
 	public function testSettingsRegistryCoveredByManifest(): void
 	{
 		$manifest = (new TransferManifest());
@@ -198,16 +236,47 @@ final class ContractCensusTest extends TestCase
 	/** @return list<string> */
 	private function migrationTables(): array
 	{
-		$tables = [];
+		return array_keys($this->migrationColumns());
+	}
+
+	/**
+	 * table → column list parsed from every migration (createTable and
+	 * later addColumn calls both count).
+	 * @return array<string, list<string>>
+	 */
+	private function migrationColumns(): array
+	{
+		$out = [];
 		$migDir = \dirname(__DIR__, 2) . '/lib/Migration';
 		foreach (glob($migDir . '/*.php') ?: [] as $file) {
 			$src = (string)file_get_contents($file);
-			if (preg_match_all("/createTable\\('([a-z0-9_]+)'/", $src, $m)) {
-				foreach ($m[1] as $t) {
-					$tables[$t] = true;
+			// createTable('t') ... addColumn('c') — attribute columns to the
+			// enclosing createTable block.
+			if (preg_match_all("/createTable\\('([a-z0-9_]+)'\\)(.*?)(?=createTable\\(|$)/s", $src, $m, PREG_SET_ORDER)) {
+				foreach ($m as $block) {
+					$table = $block[1];
+					$out[$table] = $out[$table] ?? [];
+					if (preg_match_all("/addColumn\\('([a-z0-9_]+)'/", $block[2], $cm)) {
+						$out[$table] = array_merge($out[$table], $cm[1]);
+					}
+				}
+			}
+			// getTable('t') → addColumn('c') in later migrations.
+			if (preg_match_all("/getTable\\('([a-z0-9_]+)'\\)(.*?)(?=getTable\\(|$)/s", $src, $m2, PREG_SET_ORDER)) {
+				foreach ($m2 as $block) {
+					$table = $block[1];
+					if (!isset($out[$table])) {
+						continue; // column added to a table we don't own
+					}
+					if (preg_match_all("/addColumn\\('([a-z0-9_]+)'/", $block[2], $cm)) {
+						$out[$table] = array_merge($out[$table], $cm[1]);
+					}
 				}
 			}
 		}
-		return array_keys($tables);
+		foreach ($out as $t => $cols) {
+			$out[$t] = array_values(array_unique($cols));
+		}
+		return $out;
 	}
 }

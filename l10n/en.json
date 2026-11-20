@@ -196,6 +196,11 @@
 "awaiting your decision": "awaiting your decision",
 "none": "none",
 "the companion apps": "the companion apps",
-"the mobile companion app": "the mobile companion app"
+"the mobile companion app": "the mobile companion app",
+"ExpenseCheck: %n expense claim awaiting your decision": "ExpenseCheck: %n expense claim awaiting your decision",
+"ExpenseCheck: %n expense claims awaiting your decision": "ExpenseCheck: %n expense claims awaiting your decision",
+"The following expense claims are waiting for your approval:": "The following expense claims are waiting for your approval:",
+"… and %n more": "… and %n more",
+"Review: %1$s": "Review: %1$s"
 }
 }

@@ -196,6 +196,11 @@
 "awaiting your decision": "warten auf Ihre Entscheidung",
 "none": "keine",
 "the companion apps": "die Begleit-Apps",
-"the mobile companion app": "die mobile Begleit-App"
+"the mobile companion app": "die mobile Begleit-App",
+"ExpenseCheck: %n expense claim awaiting your decision": "ExpenseCheck: %n Ausgabeantrag wartet auf Ihre Entscheidung",
+"ExpenseCheck: %n expense claims awaiting your decision": "ExpenseCheck: %n Ausgabeanträge warten auf Ihre Entscheidung",
+"The following expense claims are waiting for your approval:": "Die folgenden Ausgabeanträge warten auf Ihre Genehmigung:",
+"… and %n more": "… und %n weitere",
+"Review: %1$s": "Prüfen: %1$s"
 }
 }

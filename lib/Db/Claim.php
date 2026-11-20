@@ -61,6 +61,10 @@ use OCP\AppFramework\Db\Entity;
  * @method void setSettlementRef(?string $v)
  * @method ?int getBatchId()
  * @method void setBatchId(?int $v)
+ * @method ?\DateTime getBilledAt()
+ * @method void setBilledAt(?\DateTime $v)
+ * @method ?string getBilledRef()
+ * @method void setBilledRef(?string $v)
  * @method int getVersion()
  * @method void setVersion(int $v)
  * @method \DateTime getCreatedAt()
@@ -99,6 +103,8 @@ class Claim extends Entity
 	protected ?string $settledBy = null;
 	protected ?string $settlementRef = null;
 	protected ?int $batchId = null;
+	protected ?\DateTime $billedAt = null;
+	protected ?string $billedRef = null;
 	protected int $version = 0;
 	protected ?\DateTime $createdAt = null;
 	protected ?\DateTime $updatedAt = null;
@@ -133,6 +139,8 @@ class Claim extends Entity
 		$this->addType('settledBy', 'string');
 		$this->addType('settlementRef', 'string');
 		$this->addType('batchId', 'integer');
+		$this->addType('billedAt', 'datetime');
+		$this->addType('billedRef', 'string');
 		$this->addType('version', 'integer');
 		$this->addType('createdAt', 'datetime');
 		$this->addType('updatedAt', 'datetime');
