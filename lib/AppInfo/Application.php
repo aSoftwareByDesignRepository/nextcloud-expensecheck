@@ -35,6 +35,10 @@ class Application extends App implements IBootstrap
 		$context->registerCapability(\OCA\ExpenseCheck\Capabilities::class);
 		$context->registerNotifierService(\OCA\ExpenseCheck\Notification\Notifier::class);
 		$context->registerDashboardWidget(\OCA\ExpenseCheck\Dashboard\ExpenseWidget::class);
+		$context->registerEventListener(
+			\OCP\User\Events\UserDeletedEvent::class,
+			\OCA\ExpenseCheck\Listener\UserDeletedListener::class
+		);
 	}
 
 	public function boot(IBootContext $context): void
