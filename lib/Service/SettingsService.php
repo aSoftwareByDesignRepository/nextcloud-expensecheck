@@ -92,6 +92,49 @@ class SettingsService
 	}
 
 	/**
+	 * The single settings writer normaliser (validator parity, NN-08):
+	 * used by the settings API AND the config-transfer import path so a
+	 * transferred value lands byte-identical to a UI-saved one.
+	 *
+	 * @throws \InvalidArgumentException stable code in the message
+	 */
+	public function normalizeForWrite(string $key, string $value): string
+	{
+		$def = self::REGISTRY[$key] ?? null;
+		if ($def === null) {
+			throw new \InvalidArgumentException('UNKNOWN_SETTING_KEY');
+		}
+		[$type, , $class] = $def;
+		if ($class !== 'plain') {
+			throw new \InvalidArgumentException('KEY_NOT_WRITEABLE');
+		}
+		if ($type === 'bool') {
+			return in_array(strtolower($value), ['1', 'true', 'on'], true) ? '1' : '0';
+		}
+		if ($type === 'int') {
+			if (!preg_match('/^\d+$/', $value)) {
+				throw new \InvalidArgumentException('INVALID_INT');
+			}
+			return $value;
+		}
+		if (str_starts_with($type, 'enum:')) {
+			if (!in_array($value, explode(',', substr($type, 5)), true)) {
+				throw new \InvalidArgumentException('INVALID_ENUM');
+			}
+			return $value;
+		}
+		if ($type === 'currency') {
+			$v = strtoupper($value);
+			if (!preg_match('/^[A-Z]{3}$/', $v)) {
+				throw new \InvalidArgumentException('INVALID_CURRENCY');
+			}
+			return $v;
+		}
+		// 'ts'/'json'/'sealed' types never reach this point (non-plain class).
+		throw new \InvalidArgumentException('KEY_NOT_WRITEABLE');
+	}
+
+	/**
 	 * Server-side clamp for attachment limits: admin-tunable DOWN only —
 	 * family ceiling is hard (5 MB/file, 25 MB/claim, 10 files).
 	 */

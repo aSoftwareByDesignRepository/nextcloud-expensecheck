@@ -94,6 +94,12 @@ Wir verbessern diese App mit Rückmeldungen aus der Praxis. Fehlerberichte, Stol
 			<step>OCA\ExpenseCheck\Repair\UninstallDropTables</step>
 		</uninstall>
 	</repair-steps>
+	<commands>
+		<command>OCA\ExpenseCheck\Command\UpgradeBackupCommand</command>
+		<command>OCA\ExpenseCheck\Command\ConfigExportCommand</command>
+		<command>OCA\ExpenseCheck\Command\ConfigImportCommand</command>
+		<command>OCA\ExpenseCheck\Command\ConfigReconcileCommand</command>
+	</commands>
 	<background-jobs>
 		<job>OCA\ExpenseCheck\BackgroundJob\DigestMailJob</job>
 		<job>OCA\ExpenseCheck\BackgroundJob\RetentionCleanupJob</job>

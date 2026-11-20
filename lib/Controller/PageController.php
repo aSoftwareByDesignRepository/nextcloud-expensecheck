@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\ExpenseCheck\Controller;
 
 use OCA\ExpenseCheck\AppInfo\Application;
+use OCA\ExpenseCheck\ConfigTransfer\TransferReceiptStore;
 use OCA\ExpenseCheck\Exception\ClaimNotFoundException;
 use OCA\ExpenseCheck\Service\AccessControlService;
 use OCA\ExpenseCheck\Service\ClaimLifecycleService;
@@ -52,6 +53,7 @@ class PageController extends Controller
 		private readonly IL10N $l10n,
 		private readonly IURLGenerator $urlGenerator,
 		private readonly IUserSession $userSession,
+		private readonly TransferReceiptStore $transferReceipts,
 	) {
 		parent::__construct($appName, $request);
 	}
@@ -66,6 +68,11 @@ class PageController extends Controller
 		Util::addScript(Application::APP_ID, 'common/focus-preservation');
 		Util::addScript(Application::APP_ID, 'common/view-components');
 		Util::addScript(Application::APP_ID, 'pages/app-views');
+		if (($params['settingsSection'] ?? '') === 'transfer') {
+			Util::addStyle(Application::APP_ID, 'common/transfer');
+			Util::addScript(Application::APP_ID, 'transfer-bridge');
+			Util::addScript(Application::APP_ID, 'transfer');
+		}
 		$uid = $this->access->currentUserId();
 		$role = 'member';
 		if ($this->access->isAppAdmin($uid)) {
@@ -74,6 +81,15 @@ class PageController extends Controller
 			$role = 'finance';
 		} elseif ($this->access->isAuditor($uid)) {
 			$role = 'auditor';
+		}
+		if ($pageId === 'settings') {
+			$params['settingsSectionLabels'] = \OCA\ExpenseCheck\Service\SettingsSectionCatalog::labels($this->l10n);
+			$sectionUrls = [];
+			foreach (\OCA\ExpenseCheck\Service\SettingsSectionCatalog::SLUGS as $slug) {
+				$sectionUrls[$slug] = $this->urlGenerator->linkToRoute(
+					'expensecheck.page.settingsSection', ['section' => $slug]);
+			}
+			$params['settingsSectionUrls'] = $sectionUrls;
 		}
 		$params += [
 			'pageId' => $pageId,
@@ -253,7 +269,11 @@ class PageController extends Controller
 		if (!$this->access->isAppAdmin($this->access->currentUserId())) {
 			throw new ClaimNotFoundException();
 		}
-		return $this->render('settings', ['settingsSection' => 'general']);
+		return $this->render('settings', [
+			'settingsSection' => 'general',
+			'isSystemAdmin' => false,
+			'transferLastReceipt' => null,
+		]);
 	}
 
 	#[NoAdminRequired] #[NoCSRFRequired]
@@ -262,7 +282,17 @@ class PageController extends Controller
 		if (!$this->access->isAppAdmin($this->access->currentUserId())) {
 			throw new ClaimNotFoundException();
 		}
-		return $this->render('settings', ['settingsSection' => $section]);
+		$params = ['settingsSection' => $section];
+		if ($section === 'transfer') {
+			$params['isSystemAdmin'] = $this->access->isSystemAdmin($this->access->currentUserId());
+			$params['transferLastReceipt'] = $this->transferReceipts->lastReceipt();
+			// Config-only transfer (spec §12.6) — the synced part defaults
+			// to "business data" copy; this app must say what it ships.
+			$params['transferExportBlurb'] = $this->l10n->t(
+				'Download all settings, catalogues, approval chains and org config as one encrypted file — then import it on your production instance. Claims, receipts and journals never leave this instance.'
+			);
+		}
+		return $this->render('settings', $params);
 	}
 
 	#[NoAdminRequired] #[NoCSRFRequired]

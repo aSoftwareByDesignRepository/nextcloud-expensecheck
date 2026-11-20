@@ -123,6 +123,13 @@ return [
 		['name' => 'settingsApi#get', 'url' => '/api/settings', 'verb' => 'GET'],
 		['name' => 'settingsApi#save', 'url' => '/api/settings', 'verb' => 'POST'],
 
+		// ── Config & data transfer (test → production, spec §12.6) ─
+		['name' => 'transferApi#status', 'url' => '/api/admin/transfer/status', 'verb' => 'GET'],
+		['name' => 'transferApi#export', 'url' => '/api/admin/transfer/export', 'verb' => 'POST'],
+		['name' => 'transferApi#preview', 'url' => '/api/admin/transfer/preview', 'verb' => 'POST'],
+		['name' => 'transferApi#apply', 'url' => '/api/admin/transfer/apply', 'verb' => 'POST'],
+		['name' => 'transferApi#reconcile', 'url' => '/api/admin/transfer/reconcile', 'verb' => 'POST'],
+
 		// ── Lookups for pickers (claimant-visible, scope=access) ────
 		['name' => 'claimApi#lookups', 'url' => '/api/lookups', 'verb' => 'GET'],
 

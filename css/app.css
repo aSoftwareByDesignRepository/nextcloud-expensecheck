@@ -1,0 +1,64 @@
+/**
+ * ExpenseCheck app-level overrides — loaded last by AssetRegistrar.
+ * Only app-private rules live here; shared packs stay in css/common/.
+ */
+
+/* ── Settings section chip bar (settings-pages standard) ─────── */
+.exp-settings-nav {
+	display: flex;
+	flex-wrap: nowrap;
+	align-items: stretch;
+	gap: var(--exp-space-2);
+	margin: 0 0 var(--exp-space-5, 24px);
+	padding: 0 0 var(--exp-space-3, 12px);
+	border-bottom: 1px solid var(--exp-border);
+	overflow-x: auto;
+	overflow-y: hidden;
+	scrollbar-width: thin;
+	scroll-snap-type: x proximity;
+}
+
+#app-content.exp-app .exp-settings-nav__link,
+.exp-app .exp-settings-nav__link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	min-height: var(--exp-touch);
+	min-width: var(--exp-touch);
+	padding: var(--exp-space-2) var(--exp-space-3);
+	border-radius: var(--exp-radius-sm);
+	border: 1px solid var(--exp-border);
+	text-decoration: none;
+	color: var(--exp-text);
+	background: var(--exp-bg-card);
+	font-weight: 600;
+	font-size: var(--exp-fs-sm);
+	line-height: 1.2;
+	white-space: nowrap;
+	scroll-snap-align: start;
+}
+
+#app-content.exp-app .exp-settings-nav__link:hover,
+.exp-app .exp-settings-nav__link:hover {
+	border-color: var(--exp-primary);
+	background: var(--exp-bg-hover);
+	color: var(--exp-text);
+}
+
+#app-content.exp-app .exp-settings-nav__link.is-active,
+#app-content.exp-app .exp-settings-nav__link[aria-current="page"],
+.exp-app .exp-settings-nav__link.is-active,
+.exp-app .exp-settings-nav__link[aria-current="page"] {
+	/* Main-text ink (not primary-on-fill) — WCAG 1.4.3 parity */
+	border-color: var(--exp-primary);
+	background: var(--exp-tint-info);
+	color: var(--exp-text);
+	font-weight: 700;
+	box-shadow: none;
+}
+
+.exp-settings-nav__link:focus-visible {
+	outline: var(--exp-focus);
+	outline-offset: var(--exp-focus-offset);
+}

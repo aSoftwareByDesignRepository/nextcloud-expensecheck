@@ -57,35 +57,15 @@ class SettingsApiController extends AApiController
 		$fields = [];
 		foreach ($b as $key => $value) {
 			$def = SettingsService::REGISTRY[$key] ?? null;
-			if ($def === null) {
-				continue; // unknown keys are ignored, never stored
+			if ($def === null || $def[2] !== 'plain') {
+				continue; // unknown keys ignored; secrets via dedicated endpoints
 			}
-			[$type, , $class] = $def;
-			if ($class === 'secret' || $class === 'internal') {
-				continue; // secrets via dedicated endpoints only
+			try {
+				$this->settings->set($key, $this->settings->normalizeForWrite(
+					$key, is_scalar($value) ? (string)$value : ''));
+			} catch (\InvalidArgumentException) {
+				$fields[$key] = 'invalid';
 			}
-			$v = is_scalar($value) ? (string)$value : '';
-			if ($type === 'bool') {
-				$v = in_array(strtolower($v), ['1', 'true', 'on'], true) ? '1' : '0';
-			} elseif ($type === 'int') {
-				if (!preg_match('/^\d+$/', $v)) {
-					$fields[$key] = 'invalid';
-					continue;
-				}
-			} elseif (str_starts_with($type, 'enum:')) {
-				$allowed = explode(',', substr($type, 5));
-				if (!in_array($v, $allowed, true)) {
-					$fields[$key] = 'invalid';
-					continue;
-				}
-			} elseif ($type === 'currency') {
-				$v = strtoupper($v);
-				if (!preg_match('/^[A-Z]{3}$/', $v)) {
-					$fields[$key] = 'invalid';
-					continue;
-				}
-			}
-			$this->settings->set($key, $v);
 		}
 		if ($fields !== []) {
 			throw new ValidationException($fields);

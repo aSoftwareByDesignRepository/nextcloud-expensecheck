@@ -2,44 +2,56 @@
 
 declare(strict_types=1);
 
+/**
+ * Pre-migration repair step: snapshot ExpenseCheck data before schema migrations run.
+ *
+ * Registered under {@see info.xml} `<repair-steps><pre-migration>` so every
+ * `occ app:update expensecheck` and app reinstall over an existing version creates
+ * a recoverable backup before migrations mutate the database.
+ *
+ * @copyright Copyright (c) 2026, Nextcloud GmbH
+ * @license AGPL-3.0-or-later
+ */
+
 namespace OCA\ExpenseCheck\Repair;
 
-use OCA\ExpenseCheck\AppInfo\Application;
-use OCP\IConfig;
-use OCP\IDBConnection;
+use OCA\ExpenseCheck\Exception\UpgradeBackupException;
+use OCA\ExpenseCheck\Service\UpgradeBackupService;
 use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;
 
-/**
- * Pre-migration safety: before schema migrations run over existing data,
- * stamp a backup marker so an operator knows a snapshot is expected. The
- * actual dump happens via the host backup (nextcloud backup/occ
- * maintenance:backup if configured); this step verifies the data state and
- * logs it — it never blocks on absent backup infra, but it refuses to run
- * migrations over a half-installed schema silently.
- */
 final class BackupBeforeUpdate implements IRepairStep
 {
 	public function __construct(
-		private readonly IDBConnection $db,
-		private readonly IConfig $config,
+		private readonly UpgradeBackupService $backupService,
 	) {
 	}
 
 	public function getName(): string
 	{
-		return 'Verify ExpenseCheck data state before update migrations';
+		return 'Back up ExpenseCheck data before update migrations';
 	}
 
 	public function run(IOutput $output): void
 	{
-		if (!$this->db->tableExists('exp_claims')) {
-			$output->info('ExpenseCheck: fresh install — no data to protect.');
+		if (!$this->backupService->hasDataToBackup()) {
+			$output->info('ExpenseCheck: no existing tables to back up (fresh install); skipping pre-update snapshot.');
 			return;
 		}
-		$count = (int)$this->db->getQueryBuilder()
-			->select('id')->from('exp_claims')->setMaxResults(1)
-			->executeQuery()->fetchOne();
-		$output->info('ExpenseCheck: existing data detected — ensure a database snapshot exists before continuing (site backup).');
+
+		try {
+			$result = $this->backupService->createSnapshot('pre-migration');
+		} catch (UpgradeBackupException $e) {
+			$output->warning('ExpenseCheck: pre-update backup failed: ' . $e->getMessage());
+			throw $e;
+		}
+
+		$tableCount = count($result['manifest']['tables'] ?? []);
+		$output->info(sprintf(
+			'ExpenseCheck: pre-update backup created (%s, %d table(s)). '
+			. 'Restore with `occ expensecheck:upgrade-backup restore --latest --force` if needed.',
+			$result['id'],
+			$tableCount,
+		));
 	}
 }

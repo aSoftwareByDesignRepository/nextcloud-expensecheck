@@ -3,22 +3,28 @@
 declare(strict_types=1);
 
 /**
- * Drops every table the expensecheck app has ever created, its migration
- * rows, and app config.
+ * SPDX-FileCopyrightText: 2026 Nextcloud DB-Standards (auto-generated)
+ * SPDX-License-Identifier: AGPL-3.0-or-later
  *
- * NC runs this step on disable AND on remove. Disable (incl. auto-disable
- * during a server upgrade) must preserve data; only an explicit second
- * invocation (the remove pass) drops. The two-pass guard uses
- * REPAIR_PASS_KEY: first run sets it and preserves everything; a second
- * run with the flag set performs the drop. EnsureExpenseCheckSchema clears
- * the flag on any successful (re)enable so a later disable starts fresh.
+ * Drops every table the expensecheck app has ever created, migration rows, and app config.
  *
- * Uses physical-name DROP TABLE IF EXISTS so IDBConnection injection works
- * on all supported platforms; MySQL disables FK checks for the sweep.
+ * Nextcloud runs this step on disable ({@see \OC\App\AppManager::disableApp}) and again on
+ * remove ({@see \OC\Installer::removeApp}, {@see \OCA\Settings\Controller\AppSettingsController::uninstallApp}).
+ * Disable (including auto-disable during a server upgrade) always preserves data; only an
+ * explicit app removal drops tables.
+ *
+ * Regenerate table list via:
+ *     php scripts/check-nextcloud-db-standards.php sync-uninstall --app=expensecheck
+ *
+ * Uses `DROP TABLE IF EXISTS` (not SchemaWrapper) so IDBConnection injection works on
+ * all Nextcloud versions. MySQL temporarily disables FK checks so legacy FK chains
+ * cannot block uninstall.
  */
-
 namespace OCA\ExpenseCheck\Repair;
 
+use OCP\Files\Folder;
+use OCP\Files\IRootFolder;
+use OCP\Files\NotFoundException;
 use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\Migration\IOutput;
@@ -27,79 +33,158 @@ use OCP\Migration\IRepairStep;
 final class UninstallDropTables implements IRepairStep
 {
 	public const APP_ID = 'expensecheck';
+
+	/**
+	 * Legacy counter from the two-pass implementation. Cleared on disable and by schema
+	 * repair steps so upgrades never inherit a stale value.
+	 */
 	public const REPAIR_PASS_KEY = 'uninstall_repair_pass';
 
-	public const TABLES = SchemaTableCatalog::EXPECTED_TABLES;
+	/**
+	 * Sorted list of every table this app has ever created across all migrations.
+	 * Kept in sync by the DB-standards linter.
+	 */
+	public const TABLES = [
+		'exp_attachments',
+		'exp_audit_log',
+		'exp_categories',
+		'exp_chain_steps',
+		'exp_chains',
+		'exp_claim_allocations',
+		'exp_claim_counters',
+		'exp_claim_events',
+		'exp_claim_lines',
+		'exp_claims',
+		'exp_cost_centers',
+		'exp_delegates',
+		'exp_fx_rates',
+		'exp_idempotency',
+		'exp_manager_map',
+		'exp_mobile_seats',
+		'exp_notification_log',
+		'exp_periods',
+		'exp_rate_entries',
+		'exp_settlement_batches',
+		'exp_settlement_rows',
+		'exp_step_decisions',
+	];
+
+	// The set of tables that must exist after current migrations —
+	// TABLES minus intentionally dropped legacy tables — lives on the
+	// dedicated {@see SchemaTableCatalog} class: upgrade-path code must never
+	// reference a member added to a pre-existing class mid-release (the old
+	// version may already be loaded → `Undefined constant` stalls `occ
+	// upgrade`; see UpgradePathConstantsSafety).
 
 	public function __construct(
-		private readonly IDBConnection $db,
+		private readonly IDBConnection $connection,
 		private readonly IConfig $config,
+		private readonly IRootFolder $rootFolder,
 	) {
 	}
 
 	public function getName(): string
 	{
-		return 'Remove ExpenseCheck tables and app data';
+		return 'Drop expensecheck tables and install metadata on uninstall';
 	}
 
 	public function run(IOutput $output): void
 	{
-		if ($this->config->getAppValue(self::APP_ID, self::REPAIR_PASS_KEY, '') !== 'remove') {
-			// First pass = disable. Preserve; arm the second pass.
-			$this->config->setAppValue(self::APP_ID, self::REPAIR_PASS_KEY, 'remove');
-			$output->info('expensecheck: preserving data on disable. Tables, migration history, and settings are kept until the app is fully removed.');
+		if (UninstallRepairFlow::isRemovalContext()) {
+			$this->dropAllTablesAndMetadata($output);
 			return;
 		}
-		$this->dropAllTablesAndMetadata($output);
+
+		// Disable path (manual or auto during server upgrade): idempotent — never drop.
+		$this->config->deleteAppValue(self::APP_ID, self::REPAIR_PASS_KEY);
+		$output->info(
+			'expensecheck: preserving data on disable. '
+			. 'Tables, migration history, and settings are kept until the app is fully removed.'
+		);
 	}
 
 	private function dropAllTablesAndMetadata(IOutput $output): void
 	{
-		$provider = $this->db->getDatabaseProvider();
+		$provider = $this->connection->getDatabaseProvider();
+		$fkChecksDisabled = false;
 		if ($provider === IDBConnection::PLATFORM_MYSQL) {
-			$this->db->executeStatement('SET FOREIGN_KEY_CHECKS=0');
+			$this->connection->executeStatement('SET FOREIGN_KEY_CHECKS=0');
+			$fkChecksDisabled = true;
 		}
+
 		$dropped = 0;
 		foreach (self::TABLES as $table) {
 			if ($this->dropLogicalTableIfExists($table)) {
 				$dropped++;
 			}
 		}
-		if ($provider === IDBConnection::PLATFORM_MYSQL) {
-			$this->db->executeStatement('SET FOREIGN_KEY_CHECKS=1');
+
+		if ($fkChecksDisabled) {
+			$this->connection->executeStatement('SET FOREIGN_KEY_CHECKS=1');
 		}
 
-		$qb = $this->db->getQueryBuilder();
+		$qb = $this->connection->getQueryBuilder();
 		$qb->delete('migrations')
 			->where($qb->expr()->eq('app', $qb->createNamedParameter(self::APP_ID)));
 		$migrationsRemoved = $qb->executeStatement();
 
 		$this->config->deleteAppValues(self::APP_ID);
 
+		$this->purgeUpgradeBackupSnapshots($output);
+
 		$output->info(sprintf(
-			'expensecheck: dropped %d of %d table(s); removed %d migration row(s) and app config.',
-			$dropped, count(self::TABLES), $migrationsRemoved
+			'expensecheck: dropped %d of %d table(s); removed %d migration row(s), app config, and upgrade-backup snapshots.',
+			$dropped,
+			count(self::TABLES),
+			$migrationsRemoved,
 		));
 	}
 
 	private function dropLogicalTableIfExists(string $logicalTable): bool
 	{
-		if (!$this->db->tableExists($logicalTable)) {
+		if (!$this->connection->tableExists($logicalTable)) {
 			return false;
 		}
+
 		$prefix = (string)$this->config->getSystemValue('dbtableprefix', 'oc_');
 		$physical = $prefix . $logicalTable;
-		$provider = $this->db->getDatabaseProvider();
-		match (true) {
-			$provider === IDBConnection::PLATFORM_MYSQL =>
-				$this->db->executeStatement(sprintf('DROP TABLE IF EXISTS `%s`', $physical)),
-			$provider === IDBConnection::PLATFORM_POSTGRES =>
-				$this->db->executeStatement(sprintf('DROP TABLE IF EXISTS "%s" CASCADE', $physical)),
-			$provider === IDBConnection::PLATFORM_ORACLE =>
-				$this->db->executeStatement(sprintf('DROP TABLE %s CASCADE CONSTRAINTS', $physical)),
-			default =>
-				$this->db->executeStatement(sprintf('DROP TABLE IF EXISTS "%s"', $physical)),
-		};
+		$provider = $this->connection->getDatabaseProvider();
+
+		if ($provider === IDBConnection::PLATFORM_MYSQL) {
+			$this->connection->executeStatement(sprintf('DROP TABLE IF EXISTS `%s`', $physical));
+		} elseif ($provider === IDBConnection::PLATFORM_POSTGRES) {
+			$this->connection->executeStatement(sprintf('DROP TABLE IF EXISTS "%s" CASCADE', $physical));
+		} elseif ($provider === IDBConnection::PLATFORM_ORACLE) {
+			$this->connection->executeStatement(sprintf('DROP TABLE %s CASCADE CONSTRAINTS', $physical));
+		} elseif ($provider === IDBConnection::PLATFORM_SQLITE) {
+			$this->connection->executeStatement(sprintf('DROP TABLE IF EXISTS "%s"', $physical));
+		}
+
 		return true;
+	}
+
+	/**
+	 * Pre-update JSON snapshots contain full table exports — remove on explicit app removal.
+	 */
+	private function purgeUpgradeBackupSnapshots(IOutput $output): void
+	{
+		$instanceId = (string)$this->config->getSystemValue('instanceid', '');
+		if ($instanceId === '') {
+			return;
+		}
+
+		$path = 'appdata_' . $instanceId . '/' . self::APP_ID . '/upgrade-backups';
+		try {
+			$node = $this->rootFolder->get($path);
+		} catch (NotFoundException) {
+			return;
+		}
+
+		if (!$node instanceof Folder) {
+			return;
+		}
+
+		$node->delete();
+		$output->info('expensecheck: removed upgrade-backup snapshots from app data.');
 	}
 }

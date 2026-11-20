@@ -44,9 +44,9 @@ inboxApi#list|GET|/api/inbox|
 ingressApi#createDraft|POST|/api/ingress/drafts|
 license#apply|POST|/api/license|
 license#assignSeat|POST|/api/license/seats|
-license#removeSeatPost|POST|/api/license/seats/remove|
-license#removeSeat|DELETE|/api/license/seats/{uid}|
 license#remove|DELETE|/api/license|
+license#removeSeat|DELETE|/api/license/seats/{uid}|
+license#removeSeatPost|POST|/api/license/seats/remove|
 license#seats|GET|/api/license/seats|
 license#show|GET|/api/license|
 mobileApi#bootstrap|GET|/api/mobile/bootstrap|
@@ -75,8 +75,8 @@ page#newClaim|GET|/claims/new|
 page#rates|GET|/rates|
 page#receiptsInbox|GET|/receipts|
 page#reports|GET|/reports|
-page#settingsSection|GET|/settings/{section}|
 page#settings|GET|/settings|
+page#settingsSection|GET|/settings/{section}|
 page#settlementDetail|GET|/settlements/{batchId}|
 page#settlements|GET|/settlements|
 receiptsApi#delete|DELETE|/api/receipts-inbox/{id}|
@@ -95,3 +95,8 @@ settlementApi#queue|GET|/api/settlements|
 settlementApi#reopenPeriod|POST|/api/periods/{id}/reopen|
 settlementApi#settle|POST|/api/settlements|
 settlementApi#showBatch|GET|/api/settlements/batches/{id}|
+transferApi#apply|POST|/api/admin/transfer/apply|
+transferApi#export|POST|/api/admin/transfer/export|
+transferApi#preview|POST|/api/admin/transfer/preview|
+transferApi#reconcile|POST|/api/admin/transfer/reconcile|
+transferApi#status|GET|/api/admin/transfer/status|
