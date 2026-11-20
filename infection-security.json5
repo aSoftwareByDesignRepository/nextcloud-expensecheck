@@ -1,0 +1,26 @@
+{
+    // Mutation testing for the security-critical subset: money math, the
+    // hash-chained journal, and the approval/state-machine guards.
+    // Run: make mutation  (docker php:8.3-cli + pcov + infection.phar)
+    "$schema": "https://raw.githubusercontent.com/infection/infection/0.29.14/resources/schema.json",
+    "source": {
+        "directories": [
+            "lib/Service"
+        ]
+    },
+    "timeout": 30,
+    "tmpDir": "/tmp/expensecheck-infection",
+    "testFramework": "phpunit",
+    "testFrameworkOptions": "--testsuite=unit",
+    "logs": {
+        "text": "tests/Mutation/logs/infection.log",
+        "summary": "tests/Mutation/logs/infection-summary.log"
+    },
+    "mutators": {
+        "@default": true,
+        "PublicVisibility": false,
+        "ProtectedVisibility": false
+    },
+    "minMsi": 50,
+    "minCoveredMsi": 50
+}

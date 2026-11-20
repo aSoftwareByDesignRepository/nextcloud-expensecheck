@@ -1,0 +1,860 @@
+/* Shell chrome parity with arbeitszeitcheck (prefix dc-). */
+/* ── Skip link / live regions ─────────────────────────────── */
+.exp-skip-link {
+	min-height: var(--exp-touch, 44px);
+	position: absolute;
+	left: -9999px;
+	top: var(--exp-space-2);
+	padding: var(--exp-space-2) var(--exp-space-4);
+	background: var(--color-primary-element);
+	color: var(--color-primary-element-text);
+	border-radius: var(--exp-radius-sm);
+	z-index: 1000;
+	font-weight: 600;
+	text-decoration: none;
+}
+.exp-skip-link:focus,
+.exp-skip-link:focus-visible {
+	left: var(--exp-space-3);
+	outline: 3px solid var(--color-primary-element-text);
+	outline-offset: 2px;
+}
+
+/* ===== Skip links (AZ parity) — CRITICAL =====
+ * The nav skip link is the first child of the flex app wrapper. Without
+ * position:absolute it becomes a full-height flex column and destroys the
+ * sidebar/content layout. Hide off-screen until :focus / :focus-visible.
+ */
+#content.app-expensecheck .skip-link,
+#content.app-expensecheck a.exp-skip-link--nav {
+	position: absolute !important;
+	left: -9999px;
+	top: var(--exp-space-2, 8px);
+	z-index: 10000;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	min-height: 44px;
+	width: max-content;
+	max-width: calc(100vw - 1rem);
+	height: auto;
+	margin: 0;
+	padding: var(--exp-space-2, 8px) var(--exp-space-4, 16px);
+	flex: none;
+	align-self: flex-start;
+	box-sizing: border-box;
+	background: var(--color-primary-element);
+	color: var(--color-primary-element-text);
+	border-radius: var(--exp-radius-sm, 6px);
+	font-weight: 600;
+	text-decoration: none;
+	line-height: 1.3;
+}
+#content.app-expensecheck .skip-link:focus,
+#content.app-expensecheck .skip-link:focus-visible,
+#content.app-expensecheck a.exp-skip-link--nav:focus,
+#content.app-expensecheck a.exp-skip-link--nav:focus-visible {
+	left: 6px;
+	top: 6px;
+	outline: 3px solid var(--color-primary-element-text);
+	outline-offset: 2px;
+}
+#content.app-expensecheck #expensecheck-app,
+#content.app-expensecheck .expensecheck-app {
+	position: relative;
+}
+
+/* Buttons — AZ components.css touch targets (WCAG 2.5.5) */
+#content.app-expensecheck .exp-btn,
+#content.app-expensecheck .button,
+#content.app-expensecheck button.button,
+#content.app-expensecheck a.button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--exp-space-2, 0.5rem);
+	/* px token, not rem: NC root font-size can be 15px → 2.75rem = 41.25px,
+	 * below the 44px touch floor. --exp-touch is an absolute guarantee. */
+	min-height: var(--exp-touch, 44px);
+	min-width: var(--exp-touch, 44px);
+	padding: 0.625rem 1.15rem;
+	box-sizing: border-box;
+	border-radius: var(--exp-radius-md, 12px);
+	font-weight: 600;
+	line-height: 1.25;
+	text-decoration: none;
+	cursor: pointer;
+}
+#content.app-expensecheck .exp-btn--sm,
+#content.app-expensecheck .button.small,
+#content.app-expensecheck .button--sm {
+	/* WCAG / product: touch targets ≥44×44 — never ship 36px “compact” chrome */
+	min-height: var(--exp-touch, 44px);
+	min-width: var(--exp-touch, 44px);
+	padding: 0.35rem 0.75rem;
+}
+/* ===== END AZ skip/btn parity ===== */
+
+/* ===== AZ content surfaces — cards/sections/buttons (match azc-card / azc-btn) ===== */
+#content.app-expensecheck #app-content .exp-card,
+#content.app-expensecheck #app-content .exp-section,
+#content.app-expensecheck #app-content .exp-filter-panel {
+	background: var(--exp-bg-card, var(--color-main-background));
+	border: 1px solid var(--exp-border, var(--exp-form-border));
+	border-radius: var(--exp-radius-md, 12px);
+	box-shadow: var(--exp-shadow-sm, 0 1px 2px color-mix(in srgb, var(--color-main-text) 8%, transparent));
+	box-sizing: border-box;
+}
+#content.app-expensecheck #app-content .exp-card,
+#content.app-expensecheck #app-content .exp-section {
+	padding: var(--exp-space-5, 24px);
+	margin-top: var(--exp-space-5, 24px);
+}
+#content.app-expensecheck #app-content .exp-section:first-child,
+#content.app-expensecheck #app-content .exp-main > .exp-section:first-of-type,
+#content.app-expensecheck #app-content .exp-main > .exp-card:first-of-type,
+#content.app-expensecheck #app-content .exp-main > .exp-filter-panel:first-of-type {
+	margin-top: 0;
+}
+#content.app-expensecheck #app-content .exp-section__title,
+#content.app-expensecheck #app-content .exp-card__title {
+	margin: 0 0 var(--exp-space-3, 12px);
+	font-size: var(--exp-fs-lg, 1.125rem);
+	font-weight: 600;
+	line-height: var(--exp-line-tight, 1.2);
+	color: var(--exp-text, var(--color-main-text));
+}
+/*
+ * Bachus / AZ parity: structured cards must match Filter panel chrome.
+ * Plain .exp-card { padding } above is (2,2,0) — without this peer rule, list
+ * headers stay inset on white and look nothing like dc-filter-panel__head.
+ */
+#content.app-expensecheck #app-content .exp-card:has(.exp-card__header),
+#content.app-expensecheck #app-content .exp-card:has(.exp-card__body),
+#content.app-expensecheck #app-content .exp-filter-panel {
+	padding: 0;
+	overflow: hidden;
+}
+#content.app-expensecheck #app-content .exp-filter-panel__head,
+#content.app-expensecheck #app-content .exp-filter-panel > header,
+#content.app-expensecheck #app-content .exp-card__header {
+	padding: var(--exp-space-5, 24px);
+	border-bottom: 1px solid var(--exp-border, var(--color-border));
+	background: var(--exp-bg-soft, color-mix(in srgb, var(--color-main-background) 96%, var(--color-main-text) 4%));
+}
+#content.app-expensecheck #app-content .exp-card__header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: var(--exp-space-3, 12px) var(--exp-space-4, 16px);
+}
+#content.app-expensecheck #app-content .exp-card__header .exp-card__title {
+	margin: 0;
+}
+#content.app-expensecheck #app-content .exp-card__header .exp-card__lead {
+	margin: var(--exp-space-2, 8px) 0 0;
+	max-width: 65ch;
+	font-size: var(--exp-fs-sm, 0.875rem);
+	line-height: var(--exp-line-base, 1.5);
+	color: var(--exp-muted, var(--color-text-maxcontrast));
+}
+#content.app-expensecheck #app-content .exp-card__body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-4, 16px);
+	padding: var(--exp-space-5, 24px);
+}
+/* Empty JS mount points must not consume a gap slot — an empty list region
+   would add a phantom band inside the card body. :empty un-matches as soon
+   as JS fills the node. */
+#content.app-expensecheck #app-content .exp-card__body > :empty {
+	display: none;
+}
+#content.app-expensecheck #app-content .exp-card__body--table {
+	padding: 0;
+}
+#content.app-expensecheck #app-content .exp-filter-panel__form,
+#content.app-expensecheck #app-content .exp-filter-panel__body,
+#content.app-expensecheck #app-content .exp-filter-panel > form,
+#content.app-expensecheck #app-content .exp-filter-panel > .form {
+	padding: var(--exp-space-5, 24px);
+}
+/* Body already pads — nested form must not double the inset (Claim / Assets). */
+#content.app-expensecheck #app-content .exp-filter-panel__body > .exp-filter-panel__form,
+#content.app-expensecheck #app-content .exp-filter-panel__body > form.exp-filter-panel__form,
+#content.app-expensecheck #app-content .exp-filter-panel__body > form {
+	padding: 0;
+}
+/* Buttons — AZ azc-btn uses radius-md (12px), not sm */
+#content.app-expensecheck #app-content .exp-btn,
+#content.app-expensecheck #app-content .button,
+#content.app-expensecheck #app-content button.button,
+#content.app-expensecheck #app-content a.button {
+	border-radius: var(--exp-radius-md, 12px);
+	min-height: var(--exp-touch, 44px);
+	padding: 0.625rem 1.15rem;
+	font-weight: 600;
+}
+#content.app-expensecheck #app-content .exp-btn--sm,
+#content.app-expensecheck #app-content .button.small,
+#content.app-expensecheck #app-content .button--sm {
+	border-radius: var(--exp-radius-sm, 6px);
+	min-height: 44px;
+	min-width: 44px;
+	padding: 0.35rem 0.75rem;
+}
+#content.app-expensecheck #app-content .exp-table-wrap {
+	border: 1px solid var(--exp-border, var(--color-border));
+	border-radius: var(--exp-radius-md, 12px);
+	overflow-x: auto;
+	overflow-y: visible;
+	background: var(--exp-bg-card, var(--color-main-background));
+}
+/* §3.7 one frame: inside a card/section/dialog the wrap drops its own
+   box — the outer frame is the only frame. Dialog rules stay bare:
+   <dialog> renders in the top layer outside #content. */
+#content.app-expensecheck #app-content .exp-card .exp-table-wrap,
+#content.app-expensecheck #app-content .section .exp-table-wrap,
+#content.app-expensecheck #app-content .exp-card .table-container,
+#content.app-expensecheck #app-content .exp-card .table-responsive,
+.exp-dialog .exp-table-wrap {
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	box-shadow: none;
+}
+/* Empty states — AZ-like bordered soft panel (never page how-to guides) */
+#content.app-expensecheck #app-content .exp-empty:not(.exp-page-guide),
+#content.app-expensecheck #app-content .exp-empty-state {
+	border: 1px solid var(--exp-border-strong, var(--color-border));
+	border-radius: var(--exp-radius-md, 12px);
+	padding: var(--exp-space-7, 48px) var(--exp-space-5, 24px);
+	text-align: center;
+	background: var(--exp-bg-soft, transparent);
+}
+/* ===== END AZ content surfaces ===== */
+
+
+/* ===== AZ table parity (prefix dc) =====
+ * Matches arbeitszeitcheck/css/common/components.css table chrome.
+ * Covers both .exp-table and legacy .table / .grid-table.
+ */
+#content.app-expensecheck .exp-table-wrap,
+#content.app-expensecheck .table-container,
+#content.app-expensecheck .table-responsive {
+	overflow-x: auto;
+	overflow-y: visible;
+	border: 1px solid var(--exp-border, var(--color-border));
+	border-radius: var(--exp-radius-md, 12px);
+	background-color: var(--exp-bg-card, var(--color-main-background));
+	-webkit-overflow-scrolling: touch;
+	width: 100%;
+	box-sizing: border-box;
+}
+/* Same one-frame rule for the flat wrap selectors above (1-ID tier). */
+#content.app-expensecheck .exp-card .exp-table-wrap,
+#content.app-expensecheck .section .exp-table-wrap,
+#content.app-expensecheck .exp-card .table-container,
+#content.app-expensecheck .exp-card .table-responsive,
+.exp-dialog .exp-table-wrap,
+.exp-dialog .table-container,
+.exp-dialog .table-responsive {
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	box-shadow: none;
+}
+#content.app-expensecheck .exp-table,
+#content.app-expensecheck .table,
+#content.app-expensecheck .grid-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: var(--exp-fs-sm, 0.875rem);
+	margin-bottom: 0;
+}
+#content.app-expensecheck .exp-table thead,
+#content.app-expensecheck .table thead,
+#content.app-expensecheck .grid-table thead {
+	background-color: var(--color-background-dark, var(--exp-bg-stripe, transparent));
+}
+#content.app-expensecheck .exp-table th,
+#content.app-expensecheck .table th,
+#content.app-expensecheck .grid-table th {
+	padding: var(--exp-space-3, 0.75rem) var(--exp-space-4, 1rem);
+	text-align: left;
+	font-weight: 600;
+	color: var(--exp-text, var(--color-main-text));
+	border-bottom: 1px solid var(--exp-border, var(--color-border));
+	white-space: nowrap;
+	vertical-align: middle;
+	background-color: var(--color-background-dark, var(--exp-bg-stripe, color-mix(in srgb, var(--color-main-text) 12%, transparent)));
+}
+#content.app-expensecheck .exp-table td,
+#content.app-expensecheck .table td,
+#content.app-expensecheck .grid-table td {
+	padding: var(--exp-space-3, 0.75rem) var(--exp-space-4, 1rem);
+	border-bottom: 1px solid var(--exp-border, var(--color-border));
+	color: var(--exp-text, var(--color-main-text));
+	vertical-align: middle;
+}
+#content.app-expensecheck .exp-table tbody tr:last-child td,
+#content.app-expensecheck .table tbody tr:last-child td,
+#content.app-expensecheck .grid-table tbody tr:last-child td {
+	border-bottom: none;
+}
+#content.app-expensecheck .exp-table.table--hover tbody tr:hover,
+#content.app-expensecheck .exp-table--hover tbody tr:hover,
+#content.app-expensecheck .table--hover tbody tr:hover,
+#content.app-expensecheck .grid-table.table--hover tbody tr:hover {
+	background-color: var(--color-background-hover);
+}
+/* ===== END AZ table parity ===== */
+
+
+.exp-sr-only {
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	min-width: 0 !important;
+	min-height: 0 !important;
+	max-width: 1px !important;
+	max-height: 1px !important;
+	margin: -1px !important;
+	padding: 0 !important;
+	border: 0 !important;
+	overflow: hidden !important;
+	clip: rect(0 0 0 0) !important;
+	clip-path: inset(50%) !important;
+	white-space: nowrap !important;
+	inset-inline-start: 0 !important;
+	inset-block-start: 0 !important;
+}
+
+/* ── App shell ─────────────────────────────────────────────── */
+/* Sidebar alignment: see navigation.css (canonical); keep minimal guard here too */
+#content.app-expensecheck #app-navigation .nav-menu a,
+#content.app-expensecheck #app-navigation .nav-submenu a,
+#content.app-expensecheck #app-navigation .nav-parent-toggle {
+	justify-content: flex-start;
+	text-align: left;
+}
+
+#app-content.exp-app {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	text-align: left;
+	min-height: 100%;
+	background: var(--exp-bg-soft);
+}
+#app-content.exp-app #app-content-wrapper.exp-shell {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	text-align: left;
+	width: 100%;
+	max-width: none;
+	margin: 0;
+	padding: var(--exp-space-5) var(--exp-space-5) var(--exp-space-7);
+	/* Notched phones: keep CTAs clear of home indicator (NC mobile) */
+	padding-left: max(var(--exp-space-5), env(safe-area-inset-left, 0px));
+	padding-right: max(var(--exp-space-5), env(safe-area-inset-right, 0px));
+	padding-bottom: max(var(--exp-space-7), env(safe-area-inset-bottom, 0px));
+	box-sizing: border-box;
+}
+#app-content.exp-app--dashboard .exp-dashboard-alerts .exp-callout {
+	margin: 0;
+}
+#app-content.exp-app #exp-main-content.exp-main,
+#app-content.exp-app #exp-main-content.exp-main {
+	flex: 1 1 auto;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	text-align: left;
+	gap: var(--exp-space-5);
+	outline: none;
+}
+#app-content.exp-app--admin-notifications #exp-main-content,
+#app-content.exp-app--admin-settings #exp-main-content {
+	gap: var(--exp-space-4);
+}
+#exp-main-content.exp-main:focus-visible,
+#exp-main-content.exp-main:focus-visible {
+	outline: var(--exp-focus, 3px solid var(--color-primary-element));
+	outline-offset: var(--exp-focus-offset, 2px);
+}
+
+/* Heading contrast in all NC themes */
+#app-content.exp-app h1,
+#app-content.exp-app h2,
+#app-content.exp-app h3 {
+	color: var(--exp-text) !important;
+	opacity: 1 !important;
+}
+
+/* ── Header / breadcrumb ───────────────────────────────────── */
+.exp-page-header {
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-3);
+	margin-bottom: var(--exp-space-5);
+}
+#app-content.exp-app .exp-breadcrumb {
+	font-size: var(--exp-fs-sm);
+	line-height: var(--exp-line-tight);
+	color: var(--exp-muted);
+}
+#app-content.exp-app .exp-breadcrumb__list {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+#app-content.exp-app .exp-breadcrumb__item {
+	display: inline-flex;
+	align-items: center;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	max-width: 100%;
+}
+#app-content.exp-app .exp-breadcrumb__item:not(:last-child)::after {
+	content: '/';
+	margin-inline: var(--exp-space-2);
+	color: var(--exp-muted);
+	font-weight: 400;
+	opacity: 0.65;
+	pointer-events: none;
+	user-select: none;
+}
+#app-content.exp-app .exp-breadcrumb__link {
+	color: var(--color-primary-element);
+	font-weight: 600;
+	text-decoration: none;
+	border-radius: var(--exp-radius-sm);
+	padding-block: 2px;
+	/* WCAG 2.5.8: the anchor is the target — give it a >=24px box
+	   (was ~20px text-line; ds_chrome sweep touch probe). */
+	display: inline-flex;
+	align-items: center;
+	min-block-size: 24px;
+}
+#app-content.exp-app .exp-breadcrumb__link:hover {
+	text-decoration: underline;
+}
+#app-content.exp-app .exp-breadcrumb__link:focus-visible {
+	outline: var(--exp-focus);
+	outline-offset: var(--exp-focus-offset);
+}
+#app-content.exp-app .exp-breadcrumb__text {
+	color: var(--exp-muted);
+	font-weight: 500;
+}
+#app-content.exp-app .exp-breadcrumb__item--current {
+	color: var(--exp-text);
+	min-width: 0;
+}
+#app-content.exp-app .exp-breadcrumb__current {
+	font-weight: 600;
+	color: var(--exp-text);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: min(100%, 28rem);
+}
+/* Mobile-first: icon + title; actions full-width below (no 3-col squeeze at 320px) */
+.exp-page-header__main {
+	display: grid;
+	grid-template-columns: 56px minmax(0, 1fr);
+	gap: var(--exp-space-3) var(--exp-space-4);
+	align-items: start;
+}
+.exp-page-header__actions {
+	grid-column: 1 / -1;
+	justify-content: flex-start;
+}
+/* ≥768px tablet+: icon | title | actions on one row (NC tablet / desktop) */
+@media (min-width: 769px) {
+	.exp-page-header__main {
+		/* minmax(0,…) — the title column must be able to shrink below its
+		   min-content (long compounds, inline chips), else it shoves the
+		   actions column off the card. Same rule as the mobile track. */
+		grid-template-columns: 56px minmax(0, 1fr) auto;
+		gap: var(--exp-space-4);
+	}
+	.exp-page-header__actions {
+		grid-column: auto;
+		justify-content: flex-end;
+	}
+}
+.exp-page-header__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 56px;
+	height: 56px;
+	border-radius: var(--exp-radius-md);
+	background: var(--exp-tint-info);
+	color: var(--color-primary-element);
+}
+.exp-page-header__icon-svg {
+	width: 28px;
+	height: 28px;
+	max-width: none;
+	stroke: currentColor;
+	fill: none;
+	color: inherit;
+	stroke-width: var(--exp-icon-stroke, 2);
+}
+.exp-page-header__text h1 {
+	margin: 0 0 var(--exp-space-1);
+	font-size: var(--exp-fs-2xl);
+	line-height: var(--exp-line-tight);
+	/* Long compounds (de "Zugriffssteuerung") must wrap or hyphenate —
+	   never clip mid-glyph at the 320px viewport edge. break-word (not
+	   anywhere): headings keep normal word breaks and only split as a
+	   last resort — anywhere tears mid-word on full lines. */
+	overflow-wrap: break-word;
+	hyphens: auto;
+}
+/* ≤480px phone: the title track is ~200px (viewport − shell padding − 56px
+   icon − gap). fs-2xl brand compounds ("NachweisCheck" ≈ 215px) overflow
+   it and break-word tears mid-word — family defect
+   nw-vis-mobile-h1-midword-break. fs-xl keeps the word inside the track;
+   break-word stays last-resort for genuinely overlong words. */
+@media (max-width: 480px) {
+	.exp-page-header__text h1 {
+		font-size: var(--exp-fs-xl);
+	}
+}
+.exp-page-header__lead {
+	margin: 0;
+	color: var(--exp-muted);
+	font-size: var(--exp-fs-md);
+	line-height: var(--exp-line-base);
+	max-width: 60ch;
+}
+.exp-page-header__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--exp-space-2);
+	align-items: center;
+	/* grid-column / justify set with .exp-page-header__main (mobile-first above) */
+}
+
+/* ── Scope strip ───────────────────────────────────────────── */
+.exp-scope-strip {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--exp-space-2);
+	padding: var(--exp-space-2) var(--exp-space-3);
+	border: 1px solid var(--exp-border);
+	border-radius: var(--exp-radius-sm);
+	background: var(--exp-bg-card);
+	font-size: var(--exp-fs-sm);
+}
+.exp-scope-strip--quiet {
+	padding: var(--exp-space-1) var(--exp-space-3);
+	border-style: dashed;
+	/* Never dim the whole strip — opacity tanks WCAG contrast on muted labels. */
+}
+.exp-scope-strip__label {
+	color: var(--exp-text, var(--color-main-text));
+	font-weight: 600;
+}
+.exp-scope-strip__value {
+	font-weight: 600;
+	color: var(--exp-text);
+}
+.exp-scope-strip__sep {
+	color: var(--exp-muted);
+}
+.exp-scope-strip__chip {
+	text-decoration: none;
+}
+.exp-scope-strip__select {
+	min-height: 44px;
+	min-width: min(12rem, 100%);
+	padding: 0.5rem 2.25rem 0.5rem 0.75rem;
+	border: 1px solid var(--exp-border-strong);
+	border-radius: var(--exp-radius-sm);
+	background-color: var(--exp-bg-card);
+	color: var(--exp-text);
+	font: inherit;
+	font-weight: 600;
+}
+.exp-scope-strip__select:focus-visible {
+	outline: 3px solid var(--color-primary-element);
+	outline-offset: 2px;
+}
+
+/* ── Buttons (dc-btn taxonomy) ──────────────────────────────── */
+.exp-btn,
+.exp-app .btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--exp-space-2);
+	min-height: 44px;
+	min-width: 44px;
+	padding: var(--exp-space-2) var(--exp-space-4);
+	border-radius: var(--exp-radius-sm);
+	font-size: var(--exp-fs-md);
+	font-weight: 600;
+	line-height: 1.2;
+	text-decoration: none;
+	cursor: pointer;
+	border: 1px solid transparent;
+	transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.exp-btn:focus-visible,
+.exp-app .btn:focus-visible {
+	outline: var(--exp-focus, 3px solid var(--color-primary-element));
+	outline-offset: var(--exp-focus-offset, 2px);
+}
+.exp-btn--primary,
+.exp-app .btn--primary {
+	background: var(--color-primary-element);
+	color: var(--color-primary-element-text);
+	/* Border == fill: painted edge like .exp-btn--danger — the boundary is the
+	   fill vs the surface (WCAG 1.4.11), never a transparent border. */
+	border-color: var(--color-primary-element);
+}
+.exp-btn--secondary,
+.exp-app .btn--secondary {
+	background: color-mix(in srgb, var(--color-main-background) 82%, var(--color-main-text) 18%);
+	color: var(--exp-text);
+	border-color: var(--exp-control-border, var(--exp-border-strong));
+}
+/* NC core `button:not(.button-vue)` (0-1-1) repaints every <button> with
+   --color-primary-element-light + border:none, and its :hover/:focus leg
+   (0-2-1) repaints again — every single-class variant rule (0-1-0) loses,
+   so all <button> elements collapse to the identical pale tint. Same fix
+   as .exp-btn--danger: ID-scope + !important, full border shorthand (core
+   sets border-style:none, so border-color alone would paint nothing).
+   `#content.app-expensecheck` also reaches guest/public pages — layout.public.php
+   has no #app-content wrapper. */
+
+/* Base .exp-btn: same core-repaint guard as the variants — an unguarded
+   single-class base collapses to --color-primary-element-light on <button>
+   while <a> siblings stay transparent (button_variant_specificity_collapse).
+   .exp-dialog scope included: JS-built dialogs mount on document.body,
+   outside every ID-scoped root.
+   ORDER MATTERS: this block must precede the variant blocks — same
+   specificity, so the variant fill/border rules below must win the
+   declaration order for `.exp-btn .exp-btn--*` composites. */
+#app-content.exp-app .exp-btn,
+#app-content-wrapper .exp-btn,
+#content.app-expensecheck .exp-btn,
+.exp-dialog .exp-btn,
+#app-content.exp-app .btn,
+#app-content-wrapper .btn,
+#content.app-expensecheck .btn {
+	background: transparent !important;
+	color: var(--exp-text) !important;
+	border: 1px solid transparent !important;
+}
+#app-content.exp-app .exp-btn--primary,
+#app-content-wrapper .exp-btn--primary,
+#content.app-expensecheck .exp-btn--primary,
+.exp-dialog .exp-btn--primary,
+#app-content.exp-app .btn--primary,
+#app-content-wrapper .btn--primary,
+#content.app-expensecheck .btn--primary {
+	background: var(--color-primary-element) !important;
+	color: var(--color-primary-element-text) !important;
+	border: 1px solid var(--color-primary-element) !important;
+}
+#app-content.exp-app .exp-btn--secondary,
+#app-content-wrapper .exp-btn--secondary,
+#content.app-expensecheck .exp-btn--secondary,
+.exp-dialog .exp-btn--secondary,
+#app-content.exp-app .btn--secondary,
+#app-content-wrapper .btn--secondary,
+#content.app-expensecheck .btn--secondary {
+	background: color-mix(in srgb, var(--color-main-background) 82%, var(--color-main-text) 18%) !important;
+	color: var(--exp-text) !important;
+	border: 1px solid var(--exp-control-border, var(--exp-border-strong)) !important;
+}
+#app-content.exp-app .exp-btn--ghost,
+#app-content-wrapper .exp-btn--ghost,
+#content.app-expensecheck .exp-btn--ghost,
+.exp-dialog .exp-btn--ghost {
+	background: transparent !important;
+	color: var(--exp-text) !important;
+	border: 1px solid var(--exp-control-border, var(--exp-border-strong)) !important;
+}
+.exp-btn--flat {
+	background: transparent;
+	color: var(--exp-text);
+	border-color: transparent;
+}
+#app-content.exp-app .exp-btn--flat,
+#app-content-wrapper .exp-btn--flat,
+#content.app-expensecheck .exp-btn--flat,
+.exp-dialog .exp-btn--flat {
+	background: transparent !important;
+	color: var(--exp-text) !important;
+	border: 1px solid transparent !important;
+}
+/* Core hover repaint is also blocked by !important — restore hover feedback
+   the way .exp-btn--danger does (filter survives because core sets none). */
+.exp-btn--primary:hover,
+.exp-app .btn--primary:hover,
+.exp-btn--secondary:hover,
+.exp-app .btn--secondary:hover,
+.exp-btn--ghost:hover,
+.exp-btn--flat:hover {
+	filter: brightness(0.94);
+}
+#app-content.exp-app .exp-btn--danger,
+#app-content-wrapper .exp-btn--danger,
+#content.app-expensecheck .exp-btn--danger,
+.exp-dialog .exp-btn--danger,
+.exp-app .btn--danger {
+	/* Solid fill — never pale --color-error tint (WCAG 1.4.3 / design-system §3.3).
+	   ID-scoped + !important: NC core button:not(...) (0-1-1) otherwise paints
+	   --color-primary-element-light over the danger fill. */
+	background: var(--exp-danger-fill) !important;
+	color: var(--exp-danger-on-fill) !important;
+	/* Border == fill so the control keeps a painted edge (boundary = fill vs
+	   surface, WCAG 1.4.11) instead of a transparent border. Full shorthand:
+	   core's `border:none` wins border-style at 0-1-1, so border-color alone
+	   paints nothing. */
+	border: 1px solid var(--exp-danger-fill) !important;
+}
+.exp-btn--danger:hover,
+.exp-app .btn--danger:hover {
+	filter: brightness(0.92);
+}
+.exp-btn--danger:focus-visible,
+.exp-app .btn--danger:focus-visible {
+	filter: brightness(0.92);
+	outline: 3px solid var(--exp-danger-fill);
+	outline-offset: var(--exp-focus-offset);
+}
+.exp-btn--ghost {
+	background: transparent;
+	color: var(--exp-text);
+	border-color: var(--exp-control-border, var(--exp-border-strong));
+}
+.exp-btn--sm {
+	min-height: 44px;
+	min-width: 44px;
+	padding: var(--exp-space-1) var(--exp-space-3);
+	font-size: var(--exp-fs-sm);
+}
+.exp-btn[aria-busy="true"] {
+	opacity: 0.7;
+	pointer-events: none;
+}
+
+/* Badges: css/common/badges.css (loaded after app-vanilla to override legacy rules) */
+
+/* ── Cards / callouts ──────────────────────────────────────── */
+.exp-card {
+	background: var(--exp-bg-card);
+	border: 1px solid var(--exp-border);
+	border-radius: var(--exp-radius-md);
+	padding: var(--exp-space-5);
+	box-shadow: var(--exp-shadow-sm);
+}
+#app-content.exp-app .exp-card:has(.exp-card__header),
+#app-content.exp-app .exp-card:has(.exp-card__body) {
+	padding: 0;
+}
+#app-content.exp-app .exp-card__header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: var(--exp-space-3) var(--exp-space-4);
+	padding: var(--exp-space-5);
+	border-bottom: 1px solid var(--exp-border);
+	background: var(--exp-bg-soft);
+}
+#app-content.exp-app .exp-card__header-text {
+	flex: 1 1 14rem;
+	min-width: 0;
+}
+#app-content.exp-app .exp-card__header-actions {
+	flex: 0 0 auto;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: flex-end;
+	gap: var(--exp-space-2);
+}
+#app-content.exp-app .exp-card__title {
+	margin: 0;
+	font-size: var(--exp-fs-lg);
+	font-weight: 600;
+	line-height: var(--exp-line-tight);
+	color: var(--exp-text);
+}
+#app-content.exp-app .exp-card__lead {
+	margin: var(--exp-space-2) 0 0;
+	max-width: 52rem;
+	font-size: var(--exp-fs-sm);
+	line-height: var(--exp-line-base);
+	color: var(--exp-muted);
+}
+#app-content.exp-app .exp-card__body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-4);
+	padding: var(--exp-space-5);
+}
+/* Empty JS mount points must not consume a gap slot — otherwise an empty
+   list region adds a phantom space-4 band inside every card body. :empty
+   un-matches automatically once JS fills the node. */
+#app-content.exp-app .exp-card__body > :empty {
+	display: none;
+}
+#app-content.exp-app .exp-btn .exp-btn__icon,
+#app-content.exp-app .exp-btn .exp-icon {
+	width: var(--exp-icon-md);
+	height: var(--exp-icon-md);
+	flex-shrink: 0;
+}
+#app-content.exp-app .exp-btn--sm .exp-btn__icon,
+#app-content.exp-app .exp-btn--sm .exp-icon {
+	width: var(--exp-icon-sm);
+	height: var(--exp-icon-sm);
+}
+/* Legacy card header shim (compliance/dashboard until fully migrated) */
+#app-content.exp-app .card-header--with-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--exp-space-3) var(--exp-space-4);
+	padding: var(--exp-space-4) var(--exp-space-5);
+	margin-bottom: 0;
+	border-bottom: 1px solid var(--exp-border);
+	background: var(--exp-bg-soft);
+}
+#app-content.exp-app .card-header--with-actions .card-title {
+	margin: 0;
+	font-size: var(--exp-fs-lg);
+	font-weight: 600;
+	color: var(--exp-text);
+}
+#app-content.exp-app .card-header--with-actions .exp-btn {
+	flex-shrink: 0;
+	white-space: nowrap;
+}
+#app-content.exp-app .exp-card + .exp-card {
+	margin-top: var(--exp-space-5);
+}
+#app-content.exp-app .compliance-dashboard__status .exp-callout {
+	margin-bottom: 0;
+}
+

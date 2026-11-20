@@ -1,0 +1,32 @@
+# Dependencies
+/vendor/
+/node_modules/
+
+# PHPUnit / coverage
+.phpunit.result.cache
+tests/coverage/
+tests/results.xml
+/test-results/
+/playwright-report/
+/blob-report/
+
+# E2E secrets and artifacts (never publish)
+/tests/e2e/.env
+/tests/e2e/.auth/
+
+# Mutation / infection local output
+/tests/Mutation/infection.log
+/tests/Mutation/infection.html
+/tests/Mutation/infection-summary.json
+/tests/Mutation/logs/
+/msi-summary.json
+.infection/
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Internal docs belong in the parent workspace (documentation/ / planning/), not this repo
+docs/

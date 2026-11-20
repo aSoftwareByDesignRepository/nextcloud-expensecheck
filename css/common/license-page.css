@@ -1,0 +1,929 @@
+/*
+ * Check family — canonical license page (canonical source in _shared/license-page).
+ * SYNCED FILE — never edit the in-app copy; edit the source and re-run
+ * sync_license_page.py. exp is substituted with the app prefix at sync time.
+ *
+ * Self-contained: every class lives under .exp-license-page so the block looks
+ * identical whether it is a standalone admin page or a settings section.
+ * Token vars (--exp-*) fall back to the canonical values so the page renders
+ * correctly even in apps without a full token block.
+ *
+ * Design: ArbeitszeitCheck admin-license page (the family reference).
+ *
+ * @license AGPL-3.0-or-later
+ */
+
+.exp-license-page {
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-5, 1.25rem);
+	width: 100%;
+	max-width: none;
+	min-width: 0;
+}
+
+/* [hidden] wins over any display rule — JS toggles el.hidden on elements
+ * whose classes declare display (callout, buttons, results list). */
+.exp-license-page [hidden] {
+	display: none !important;
+}
+
+/* ── Screen-reader-only + live regions ───────────────────────── */
+.exp-license-sr-only,
+.exp-license-page .exp-license-sr-only {
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	padding: 0 !important;
+	margin: -1px !important;
+	overflow: hidden !important;
+	clip: rect(0, 0, 0, 0) !important;
+	white-space: nowrap !important;
+	border: 0 !important;
+}
+
+/* ── Visible feedback banner ─────────────────────────────────── */
+.exp-license-feedback {
+	margin: 0;
+	padding: var(--exp-space-3, 0.75rem) var(--exp-space-4, 1rem);
+	border-radius: var(--exp-radius-sm, 8px);
+	border: 1px solid var(--color-border);
+	font-size: var(--exp-fs-sm, 0.875rem);
+	line-height: var(--exp-line-base, 1.5);
+}
+
+.exp-license-feedback--success {
+	border-color: var(--color-success-text, var(--color-success));
+	background: color-mix(in srgb, var(--color-success-text, var(--color-success)) 12%, var(--color-main-background));
+	color: var(--color-main-text);
+}
+
+.exp-license-feedback--error {
+	border-color: var(--color-error-text, var(--color-error));
+	background: color-mix(in srgb, var(--color-error-text, var(--color-error)) 12%, var(--color-main-background));
+	color: var(--color-main-text);
+}
+
+/* ── Callouts ────────────────────────────────────────────────── */
+.exp-license-callout {
+	display: flex;
+	gap: var(--exp-space-3, 0.75rem);
+	margin: 0;
+	padding: var(--exp-space-4, 1rem);
+	border: 1px solid var(--color-border);
+	border-inline-start: 4px solid var(--color-primary-element);
+	border-radius: var(--exp-radius-md, 10px);
+	background: var(--color-main-background);
+}
+
+.exp-license-callout--info {
+	border-inline-start-color: var(--color-primary-element);
+	background: color-mix(in srgb, var(--color-primary-element) 7%, var(--color-main-background));
+}
+
+.exp-license-callout--warning {
+	border-inline-start-color: var(--color-warning-text, var(--color-warning));
+	background: color-mix(in srgb, var(--color-warning-text, var(--color-warning)) 12%, var(--color-main-background));
+}
+
+.exp-license-callout--danger {
+	border-inline-start-color: var(--color-error-text, var(--color-error));
+	background: color-mix(in srgb, var(--color-error-text, var(--color-error)) 10%, var(--color-main-background));
+}
+
+.exp-license-callout__title {
+	margin: 0 0 var(--exp-space-1, 0.25rem);
+	font-size: var(--exp-fs-md, 1rem);
+	font-weight: 600;
+}
+
+.exp-license-callout__text {
+	margin: 0;
+	line-height: var(--exp-line-base, 1.5);
+}
+
+.exp-license-callout__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--exp-space-3, 0.75rem);
+	margin-top: var(--exp-space-3, 0.75rem);
+}
+
+/* ── Stat tiles (design-system §3.5) ─────────────────────────── */
+.exp-license-stat-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(11rem, 100%), 1fr));
+	gap: var(--exp-space-3, 0.75rem);
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	min-width: 0;
+	list-style: none;
+}
+
+.exp-license-stat-tile {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	justify-content: flex-start;
+	gap: 0.25rem;
+	min-height: 6.5rem;
+	min-width: 0;
+	margin: 0;
+	padding: var(--exp-space-4, 1rem);
+	border: 1px solid var(--color-border);
+	border-inline-start: 3px solid var(--color-border-maxcontrast, var(--color-border));
+	border-radius: var(--exp-radius-md, 10px);
+	background: var(--color-main-background);
+	text-align: left;
+	color: inherit;
+}
+
+.exp-license-stat-tile--primary { border-inline-start-color: var(--color-primary-element); }
+.exp-license-stat-tile--success { border-inline-start-color: var(--color-success-text, var(--color-success)); }
+.exp-license-stat-tile--warning { border-inline-start-color: var(--color-warning-text, var(--color-warning)); }
+.exp-license-stat-tile--neutral { border-inline-start-color: var(--color-border); }
+
+.exp-license-stat-tile__label {
+	margin: 0;
+	font-size: var(--exp-fs-xs, 0.8125rem);
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--exp-muted, var(--color-text-maxcontrast));
+}
+
+.exp-license-stat-tile__value {
+	margin: 0;
+	font-size: clamp(1.25rem, 2vw, 1.6rem);
+	font-weight: 700;
+	line-height: var(--exp-line-tight, 1.2);
+	font-variant-numeric: tabular-nums;
+	overflow-wrap: anywhere;
+}
+
+.exp-license-stat-tile__sep {
+	margin-inline: 0.15em;
+	font-weight: 500;
+	color: var(--exp-muted, var(--color-text-maxcontrast));
+}
+
+.exp-license-stat-tile__meta {
+	margin: 0;
+	font-size: var(--exp-fs-xs, 0.8125rem);
+	line-height: 1.4;
+	color: var(--exp-muted, var(--color-text-maxcontrast));
+}
+
+.exp-license-stat__meta-label { font-weight: 600; }
+
+/* Usage meter */
+.exp-license-meter {
+	height: 0.375rem;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--color-main-text) 8%, transparent);
+	overflow: hidden;
+	margin-top: auto;
+}
+
+.exp-license-meter__fill {
+	height: 100%;
+	border-radius: inherit;
+	background: var(--color-primary-element);
+	transition: width 0.25s ease;
+}
+
+.exp-license-meter__fill--full {
+	background: var(--color-warning-text, var(--color-warning));
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.exp-license-meter__fill { transition: none; }
+}
+
+/* ── Badges ──────────────────────────────────────────────────── */
+.exp-license-badge {
+	display: inline-block;
+	padding: 0.25rem 0.65rem;
+	border-radius: 999px;
+	font-size: var(--exp-fs-xs, 0.8125rem);
+	font-weight: 600;
+	line-height: 1.3;
+}
+
+.exp-license-badge--success {
+	background: color-mix(in srgb, var(--color-success-text, var(--color-success)) 18%, var(--color-main-background));
+	color: var(--color-success-text, var(--color-success));
+}
+
+.exp-license-badge--warning {
+	background: color-mix(in srgb, var(--color-warning-text, var(--color-warning)) 22%, var(--color-main-background));
+	color: var(--color-warning-text, var(--color-warning));
+}
+
+/* ── Section cards ───────────────────────────────────────────── */
+.exp-license-card {
+	margin: 0;
+	border: 1px solid var(--color-border);
+	border-radius: var(--exp-radius-md, 12px);
+	background: var(--color-main-background);
+	min-width: 0;
+}
+
+.exp-license-card__header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: var(--exp-space-3, 0.75rem);
+	padding: var(--exp-space-4, 1rem) var(--exp-space-4, 1rem) 0;
+}
+
+.exp-license-card__title {
+	margin: 0;
+	font-size: var(--exp-fs-lg, 1.125rem);
+	font-weight: 700;
+}
+
+.exp-license-card__lead {
+	margin: var(--exp-space-1, 0.25rem) 0 0;
+	font-size: var(--exp-fs-sm, 0.875rem);
+	line-height: var(--exp-line-base, 1.5);
+	color: var(--exp-muted, var(--color-text-maxcontrast));
+}
+
+.exp-license-card__header-actions {
+	flex: 0 0 auto;
+}
+
+.exp-license-card__body {
+	padding: var(--exp-space-4, 1rem);
+}
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+.exp-license-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.4em;
+	min-height: var(--exp-touch, 44px);
+	min-width: 44px;
+	padding: 0.5rem 1rem;
+	border: 2px solid transparent;
+	border-radius: var(--exp-radius-sm, 8px);
+	font: inherit;
+	font-weight: 600;
+	text-decoration: none;
+	cursor: pointer;
+	box-sizing: border-box;
+}
+
+.exp-license-btn--primary {
+	background: var(--color-primary-element);
+	color: var(--color-primary-element-text, var(--color-primary-text));
+	border-color: var(--color-primary-element);
+}
+
+.exp-license-btn--secondary {
+	background: var(--color-main-background);
+	color: var(--color-main-text);
+	border-color: var(--color-border-maxcontrast, var(--color-border));
+}
+
+.exp-license-btn--danger {
+	background: var(--color-element-error, var(--color-error));
+	color: var(--color-primary-element-text, var(--color-primary-text));
+	border-color: var(--color-element-error, var(--color-error));
+}
+
+.exp-license-btn--sm {
+	min-height: var(--exp-touch, 44px);
+	padding: 0.375rem 0.875rem;
+	font-size: var(--exp-fs-sm, 0.875rem);
+}
+
+.exp-license-btn:hover { filter: brightness(0.95); }
+
+.exp-license-btn:focus-visible {
+	outline: 3px solid color-mix(in srgb, var(--color-primary-element) 55%, transparent);
+	outline-offset: 2px;
+}
+
+.exp-license-btn--danger:hover,
+.exp-license-btn--danger:focus-visible {
+	filter: brightness(0.92);
+	outline: 3px solid color-mix(in srgb, var(--color-element-error, var(--color-error)) 55%, transparent);
+	outline-offset: 2px;
+}
+
+.exp-license-btn:disabled,
+.exp-license-btn[aria-disabled='true'] {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.exp-license-btn--icon {
+	padding: 0.5rem;
+}
+
+.exp-license-btn--icon svg {
+	width: 1.125rem;
+	height: 1.125rem;
+	display: block;
+}
+
+/* ── Button-variant armor ──────────────────────────────────────
+ * NC core inputs.scss repaints every button:not(.button-vue,
+ * [class^=vs__]) at specificity (0,1,1) with the pale
+ * --color-primary-element-light fill + light-text ink — stronger
+ * than the lone .exp-license-btn--{variant} rules above (0,1,0),
+ * so every variant collapses to the same pale skin
+ * (button_variant_specificity_collapse; dutycheck visual r40:
+ * destructive "Remove license" ≡ secondary "Cancel").
+ *
+ * Canonical fix shape (same as the .dc-btn armor in app
+ * css/app.css): ONE scope list — the pack page root, the app's
+ * content canvas, and every body-mounted overlay scope the pack
+ * <dialog> modals can land under — applying !important fills for
+ * EVERY variant incl. :hover/:focus-visible/:active. A new
+ * overlay is armored by landing on the scope list, never by a
+ * per-dialog-class rule. */
+.exp-license-page .exp-license-btn--primary,
+#app-content .exp-license-btn--primary,
+#app-content-wrapper .exp-license-btn--primary,
+.exp-license-modal .exp-license-btn--primary,
+.exp-modal .exp-license-btn--primary,
+.exp-dialog .exp-license-btn--primary,
+dialog .exp-license-btn--primary,
+[role="dialog"] .exp-license-btn--primary,
+[role="alertdialog"] .exp-license-btn--primary {
+	background: var(--color-primary-element) !important;
+	border-color: var(--color-primary-element) !important;
+	color: var(--color-primary-element-text, var(--color-primary-text)) !important;
+}
+.exp-license-page .exp-license-btn--primary:hover,
+#app-content .exp-license-btn--primary:hover,
+#app-content-wrapper .exp-license-btn--primary:hover,
+.exp-license-modal .exp-license-btn--primary:hover,
+.exp-modal .exp-license-btn--primary:hover,
+.exp-dialog .exp-license-btn--primary:hover,
+dialog .exp-license-btn--primary:hover,
+[role="dialog"] .exp-license-btn--primary:hover,
+[role="alertdialog"] .exp-license-btn--primary:hover {
+	background: var(--color-primary-element-hover, var(--color-primary-element)) !important;
+	border-color: var(--color-primary-element-hover, var(--color-primary-element)) !important;
+	color: var(--color-primary-element-text, var(--color-primary-text)) !important;
+}
+.exp-license-page .exp-license-btn--primary:focus-visible,
+#app-content .exp-license-btn--primary:focus-visible,
+#app-content-wrapper .exp-license-btn--primary:focus-visible,
+.exp-license-modal .exp-license-btn--primary:focus-visible,
+.exp-modal .exp-license-btn--primary:focus-visible,
+.exp-dialog .exp-license-btn--primary:focus-visible,
+dialog .exp-license-btn--primary:focus-visible,
+[role="dialog"] .exp-license-btn--primary:focus-visible,
+[role="alertdialog"] .exp-license-btn--primary:focus-visible {
+	background: var(--color-primary-element-hover, var(--color-primary-element)) !important;
+	border-color: var(--color-primary-element-hover, var(--color-primary-element)) !important;
+	color: var(--color-primary-element-text, var(--color-primary-text)) !important;
+	outline: 3px solid color-mix(in srgb, var(--color-primary-element) 55%, transparent);
+	outline-offset: 2px;
+}
+.exp-license-page .exp-license-btn--primary:active,
+#app-content .exp-license-btn--primary:active,
+#app-content-wrapper .exp-license-btn--primary:active,
+.exp-license-modal .exp-license-btn--primary:active,
+.exp-modal .exp-license-btn--primary:active,
+.exp-dialog .exp-license-btn--primary:active,
+dialog .exp-license-btn--primary:active,
+[role="dialog"] .exp-license-btn--primary:active,
+[role="alertdialog"] .exp-license-btn--primary:active {
+	background: var(--color-primary-element) !important;
+	border-color: var(--color-primary-element) !important;
+	color: var(--color-primary-element-text, var(--color-primary-text)) !important;
+}
+
+.exp-license-page .exp-license-btn--secondary,
+#app-content .exp-license-btn--secondary,
+#app-content-wrapper .exp-license-btn--secondary,
+.exp-license-modal .exp-license-btn--secondary,
+.exp-modal .exp-license-btn--secondary,
+.exp-dialog .exp-license-btn--secondary,
+dialog .exp-license-btn--secondary,
+[role="dialog"] .exp-license-btn--secondary,
+[role="alertdialog"] .exp-license-btn--secondary {
+	background: var(--color-main-background) !important;
+	border-color: var(--color-border-maxcontrast, var(--color-border)) !important;
+	color: var(--color-main-text) !important;
+}
+.exp-license-page .exp-license-btn--secondary:hover,
+#app-content .exp-license-btn--secondary:hover,
+#app-content-wrapper .exp-license-btn--secondary:hover,
+.exp-license-modal .exp-license-btn--secondary:hover,
+.exp-dialog .exp-license-btn--secondary:hover,
+.exp-modal .exp-license-btn--secondary:hover,
+dialog .exp-license-btn--secondary:hover,
+[role="dialog"] .exp-license-btn--secondary:hover,
+[role="alertdialog"] .exp-license-btn--secondary:hover {
+	background: var(--color-background-hover, var(--color-main-background)) !important;
+	border-color: var(--color-border-maxcontrast, var(--color-border)) !important;
+	color: var(--color-main-text) !important;
+}
+.exp-license-page .exp-license-btn--secondary:focus-visible,
+#app-content .exp-license-btn--secondary:focus-visible,
+#app-content-wrapper .exp-license-btn--secondary:focus-visible,
+.exp-license-modal .exp-license-btn--secondary:focus-visible,
+.exp-dialog .exp-license-btn--secondary:focus-visible,
+.exp-modal .exp-license-btn--secondary:focus-visible,
+dialog .exp-license-btn--secondary:focus-visible,
+[role="dialog"] .exp-license-btn--secondary:focus-visible,
+[role="alertdialog"] .exp-license-btn--secondary:focus-visible {
+	background: var(--color-background-hover, var(--color-main-background)) !important;
+	border-color: var(--color-border-maxcontrast, var(--color-border)) !important;
+	color: var(--color-main-text) !important;
+	outline: 3px solid color-mix(in srgb, var(--color-primary-element) 55%, transparent);
+	outline-offset: 2px;
+}
+.exp-license-page .exp-license-btn--secondary:active,
+#app-content .exp-license-btn--secondary:active,
+#app-content-wrapper .exp-license-btn--secondary:active,
+.exp-license-modal .exp-license-btn--secondary:active,
+.exp-dialog .exp-license-btn--secondary:active,
+.exp-modal .exp-license-btn--secondary:active,
+dialog .exp-license-btn--secondary:active,
+[role="dialog"] .exp-license-btn--secondary:active,
+[role="alertdialog"] .exp-license-btn--secondary:active {
+	background: var(--color-main-background) !important;
+	border-color: var(--color-border-maxcontrast, var(--color-border)) !important;
+	color: var(--color-main-text) !important;
+}
+
+.exp-license-page .exp-license-btn--danger,
+#app-content .exp-license-btn--danger,
+#app-content-wrapper .exp-license-btn--danger,
+.exp-license-modal .exp-license-btn--danger,
+.exp-modal .exp-license-btn--danger,
+.exp-dialog .exp-license-btn--danger,
+dialog .exp-license-btn--danger,
+[role="dialog"] .exp-license-btn--danger,
+[role="alertdialog"] .exp-license-btn--danger {
+	background: var(--color-element-error, var(--color-error)) !important;
+	border-color: var(--color-element-error, var(--color-error)) !important;
+	color: var(--color-primary-element-text, var(--color-primary-text)) !important;
+}
+.exp-license-page .exp-license-btn--danger:hover,
+#app-content .exp-license-btn--danger:hover,
+#app-content-wrapper .exp-license-btn--danger:hover,
+.exp-license-modal .exp-license-btn--danger:hover,
+.exp-modal .exp-license-btn--danger:hover,
+.exp-dialog .exp-license-btn--danger:hover,
+dialog .exp-license-btn--danger:hover,
+[role="dialog"] .exp-license-btn--danger:hover,
+[role="alertdialog"] .exp-license-btn--danger:hover {
+	background: var(--color-element-error, var(--color-error)) !important;
+	border-color: var(--color-element-error, var(--color-error)) !important;
+	color: var(--color-primary-element-text, var(--color-primary-text)) !important;
+}
+.exp-license-page .exp-license-btn--danger:focus-visible,
+#app-content .exp-license-btn--danger:focus-visible,
+#app-content-wrapper .exp-license-btn--danger:focus-visible,
+.exp-license-modal .exp-license-btn--danger:focus-visible,
+.exp-modal .exp-license-btn--danger:focus-visible,
+.exp-dialog .exp-license-btn--danger:focus-visible,
+dialog .exp-license-btn--danger:focus-visible,
+[role="dialog"] .exp-license-btn--danger:focus-visible,
+[role="alertdialog"] .exp-license-btn--danger:focus-visible {
+	background: var(--color-element-error, var(--color-error)) !important;
+	border-color: var(--color-element-error, var(--color-error)) !important;
+	color: var(--color-primary-element-text, var(--color-primary-text)) !important;
+	outline: 3px solid color-mix(in srgb, var(--color-element-error, var(--color-error)) 55%, transparent);
+	outline-offset: 2px;
+}
+.exp-license-page .exp-license-btn--danger:active,
+#app-content .exp-license-btn--danger:active,
+#app-content-wrapper .exp-license-btn--danger:active,
+.exp-license-modal .exp-license-btn--danger:active,
+.exp-modal .exp-license-btn--danger:active,
+.exp-dialog .exp-license-btn--danger:active,
+dialog .exp-license-btn--danger:active,
+[role="dialog"] .exp-license-btn--danger:active,
+[role="alertdialog"] .exp-license-btn--danger:active {
+	background: var(--color-element-error, var(--color-error)) !important;
+	border-color: var(--color-element-error, var(--color-error)) !important;
+	color: var(--color-primary-element-text, var(--color-primary-text)) !important;
+}
+
+/* ── Form elements ───────────────────────────────────────────── */
+.exp-license-field__label {
+	display: block;
+	margin: 0 0 var(--exp-space-2, 0.5rem);
+	font-weight: 600;
+	font-size: var(--exp-fs-sm, 0.875rem);
+}
+
+.exp-license-field__hint {
+	margin: var(--exp-space-2, 0.5rem) 0 0;
+	font-size: var(--exp-fs-sm, 0.875rem);
+	line-height: var(--exp-line-base, 1.5);
+	color: var(--exp-muted, var(--color-text-maxcontrast));
+}
+
+.exp-license-input,
+.exp-license-page .exp-license-input {
+	width: 100%;
+	box-sizing: border-box;
+	padding: var(--exp-space-3, 0.75rem);
+	border: 2px solid var(--color-border-maxcontrast, var(--color-border));
+	border-radius: var(--exp-radius-sm, 8px);
+	/* background-color, never bare background: — the shorthand would reset
+	 * the native chevron on <select> consumers (select-background-shorthand). */
+	background-color: var(--color-main-background);
+	color: var(--color-main-text);
+	font: inherit;
+}
+
+.exp-license-input:focus-visible {
+	outline: 3px solid color-mix(in srgb, var(--color-primary-element) 55%, transparent);
+	outline-offset: 2px;
+	border-color: var(--color-primary-element);
+}
+
+.exp-license-input:disabled,
+.exp-license-input[aria-disabled='true'] {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.exp-license-key-input {
+	min-height: 6rem;
+	font-family: var(--font-face-monospace, ui-monospace, monospace);
+	font-size: var(--exp-fs-sm, 0.875rem);
+	line-height: 1.45;
+	resize: vertical;
+}
+
+.exp-license-instance-box {
+	margin-top: var(--exp-space-4, 1rem);
+	padding: var(--exp-space-4, 1rem);
+	border: 1px solid var(--color-border);
+	border-radius: var(--exp-radius-sm, 8px);
+	background: color-mix(in srgb, var(--color-primary-element) 6%, var(--color-main-background));
+}
+
+.exp-license-instance-box .exp-license-field__label { margin-bottom: 0; }
+
+.exp-license-instance-id {
+	display: block;
+	margin-top: var(--exp-space-2, 0.5rem);
+	padding: var(--exp-space-2, 0.5rem) var(--exp-space-3, 0.75rem);
+	font-family: var(--font-face-monospace, ui-monospace, monospace);
+	font-size: var(--exp-fs-sm, 0.875rem);
+	word-break: break-all;
+	background: var(--color-main-background);
+	border-radius: var(--exp-radius-sm, 8px);
+	border: 1px solid var(--color-border);
+}
+
+.exp-license-form__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--exp-space-3, 0.75rem);
+	margin-top: var(--exp-space-4, 1rem);
+}
+
+/* ── Current license details ─────────────────────────────────── */
+.exp-license-status {
+	margin-top: var(--exp-space-5, 1.25rem);
+	padding-top: var(--exp-space-5, 1.25rem);
+	border-top: 1px solid var(--color-border);
+}
+
+/* Neutralise Nextcloud core server.css definition-list styling. */
+.exp-license-status__grid dt,
+.exp-license-status__grid dd {
+	display: block;
+	width: auto;
+	padding: 0;
+	text-align: start;
+	white-space: normal;
+}
+
+.exp-license-status__title {
+	font-size: var(--exp-fs-md, 1rem);
+	font-weight: 600;
+	margin: 0 0 var(--exp-space-3, 0.75rem);
+}
+
+.exp-license-status__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+	gap: var(--exp-space-4, 1rem);
+	margin: 0;
+}
+
+.exp-license-status__item dt {
+	font-size: var(--exp-fs-xs, 0.8125rem);
+	font-weight: 600;
+	color: var(--exp-muted, var(--color-text-maxcontrast));
+	margin: 0 0 var(--exp-space-1, 0.25rem);
+}
+
+.exp-license-status__item dd {
+	margin: 0;
+	font-size: var(--exp-fs-md, 1rem);
+	word-break: break-word;
+}
+
+.exp-license-status__purchase {
+	margin: var(--exp-space-4, 1rem) 0 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--exp-space-3, 0.75rem);
+}
+
+.exp-license-expiry-callout { margin-top: var(--exp-space-4, 1rem); }
+.exp-license-no-key-callout { margin-bottom: 0; }
+
+/* ── Seat picker combobox ────────────────────────────────────── */
+.exp-license-seat-picker { margin-bottom: var(--exp-space-5, 1.25rem); }
+
+.exp-license-search-wrap {
+	position: relative;
+	max-width: 32rem;
+}
+
+.exp-license-search-input { width: 100%; }
+
+.exp-license-seat-count {
+	margin: var(--exp-space-2, 0.5rem) 0 0;
+	font-size: var(--exp-fs-sm, 0.875rem);
+	font-weight: 600;
+}
+
+.exp-license-seats-full-hint {
+	color: var(--color-warning-text, var(--color-warning));
+	font-weight: 500;
+}
+
+.exp-license-assign-btn { margin-top: var(--exp-space-3, 0.75rem); }
+
+.exp-license-batch-result { margin-top: var(--exp-space-3, 0.75rem); }
+
+.exp-seat-search-results {
+	list-style: none;
+	position: absolute;
+	z-index: 20;
+	left: 0;
+	right: 0;
+	margin: var(--exp-space-1, 0.25rem) 0 0;
+	padding: 0;
+	border: 2px solid var(--color-border);
+	border-radius: var(--exp-radius-sm, 8px);
+	background: var(--color-main-background);
+	max-height: 14rem;
+	overflow-y: auto;
+	box-shadow: 0 8px 24px color-mix(in srgb, var(--color-main-text) 12%, transparent);
+}
+
+.exp-seat-search-results li { margin: 0; }
+
+.exp-seat-search-results li[role='option'] {
+	display: flex;
+	align-items: center;
+	width: 100%;
+	min-height: var(--exp-touch, 44px);
+	padding: var(--exp-space-3, 0.75rem) var(--exp-space-4, 1rem);
+	color: var(--color-main-text);
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+	box-sizing: border-box;
+}
+
+.exp-seat-search-results li[role='option']:hover {
+	background: var(--color-background-hover);
+}
+
+.exp-seat-search-results li[role='option'][aria-selected='true'],
+.exp-seat-search-results li[role='option'].is-active {
+	background: color-mix(in srgb, var(--color-primary-element) 14%, transparent);
+	box-shadow: inset 3px 0 0 var(--color-primary-element);
+}
+
+.exp-seat-search-results__label {
+	display: flex;
+	align-items: center;
+	gap: var(--exp-space-3, 0.75rem);
+	width: 100%;
+	cursor: pointer;
+}
+
+.exp-seat-search-results__check {
+	width: 1.1rem;
+	height: 1.1rem;
+	margin: 0;
+	flex: 0 0 auto;
+}
+
+.exp-seat-search-results__empty {
+	padding: var(--exp-space-3, 0.75rem) var(--exp-space-4, 1rem);
+	color: var(--exp-muted, var(--color-text-maxcontrast));
+	font-size: var(--exp-fs-sm, 0.875rem);
+}
+
+/* ── Seats / devices tables ──────────────────────────────────── */
+.exp-license-seats-table-wrap { margin-top: var(--exp-space-3, 0.75rem); }
+
+/* Self-contained table styling: NC core server.css sets
+   table { white-space: nowrap; border-collapse: separate }. */
+.exp-license-seats-table {
+	width: 100%;
+	border-collapse: collapse;
+	border-spacing: 0;
+	white-space: normal;
+}
+
+.exp-license-seats-table th,
+.exp-license-seats-table td {
+	padding: var(--exp-space-3, 0.75rem) var(--exp-space-4, 1rem);
+	text-align: start;
+	vertical-align: middle;
+	white-space: normal;
+	overflow-wrap: anywhere;
+	border-bottom: 1px solid var(--color-border);
+}
+
+.exp-license-seats-table thead th {
+	font-weight: 600;
+	font-size: var(--exp-fs-sm, 0.875rem);
+	color: var(--exp-muted, var(--color-text-maxcontrast));
+	background: var(--color-background-dark, var(--color-background-hover));
+}
+
+.exp-license-seats-table tbody tr:last-child td { border-bottom: none; }
+.exp-license-seats-table tbody tr:hover { background: var(--color-background-hover); }
+
+.exp-license-seats-table td.actions-cell {
+	text-align: end;
+	white-space: nowrap;
+}
+
+.exp-license-table-actions {
+	display: inline-flex;
+	gap: var(--exp-space-2, 0.5rem);
+}
+
+.exp-license-user-id {
+	font-size: var(--exp-fs-xs, 0.8125rem);
+	padding: 0.1rem 0.35rem;
+	border-radius: 4px;
+	background: color-mix(in srgb, var(--color-main-text) 6%, transparent);
+}
+
+/* ── Empty states ────────────────────────────────────────────── */
+.exp-license-empty-state {
+	padding: var(--exp-space-5, 1.25rem) var(--exp-space-4, 1rem);
+	text-align: center;
+}
+
+.exp-license-empty-state__title {
+	margin: 0 0 var(--exp-space-1, 0.25rem);
+	font-weight: 600;
+}
+
+.exp-license-empty-state__text {
+	margin: 0;
+	font-size: var(--exp-fs-sm, 0.875rem);
+	color: var(--exp-muted, var(--color-text-maxcontrast));
+}
+
+/* ── Devices card ────────────────────────────────────────────── */
+.exp-license-terminal-summary {
+	margin: 0 0 var(--exp-space-4, 1rem);
+	font-size: var(--exp-fs-md, 1rem);
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+
+.exp-license-terminal-form { margin-bottom: var(--exp-space-4, 1rem); }
+
+.exp-license-terminal-fields {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
+	gap: var(--exp-space-4, 1rem);
+}
+
+.exp-license-terminal-field { min-width: 0; }
+
+.exp-license-token-value {
+	display: block;
+	margin: 0 0 var(--exp-space-4, 1rem);
+	padding: var(--exp-space-3, 0.75rem);
+	font-family: var(--font-face-monospace, ui-monospace, monospace);
+	font-size: var(--exp-fs-sm, 0.875rem);
+	word-break: break-all;
+	white-space: pre-wrap;
+	background: color-mix(in srgb, var(--color-main-text) 5%, var(--color-main-background));
+	border: 1px solid var(--color-border);
+	border-radius: var(--exp-radius-sm, 8px);
+	max-height: 10rem;
+	overflow-y: auto;
+}
+
+/* ── Confirmation / token modals ─────────────────────────────── */
+.exp-license-modal::backdrop {
+	background: var(--exp-scrim, color-mix(in srgb, var(--color-main-text) 45%, transparent));
+}
+
+.exp-license-modal {
+	margin: auto;
+	padding: var(--exp-space-5, 1.25rem);
+	max-width: min(28rem, calc(100vw - 2rem));
+	width: 100%;
+	border: 2px solid var(--color-primary-element);
+	border-radius: var(--exp-radius-lg, 12px);
+	background: var(--color-main-background);
+	box-shadow: 0 8px 24px color-mix(in srgb, var(--color-main-text) 12%, transparent);
+	box-sizing: border-box;
+}
+
+/* Nextcloud core's reset prints `dialog { display: block }` at author
+   origin — it outranks the UA `dialog:not([open]) { display: none }`
+   rule, so a closed license modal would still paint (and catch clicks /
+   enter the a11y tree) mid-page. Re-hide it explicitly. */
+.exp-license-modal:not([open]) {
+	display: none;
+}
+
+.exp-license-modal h3 {
+	margin: 0 0 var(--exp-space-2, 0.5rem);
+	font-size: var(--exp-fs-lg, 1.125rem);
+}
+
+.exp-license-modal__hint {
+	color: var(--exp-muted, var(--color-text-maxcontrast));
+	margin: 0 0 var(--exp-space-4, 1rem);
+	line-height: var(--exp-line-base, 1.5);
+}
+
+.exp-license-modal__actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: var(--exp-space-3, 0.75rem);
+}
+
+body.exp-license-modal-open { overflow: hidden; }
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 480px) {
+	.exp-license-stat-grid { grid-template-columns: 1fr; }
+	.exp-license-status__grid { grid-template-columns: 1fr; }
+
+	.exp-license-form__actions .exp-license-btn,
+	.exp-license-modal__actions .exp-license-btn {
+		flex: 1 1 auto;
+		justify-content: center;
+	}
+}
+
+/* Mobile table → labeled rows (design-system §3.7) */
+@media (max-width: 768.98px) {
+	.exp-license-seats-table thead { display: none; }
+
+	.exp-license-seats-table,
+	.exp-license-seats-table tbody,
+	.exp-license-seats-table tr,
+	.exp-license-seats-table td { display: block; width: 100%; }
+
+	.exp-license-seats-table tr {
+		border: 1px solid var(--color-border);
+		border-radius: var(--exp-radius-sm, 8px);
+		margin-bottom: var(--exp-space-3, 0.75rem);
+		padding: var(--exp-space-2, 0.5rem) 0;
+	}
+
+	.exp-license-seats-table td {
+		border-bottom: none;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: var(--exp-space-3, 0.75rem);
+	}
+
+	.exp-license-seats-table td::before {
+		content: attr(data-label);
+		font-weight: 600;
+		font-size: var(--exp-fs-xs, 0.8125rem);
+		color: var(--exp-muted, var(--color-text-maxcontrast));
+	}
+
+	.exp-license-seats-table td.actions-cell { text-align: start; }
+}
+
+@media (forced-colors: active) {
+	.exp-license-stat-tile,
+	.exp-license-modal,
+	.exp-license-card { border-color: CanvasText; }
+
+	.exp-license-meter__fill { background: Highlight; }
+}

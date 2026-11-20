@@ -1,0 +1,187 @@
+{
+	"schemaVersion": 1,
+	"appId": "expensecheck",
+	"companionDir": "mobile/expensecheck",
+	"contracts": [
+		{
+			"id": "line-required-fields",
+			"param": "occurred_on",
+			"description": "Claim lines require line_type, occurred_on, category_id and money inputs (receipt: amount; rated: qty + rate_code). Server rejects with field-level VALIDATION_FAILED.",
+			"errorCodes": [
+				"VALIDATION_FAILED"
+			],
+			"server": [
+				{
+					"file": "lib/Service/ClaimLineService.php",
+					"needles": [
+						"line_type",
+						"occurred_on",
+						"category_id",
+						"rate_code"
+					]
+				}
+			],
+			"web": [
+				{
+					"file": "js/pages/app-views.js",
+					"needles": [
+						"line_type",
+						"occurred_on",
+						"category_id",
+						"rate_code",
+						"qty"
+					]
+				},
+				{
+					"file": "templates/body/claim-form.php",
+					"needles": [
+						"exp-lines",
+						"exp-add-line"
+					]
+				}
+			],
+			"mobile": [
+				{
+					"file": "src/api.ts",
+					"needles": [
+						"line_type",
+						"occurred_on",
+						"category_id"
+					]
+				}
+			]
+		},
+		{
+			"id": "line-allocations",
+			"param": "allocations",
+			"description": "Every line requires allocations resolving exactly to the line amount (percent sums to 100 or amounts sum to line total).",
+			"errorCodes": [
+				"ALLOCATION_SUM_MISMATCH",
+				"VALIDATION_FAILED"
+			],
+			"server": [
+				{
+					"file": "lib/Service/MoneyMathService.php",
+					"needles": [
+						"resolveAllocations",
+						"ALLOCATION_SUM_MISMATCH"
+					]
+				}
+			],
+			"web": [
+				{
+					"file": "js/pages/app-views.js",
+					"needles": [
+						"allocations",
+						"cost_center_id"
+					]
+				}
+			],
+			"mobile": [
+				{
+					"file": "src/api.ts",
+					"needles": [
+						"allocations",
+						"cost_center_id"
+					]
+				}
+			]
+		},
+		{
+			"id": "decision-note-required",
+			"param": "note",
+			"description": "Reject and request-changes decisions require a note (>=3 chars). Approve does not.",
+			"errorCodes": [
+				"VALIDATION_FAILED"
+			],
+			"server": [
+				{
+					"file": "lib/Service/ApprovalService.php",
+					"needles": [
+						"note",
+						"DECISION_REQUEST_CHANGES",
+						"DECISION_REJECT"
+					]
+				}
+			],
+			"web": [
+				{
+					"file": "js/pages/app-views.js",
+					"needles": [
+						"decision: 'changes_requested'",
+						"decision: 'rejected'",
+						"note.value"
+					]
+				}
+			],
+			"mobile": null
+		},
+		{
+			"id": "settlement-paid-ref",
+			"param": "paid_ref",
+			"description": "Settling a batch requires claim_ids and paid_ref.",
+			"errorCodes": [
+				"VALIDATION_FAILED"
+			],
+			"server": [
+				{
+					"file": "lib/Controller/SettlementApiController.php",
+					"needles": [
+						"claim_ids",
+						"paid_ref"
+					]
+				}
+			],
+			"web": [
+				{
+					"file": "js/pages/app-views.js",
+					"needles": [
+						"claim_ids",
+						"paid_ref",
+						"exp-paid-ref"
+					]
+				},
+				{
+					"file": "templates/body/settlements.php",
+					"needles": [
+						"exp-paid-ref"
+					]
+				}
+			],
+			"mobile": null
+		},
+		{
+			"id": "version-cas-fields",
+			"param": "version",
+			"description": "Submit/decide/settle mutations send the claim version for CAS; server fails closed on stale versions (VERSION_CONFLICT).",
+			"errorCodes": [
+				"VERSION_CONFLICT"
+			],
+			"server": [
+				{
+					"file": "lib/Db/ClaimMapper.php",
+					"needles": [
+						"updateWithVersion",
+						"expectedVersion"
+					]
+				}
+			],
+			"web": [
+				{
+					"file": "js/pages/app-views.js",
+					"needles": [
+						"version: ver"
+					]
+				}
+			],
+			"mobile": [
+				{
+					"file": "src/api.ts",
+					"needles": [
+						"version"
+					]
+				}
+			]
+		}
+	]
+}

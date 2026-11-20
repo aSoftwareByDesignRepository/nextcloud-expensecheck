@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<!--
+  - SPDX-FileCopyrightText: 2026 Alexander Mäule <info@software-by-design.de>
+  - SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+<info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
+	<id>expensecheck</id>
+	<name>ExpenseCheck</name>
+	<summary>Claim, approve and reimburse employee expenses — receipts, mileage and per-diem on your Nextcloud</summary>
+	<summary lang="de">Spesenabrechnung &amp; Auslagenerstattung für Mitarbeitende — Belege, Kilometergeld und Pauschalen in Ihrer Nextcloud</summary>
+	<description><![CDATA[
+# File. Approve. Reimburse. With a trail.
+
+ExpenseCheck runs employee expense reimbursement inside your self-hosted Nextcloud: receipt claims with photos, mileage and per-diem via an admin-managed rate catalog, configurable multi-step approval chains, a finance settlement queue with CSV/ODS export, and an append-only hash-chained audit journal.
+
+**Free web app** (AGPL-3.0-or-later). The official Android companion is a licensed add-on (EXP2 seats).
+
+## Why teams install it
+
+- **Claims in under a minute** — receipt, mileage, per-diem and flat lines; receipts inbox for capture-first filing
+- **Approval chains your org defines** — 1..N steps by group, named user or line manager; amount/category routing
+- **A finance queue that reconciles** — batch settlement with payment references; formula-injection-safe CSV/ODS export
+- **Books that can't be silently rewritten** — settled claims immutable, period close, every decision in a hash-chained journal
+- **Jurisdiction-agnostic** — every rate, category, tax mode and approval rule is admin-configured; no statutory logic shipped
+
+## Clear limits
+
+- Export is the boundary — ExpenseCheck never executes payments.
+- No OCR/AI receipt scanning; no bank or card feeds.
+- Audit entries are append-only.
+- Declared databases: MySQL and PostgreSQL.
+
+## Feedback welcome
+
+We improve this app with real-world use. Bug reports, rough edges, and ideas help — open a GitHub Issue (https://github.com/aSoftwareByDesignRepository/nextcloud-expensecheck/issues) or write to info@software-by-design.de. Your feedback directly shapes what we build next.
+
+## Requirements
+
+- Nextcloud 32–35 · PHP 8.2–8.5 · MySQL or PostgreSQL
+	]]></description>
+	<description lang="de"><![CDATA[
+# Einreichen. Genehmigen. Erstatten. Mit Nachweis.
+
+ExpenseCheck bildet die Spesenabrechnung für Mitarbeitende in Ihrer selbst gehosteten Nextcloud ab: Belegabrechnungen mit Fotos, Kilometergeld und Verpflegungspauschalen über einen vom Admin gepflegten Tarifkatalog, konfigurierbare mehrstufige Genehmigungsketten, eine Auszahlungswarteschlange mit CSV/ODS-Export und ein manipulationssicheres, hash-verkettetes Prüfjournal.
+
+**Kostenlose Web-App** (AGPL-3.0-or-later). Der offizielle Android-Begleiter ist ein lizenzierter Zusatz (EXP2-Sitzplätze).
+
+## Warum Teams es einsetzen
+
+- **Abrechnung in unter einer Minute** — Beleg-, Fahrtkosten-, Pauschal- und Flatrate-Positionen; Belegeingang für Capture-first
+- **Genehmigungsketten nach Ihren Regeln** — 1..N Stufen per Gruppe, Person oder Linienvorgesetzten; Betrags-/Kategorie-Routing
+- **Eine Finanzqueue, die stimmt** — Auszahlungsläufe mit Zahlungsreferenz; formelsicherer CSV/ODS-Export
+- **Bücher, die nicht still umgeschrieben werden** — ausgezahlte Abrechnungen unveränderlich, Periodenabschluss, jede Entscheidung im hash-verketteten Journal
+- **Jurisdiktionsneutral** — jeder Tarif, jede Kategorie, jeder Steuermodus und jede Genehmigungsregel wird vom Admin konfiguriert; keine gesetzlichen Logiken mitgeliefert
+
+## Klare Grenzen
+
+- Export ist die Grenze — ExpenseCheck führt keine Zahlungen aus.
+- Keine OCR-/KI-Belegerkennung; keine Bank- oder Karten-Feeds.
+- Audit-Einträge sind nur anhängbar.
+- Deklarierte Datenbanken: MySQL und PostgreSQL.
+
+## Feedback willkommen
+
+Wir verbessern diese App mit Rückmeldungen aus der Praxis. Fehlerberichte, Stolpersteine und Ideen helfen — öffnen Sie ein GitHub Issue (https://github.com/aSoftwareByDesignRepository/nextcloud-expensecheck/issues) oder schreiben Sie an info@software-by-design.de. Ihr Feedback prägt direkt, was wir als Nächstes bauen.
+
+## Voraussetzungen
+
+- Nextcloud 32–35 · PHP 8.2–8.5 · MySQL oder PostgreSQL
+	]]></description>
+	<version>1.0.0</version>
+	<licence>agpl</licence>
+	<author mail="info@software-by-design.de" homepage="https://software-by-design.de">Alexander Mäule</author>
+	<namespace>ExpenseCheck</namespace>
+	<category>organization</category>
+	<category>office</category>
+	<dependencies>
+		<nextcloud min-version="32" max-version="35"/>
+		<php min-version="8.2" max-version="8.5"/>
+		<database>mysql</database>
+		<database>pgsql</database>
+	</dependencies>
+	<repair-steps>
+		<install>
+			<step>OCA\ExpenseCheck\Repair\EnsureExpenseCheckSchema</step>
+		</install>
+		<pre-migration>
+			<step>OCA\ExpenseCheck\Repair\BackupBeforeUpdate</step>
+		</pre-migration>
+		<post-migration>
+			<step>OCA\ExpenseCheck\Repair\EnsureExpenseCheckSchema</step>
+		</post-migration>
+		<uninstall>
+			<step>OCA\ExpenseCheck\Repair\UninstallDropTables</step>
+		</uninstall>
+	</repair-steps>
+	<background-jobs>
+		<job>OCA\ExpenseCheck\BackgroundJob\DigestMailJob</job>
+		<job>OCA\ExpenseCheck\BackgroundJob\RetentionCleanupJob</job>
+		<job>OCA\ExpenseCheck\BackgroundJob\IdempotencyPurgeJob</job>
+	</background-jobs>
+	<navigations>
+		<navigation>
+			<name>ExpenseCheck</name>
+			<route>expensecheck.page.index</route>
+			<icon>app.svg</icon>
+			<order>10</order>
+		</navigation>
+	</navigations>
+	<settings>
+		<admin-section>OCA\ExpenseCheck\Settings\AdminSection</admin-section>
+		<admin>OCA\ExpenseCheck\Settings\AdminSettings</admin>
+	</settings>
+</info>

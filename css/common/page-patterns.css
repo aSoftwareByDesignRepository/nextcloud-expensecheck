@@ -1,0 +1,1056 @@
+/* Auto-adapted from arbeitszeitcheck/css/common/page-patterns.css for the Check-family shell. Do not invent divergent layout rules here. */
+/**
+ * Shared page layout patterns (stack, grid, filters, empty states).
+ * Shell width modifiers live here; #app-content-wrapper.exp-shell in app.css sets base padding.
+ */
+
+/* ── Shell width ───────────────────────────────────────────── */
+#app-content.exp-app #app-content-wrapper.exp-shell--wide {
+	max-width: none;
+	margin-inline: 0;
+}
+
+#app-content.exp-app #app-content-wrapper.exp-shell--constrained {
+	max-width: 72rem;
+	margin-inline: auto;
+}
+
+#app-content.exp-app #app-content-wrapper.exp-shell--minimal {
+	max-width: 40rem;
+	margin-inline: auto;
+	padding: var(--exp-space-6) var(--exp-space-5);
+}
+
+/* ── Page stack (vertical rhythm inside main) ───────────────── */
+#app-content.exp-app .exp-page-stack {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: var(--exp-space-5);
+	width: 100%;
+	min-width: 0;
+}
+
+/* Reset flow-children margins for the stack rhythm — but never while a
+   child renders :modal: a top-layer <dialog> relies on UA/pack
+   margin:auto centering and this reset at higher specificity would pin
+   it to the viewport top-left (native_dialog_margin_reset_uncentered).
+   :not(:modal) keeps the reset for flow children only — a closed dialog
+   is display:none anyway. */
+#app-content.exp-app .exp-page-stack > *:not(:modal) {
+	margin: 0;
+}
+
+/* ── Two-column page grid (admin stats, side-by-side cards) ─── */
+/* Mobile-first: single column; ≥769px restores 2-col desktop grid */
+#app-content.exp-app .exp-page-grid {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: var(--exp-space-5);
+	width: 100%;
+	min-width: 0;
+}
+
+@media (min-width: 769px) {
+	#app-content.exp-app .exp-page-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+/* ── Legacy .section reset inside app shell ─────────────────── */
+#app-content.exp-app #exp-main-content .section {
+	margin: 0;
+	padding: 0;
+	border: none;
+	border-radius: 0;
+	background-color: transparent;
+	box-shadow: none;
+}
+
+#app-content.exp-app #exp-main-content .section::before {
+	display: none;
+}
+
+/* ── Filter panel (list pages — AZC parity, fluid ProjectCheck grid) ── */
+#app-content.exp-app .exp-filter-panel {
+	border-left: 4px solid var(--color-primary-element);
+}
+
+#app-content.exp-app .exp-filter-panel__head {
+	margin-bottom: 0;
+}
+
+#app-content.exp-app .exp-filter-panel__head h2 {
+	margin: 0 0 var(--exp-space-2);
+	font-size: var(--exp-fs-lg);
+	font-weight: 600;
+	line-height: var(--exp-line-tight);
+}
+
+#app-content.exp-app .exp-filter-panel__intro {
+	margin: 0;
+	max-width: 65ch;
+	font-size: var(--exp-fs-sm);
+	line-height: var(--exp-line-base);
+	color: var(--exp-muted);
+}
+
+/*
+ * Filter body: padded stack for panel chrome. The form itself is a CSS
+ * grid (not flex column) so nested .exp-form-grid / field grids keep their
+ * columns — ID-scoped flex on __form used to flatten every child to 1 col.
+ */
+#app-content.exp-app .exp-filter-panel__body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-4);
+	min-width: 0;
+}
+
+#app-content.exp-app .exp-filter-panel__form {
+	display: grid;
+	gap: var(--exp-space-4);
+	min-width: 0;
+	align-content: start;
+}
+
+/*
+ * Filter field grid — one even responsive grid for every Filters panel
+ * (Claim, Assets, Utilisation, On-site report). ProjectCheck pattern:
+ * auto-fit + minmax(…, 1fr) so columns share the full width with equal
+ * gaps — no capped tracks leaving a dead strip on the right, no empty
+ * auto-fill ghost columns. AZC subgrid keeps labels/controls on one baseline.
+ * Legacy modifiers (--fill/--record/--compact/--extended) resolve to the
+ * same grid so old markup cannot drift into a second layout.
+ * Fallback without subgrid: top-align cells (same as .exp-fieldset__grid).
+ */
+#app-content.exp-app .exp-filter-grid,
+#app-content.exp-app .exp-filter-grid--compact,
+#app-content.exp-app .exp-filter-grid--extended,
+#app-content.exp-app .exp-filter-grid--fill,
+#app-content.exp-app .exp-filter-grid--record {
+	display: grid;
+	/* Mobile-first: one field per row (<768); auto-fit from tablet up */
+	grid-template-columns: 1fr;
+	grid-auto-rows: auto minmax(44px, auto);
+	column-gap: var(--exp-space-3);
+	row-gap: var(--exp-space-3);
+	justify-content: stretch;
+	align-items: stretch;
+	width: 100%;
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+/* ≥769px: even auto-fit columns (NC tablet+ / desktop filter panels) */
+@media (min-width: 769px) {
+	#app-content.exp-app .exp-filter-grid,
+	#app-content.exp-app .exp-filter-grid--compact,
+	#app-content.exp-app .exp-filter-grid--extended,
+	#app-content.exp-app .exp-filter-grid--fill,
+	#app-content.exp-app .exp-filter-grid--record {
+		grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+		column-gap: var(--exp-space-4);
+		row-gap: var(--exp-space-4);
+	}
+}
+
+/*
+ * Exact two-field toolbars (Assets Site|Name). auto-fit can still wrap under
+ * ~24rem+gutter and look like a broken stacked form — pin two equal columns
+ * from tablet up; mobile stays 1fr from base rule.
+ */
+#app-content.exp-app .exp-filter-grid--pair {
+	grid-template-columns: 1fr;
+}
+
+@media (min-width: 769px) {
+	#app-content.exp-app .exp-filter-grid--pair {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+#app-content.exp-app .exp-filter-field {
+	display: grid;
+	grid-template-rows: subgrid;
+	grid-row: span 2;
+	gap: var(--exp-space-2);
+	min-width: 0;
+	margin: 0;
+	align-self: stretch;
+}
+
+#app-content.exp-app .exp-filter-field__label {
+	display: block;
+	margin: 0;
+	padding: 0;
+	font-size: 0.8125rem;
+	font-weight: 700;
+	line-height: 1.3;
+	color: var(--color-text-maxcontrast, var(--exp-muted));
+	min-height: 1.3em;
+}
+
+#app-content.exp-app .exp-filter-field__control {
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-1);
+	min-width: 0;
+	min-height: 44px;
+	/* Top of the shared control track — never flex-end (hints would shove siblings down). */
+	justify-content: flex-start;
+}
+
+#app-content.exp-app .exp-filter-field__control > .exp-input,
+#app-content.exp-app .exp-filter-field__control > input,
+#app-content.exp-app .exp-filter-field__control > select,
+#app-content.exp-app .exp-filter-field__control > textarea {
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	box-sizing: border-box;
+	min-height: 44px;
+}
+
+#app-content.exp-app .exp-filter-field__control > .exp-form-row__hint {
+	margin: 0;
+	font-size: var(--exp-fs-xs, 0.75rem);
+	line-height: 1.35;
+	color: var(--exp-muted);
+}
+
+#app-content.exp-app .exp-filter-field.has-error .exp-form-row__error {
+	display: block;
+}
+
+#app-content.exp-app .exp-filter-field.has-error input,
+#app-content.exp-app .exp-filter-field.has-error select,
+#app-content.exp-app .exp-filter-field.has-error textarea {
+	border-color: var(--color-error-text, var(--color-element-error));
+	box-shadow: 0 0 0 1px var(--color-error-text, var(--color-element-error));
+}
+
+/* Checkbox: spacer label keeps the control on the shared input row */
+#app-content.exp-app .exp-filter-field--checkbox .exp-filter-field__control {
+	min-height: 44px;
+	justify-content: flex-start;
+}
+
+#app-content.exp-app .exp-filter-field--checkbox .exp-checkbox-row {
+	min-height: 44px;
+	align-items: center;
+}
+
+/*
+ * Actions field (Apply + Clear) — §3.6b. The base .exp-filter-field is a
+ * label/control subgrid pair; the actions field has no label, so it leaves
+ * the subgrid and becomes a bottom-aligned button row in the control
+ * track. Buttons keep touch height, shrink to content on desktop and
+ * stack full-width on narrow screens.
+ */
+#app-content.exp-app .exp-filter-field--actions {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: var(--exp-space-2, 0.5rem);
+	align-items: flex-end;
+	grid-row: span 2;
+}
+
+#app-content.exp-app .exp-filter-field--actions > .exp-btn,
+#app-content.exp-app .exp-filter-field--actions > .button {
+	flex: 0 0 auto;
+	min-height: 44px;
+}
+
+@media (max-width: 768.98px) {
+	#app-content.exp-app .exp-filter-field--actions {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	#app-content.exp-app .exp-filter-field--actions > * {
+		width: 100%;
+	}
+}
+
+#app-content.exp-app .exp-filter-field--wide,
+#app-content.exp-app .exp-filter-field--full,
+#app-content.exp-app .exp-filter-grid > .exp-choice-group {
+	grid-column: 1 / -1;
+}
+
+/* Choice groups are not label/control pairs — still occupy one logical field row */
+#app-content.exp-app .exp-filter-grid > .exp-choice-group {
+	grid-row: span 2;
+}
+
+#app-content.exp-app .exp-filter-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--exp-space-3);
+	min-height: 44px;
+	min-width: 0;
+	/* Mobile: full-width action row */
+	width: 100%;
+}
+
+#app-content.exp-app .exp-filter-actions .exp-btn,
+#app-content.exp-app .exp-filter-actions .button {
+	min-height: 44px;
+	min-width: 44px;
+	flex: 1 1 auto;
+}
+
+/* ≥769px: actions shrink to content beside filter fields */
+@media (min-width: 769px) {
+	#app-content.exp-app .exp-filter-actions {
+		width: auto;
+	}
+
+	#app-content.exp-app .exp-filter-actions .exp-btn,
+	#app-content.exp-app .exp-filter-actions .button {
+		flex: 0 0 auto;
+	}
+}
+
+/* Action row under the field grid — even separator, never jammed against inputs */
+#app-content.exp-app .exp-filter-panel__form > .exp-filter-actions {
+	margin-top: var(--exp-space-2);
+	padding-top: var(--exp-space-4);
+	border-top: 1px solid var(--exp-border, var(--color-border));
+}
+
+#app-content.exp-app .exp-filter-grid > .exp-filter-actions {
+	grid-row: span 2;
+	align-self: end;
+	margin-top: 0;
+	padding-top: 0;
+	border-top: 0;
+}
+
+@supports not (grid-template-rows: subgrid) {
+	#app-content.exp-app .exp-filter-grid {
+		grid-auto-rows: auto;
+		align-items: start;
+	}
+
+	#app-content.exp-app .exp-filter-field {
+		display: flex;
+		flex-direction: column;
+		grid-row: auto;
+		gap: var(--exp-space-2);
+	}
+
+	#app-content.exp-app .exp-filter-grid > .exp-choice-group,
+	#app-content.exp-app .exp-filter-grid > .exp-filter-actions {
+		grid-row: auto;
+	}
+}
+
+#app-content.exp-app .exp-filter-field__control .form-input[aria-invalid='true'],
+#app-content.exp-app .exp-filter-field__control .form-select[aria-invalid='true'],
+#app-content.exp-app .exp-filter-field__control [aria-invalid='true'] {
+	border-color: var(--color-error-text, var(--color-element-error));
+	outline-color: var(--color-error-text, var(--color-element-error));
+}
+
+/* Claim / multi-section filters: calm fieldsets inside the panel body */
+#app-content.exp-app .exp-filter-panel__form .exp-fieldset {
+	border: 0;
+	margin: 0;
+	padding: 0;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-3);
+	background-color: transparent;
+}
+
+#app-content.exp-app .exp-filter-panel__form .exp-fieldset > .exp-fieldset__legend {
+	font-size: 0.9375rem;
+	font-weight: 700;
+	padding-bottom: var(--exp-space-2);
+	margin: 0;
+	border-bottom: 1px solid var(--exp-border);
+	color: var(--exp-text);
+}
+
+#app-content.exp-app .exp-date-range {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: var(--exp-space-2) var(--exp-space-3);
+}
+
+#app-content.exp-app .exp-date-range__part {
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-1);
+	min-width: 0;
+	flex: 1 1 8rem;
+}
+
+#app-content.exp-app .exp-date-range__sublabel {
+	font-size: var(--exp-fs-xs);
+	font-weight: 500;
+	color: var(--exp-muted);
+}
+
+#app-content.exp-app .exp-date-range__sep {
+	align-self: flex-end;
+	padding-bottom: 0.65rem;
+	color: var(--exp-muted);
+	font-size: var(--exp-fs-sm);
+}
+
+/* ── Empty / loading states ─────────────────────────────────── */
+#app-content.exp-app .exp-empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: var(--exp-space-3);
+	padding: var(--exp-space-7) var(--exp-space-5);
+	text-align: center;
+	color: var(--exp-muted);
+}
+
+#app-content.exp-app .exp-empty-state__title {
+	margin: 0;
+	font-size: var(--exp-fs-lg);
+	font-weight: 600;
+	color: var(--exp-text);
+}
+
+#app-content.exp-app .exp-empty-state__text {
+	margin: 0;
+	max-width: 42ch;
+	font-size: var(--exp-fs-sm);
+	line-height: var(--exp-line-base);
+}
+
+/* Error variant: danger-tinted panel so a failed load never reads as empty data. */
+#app-content.exp-app .exp-empty-state--error {
+	color: var(--exp-text);
+	border: 1px solid var(--exp-border-strong, var(--color-border-maxcontrast));
+	border-left: 4px solid var(--exp-danger-fill, var(--color-element-error, var(--color-error)));
+	border-radius: var(--exp-radius-md, 12px);
+	background: var(--exp-bg-soft, var(--color-background-dark));
+	align-items: flex-start;
+	text-align: left;
+}
+
+#app-content.exp-app .exp-empty-state--error .exp-empty-state__text {
+	max-width: none;
+}
+
+#app-content.exp-app .exp-loading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--exp-space-3);
+	padding: var(--exp-space-6);
+	color: var(--exp-muted);
+	font-size: var(--exp-fs-sm);
+}
+
+#app-content.exp-app .exp-loading[aria-busy="true"]::before {
+	content: '';
+	width: 1.25rem;
+	height: 1.25rem;
+	border: 2px solid var(--exp-border);
+	border-top-color: var(--color-primary-element);
+	border-radius: 50%;
+	animation: dc-spin 0.8s linear infinite;
+}
+
+@keyframes dc-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	#app-content.exp-app .exp-loading[aria-busy="true"]::before {
+		animation: none;
+		border-top-color: var(--exp-border);
+	}
+}
+
+/* Nextcloud personal settings panel (outside app shell) */
+#expensecheck-personal-settings.exp-nc-settings-panel {
+	max-width: 52rem;
+}
+
+#expensecheck-personal-settings .settings-hint {
+	max-width: 60ch;
+	line-height: var(--exp-line-base, 1.5);
+	color: var(--color-text-maxcontrast, var(--exp-muted));
+}
+
+#expensecheck-personal-settings .settings-subheading {
+	margin: var(--exp-space-5, 1.25rem) 0 var(--exp-space-2, 0.5rem);
+	font-size: var(--exp-fs-md, 1rem);
+	font-weight: 600;
+}
+
+#expensecheck-personal-settings .exp-btn + .exp-btn {
+	margin-inline-start: var(--exp-space-2, 0.5rem);
+}
+
+/* Filter panel cards use dc-card header/body padding (app.css); accent bar only on .exp-filter-panel */
+
+/* ── Data tables (single convention app-wide) ─────────────────
+   Markup: .table-container > .table.table--hover
+   Legacy aliases: .table-responsive, .exp-table-wrap, .grid-table, .expensecheck-table
+   Actions column: .exp-table-actions-col + .exp-table-actions
+   Matrix tables: .exp-table--matrix (admin notification grids)
+   Card layout on narrow screens: .exp-table--responsive + data-label on td
+   ───────────────────────────────────────────────────────────── */
+#app-content.exp-app .table-container,
+#app-content.exp-app .table-responsive,
+#app-content.exp-app .exp-table-wrap {
+	margin: 0;
+	width: 100%;
+	min-width: 0;
+	max-width: 100%;
+	box-sizing: border-box;
+	overflow-x: auto;
+	overflow-y: visible;
+	-webkit-overflow-scrolling: touch;
+	scroll-padding-inline-end: var(--exp-space-4, 1rem);
+}
+
+#app-content.exp-app .exp-card .table-container,
+#app-content.exp-app .exp-card .table-responsive,
+#app-content.exp-app .exp-card .exp-table-wrap,
+#app-content.exp-app .section .table-container,
+#app-content.exp-app .section .table-responsive,
+#app-content.exp-app .section .exp-table-wrap,
+.exp-dialog .table-container,
+.exp-dialog .table-responsive,
+.exp-dialog .exp-table-wrap,
+#app-content.exp-app .exp-card__body > .table-container,
+#app-content.exp-app .exp-card__body > .table-responsive,
+#app-content.exp-app .exp-card__body > .exp-table-wrap {
+	margin-block: 0;
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	box-shadow: none;
+}
+
+/* Sole content of the card: sit flush under the header, no inner inset. */
+#app-content.exp-app .exp-card__body:has(> .table-container:only-child),
+#app-content.exp-app .exp-card__body:has(> .table-responsive:only-child),
+#app-content.exp-app .exp-card__body:has(> .exp-table-wrap:only-child) {
+	padding: 0;
+	gap: 0;
+}
+
+#app-content.exp-app .table-container .table,
+#app-content.exp-app .table-container .grid-table,
+#app-content.exp-app .table-container .expensecheck-table,
+#app-content.exp-app .table-container .exp-table,
+#app-content.exp-app .table-container .report-table,
+#app-content.exp-app .table-responsive .table,
+#app-content.exp-app .table-responsive .grid-table,
+#app-content.exp-app .exp-table-wrap .table,
+#app-content.exp-app .exp-table-wrap .grid-table,
+#app-content.exp-app .exp-table-wrap .exp-table {
+	margin-bottom: 0;
+	width: 100%;
+	table-layout: auto;
+}
+
+/* Desktop: fill available width; scroll horizontally only when columns need more space */
+@media (min-width: 769px) {
+	#app-content.exp-app .table-container .table:not(.exp-table--matrix),
+	#app-content.exp-app .table-container .grid-table:not(.exp-table--matrix),
+	#app-content.exp-app .table-container .expensecheck-table:not(.exp-table--matrix),
+	#app-content.exp-app .table-container .exp-table:not(.exp-table--matrix),
+	#app-content.exp-app .table-responsive .table:not(.exp-table--matrix),
+	#app-content.exp-app .table-responsive .grid-table:not(.exp-table--matrix),
+	#app-content.exp-app .exp-table-wrap .table:not(.exp-table--matrix),
+	#app-content.exp-app .exp-table-wrap .grid-table:not(.exp-table--matrix),
+	#app-content.exp-app .exp-table-wrap .exp-table:not(.exp-table--matrix) {
+		width: 100%;
+		min-width: max-content;
+	}
+}
+
+/* Legacy alias tables keep NC core's td { white-space: nowrap } — give
+   their cells an explicit wrap path so long values never clip at the
+   screen edge (WCAG 1.4.10 reflow; the farm's table_actions_fit gate). */
+#app-content.exp-app .grid-table td,
+#app-content.exp-app .exp-table td,
+.exp-pub .exp-table td {
+	white-space: normal;
+}
+
+#app-content.exp-app .table:not(.exp-table--matrix) thead,
+#app-content.exp-app .grid-table:not(.exp-table--matrix) thead,
+#app-content.exp-app .exp-table:not(.exp-table--matrix) thead,
+.exp-dialog .table thead {
+	background: transparent;
+}
+
+/* §3.7: header cells use the card surface — never a dark band. */
+#app-content.exp-app .table:not(.exp-table--matrix) thead th,
+#app-content.exp-app .grid-table:not(.exp-table--matrix) thead th,
+#app-content.exp-app .exp-table:not(.exp-table--matrix) thead th,
+.exp-dialog .table thead th {
+	position: sticky;
+	top: 0;
+	z-index: 3;
+	background-color: var(--exp-bg-card, var(--color-main-background));
+	color: var(--exp-muted, var(--color-text-maxcontrast));
+	font-weight: 600;
+	font-size: var(--exp-fs-sm, 0.875rem);
+	box-shadow: none;
+	border-bottom: 1px solid var(--exp-border, var(--color-border));
+}
+
+#app-content.exp-app .table tbody tr:focus-within,
+#app-content.exp-app .grid-table tbody tr:focus-within,
+#app-content.exp-app .exp-table tbody tr:focus-within {
+	outline: 2px solid var(--color-primary-element);
+	outline-offset: -2px;
+}
+
+#app-content.exp-app .table td.exp-table-empty,
+#app-content.exp-app .table td.exp-table-loading,
+#app-content.exp-app .grid-table td.exp-table-empty,
+#app-content.exp-app .grid-table td.exp-table-loading,
+#app-content.exp-app .exp-table td.exp-table-empty,
+#app-content.exp-app .exp-table td.exp-table-loading,
+#app-content.exp-app .table td.text-center:not(:only-child),
+#app-content.exp-app .grid-table td.text-center:not(:only-child) {
+	text-align: center;
+	color: var(--exp-muted, var(--color-text-maxcontrast));
+	font-size: var(--exp-fs-sm, 0.875rem);
+	padding: var(--exp-space-5, 1.25rem) var(--exp-space-4, 1rem);
+}
+
+#app-content.exp-app .table td .exp-empty-state,
+#app-content.exp-app .grid-table td .exp-empty-state,
+#app-content.exp-app .exp-table td .exp-empty-state {
+	padding: var(--exp-space-5, 1.25rem) var(--exp-space-3, 0.75rem);
+}
+
+#app-content.exp-app .table .exp-table-actions,
+#app-content.exp-app .grid-table .exp-table-actions,
+#app-content.exp-app .exp-table .exp-table-actions,
+#app-content.exp-app .table .admin-holidays__row-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--exp-space-2, 0.5rem);
+	align-items: center;
+	justify-content: flex-end;
+}
+
+/* Actions column alignment. Width lives in the two media blocks below:
+   below 769px the column sizes to the button labels; from 769px it
+   collapses and the buttons cover the inline end of the hovered or
+   focused row. That cover is the layout. Do not put min-width:max-content
+   back on these cells at desktop — it reserves a column and the release
+   check treats that as a regression. */
+#app-content.exp-app .table th.exp-table-actions-col,
+#app-content.exp-app .table th.actions-col,
+#app-content.exp-app .table td.actions-cell,
+#app-content.exp-app .table td.exp-table-actions-col,
+#app-content.exp-app .table td.admin-ot-audit__actions,
+#app-content.exp-app .table td.admin-tariff-rules__row-actions,
+#app-content.exp-app .table td.layer-card__history-actions,
+#app-content.exp-app .grid-table th.exp-table-actions-col,
+#app-content.exp-app .grid-table td.actions-cell,
+#app-content.exp-app .grid-table td.exp-table-actions-col,
+#app-content.exp-app .exp-table th.exp-table-actions-col,
+#app-content.exp-app .exp-table td.actions-cell,
+#app-content.exp-app .exp-table td.exp-table-actions-col {
+	text-align: right;
+	vertical-align: middle;
+	white-space: nowrap;
+	overflow: visible;
+}
+
+/* Narrow tables: size the actions column to the button labels.
+   From 769px the column collapses — see the wide-table block below. */
+@media (max-width: 768.98px) {
+	#app-content.exp-app .table th.exp-table-actions-col,
+	#app-content.exp-app .table th.actions-col,
+	#app-content.exp-app .table td.actions-cell,
+	#app-content.exp-app .table td.exp-table-actions-col,
+	#app-content.exp-app .table td.admin-ot-audit__actions,
+	#app-content.exp-app .table td.admin-tariff-rules__row-actions,
+	#app-content.exp-app .table td.layer-card__history-actions,
+	#app-content.exp-app .grid-table th.exp-table-actions-col,
+	#app-content.exp-app .grid-table td.actions-cell,
+	#app-content.exp-app .grid-table td.exp-table-actions-col,
+	#app-content.exp-app .exp-table th.exp-table-actions-col,
+	#app-content.exp-app .exp-table td.actions-cell,
+	#app-content.exp-app .exp-table td.exp-table-actions-col {
+		width: auto;
+		min-width: max-content;
+		max-width: none;
+	}
+}
+
+#app-content.exp-app .table td.actions-cell,
+#app-content.exp-app .table td.exp-table-actions-col,
+#app-content.exp-app .table td.admin-ot-audit__actions,
+#app-content.exp-app .table td.admin-tariff-rules__row-actions,
+#app-content.exp-app .table td.layer-card__history-actions,
+#app-content.exp-app .grid-table td.actions-cell,
+#app-content.exp-app .grid-table td.exp-table-actions-col,
+#app-content.exp-app .exp-table td.actions-cell,
+#app-content.exp-app .exp-table td.exp-table-actions-col {
+	display: table-cell;
+}
+
+#app-content.exp-app .table td.exp-table-actions-col .btn,
+#app-content.exp-app .table td.actions-cell .btn,
+#app-content.exp-app .table .exp-table-actions .btn,
+#app-content.exp-app .table .exp-table-actions .exp-btn,
+#app-content.exp-app .grid-table td.actions-cell .btn,
+#app-content.exp-app .grid-table .exp-table-actions .btn,
+#app-content.exp-app .exp-table .exp-table-actions .btn,
+#app-content.exp-app .exp-table .exp-table-actions .exp-btn {
+	flex-shrink: 0;
+	white-space: nowrap;
+}
+
+/*
+ * Wide tables: the actions column must not widen the table or sit on top of
+ * the data while you scroll. On hover, focus, or a touch screen the buttons
+ * do cover the inline end of that row — that overlap is intentional.
+ * The header text stays in the accessibility tree
+ * and is clipped by the zero-width cell. Buttons stay in the tab order
+ * (never display:none). A pointer reveals them on the row; keyboard focus
+ * does too. Escape adds .exp-row-actions-dismissed until the pointer
+ * re-enters or focus returns to an action. Touch (hover: none) keeps the
+ * cluster visible, pinned to the inline end, so it is tappable without a
+ * sideways scroll. Dialogs live on document.body, so .exp-dialog is included.
+ */
+@media (min-width: 769px) {
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) th.exp-table-actions-col,
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) th.actions-col,
+	:is(#app-content.exp-app, .exp-dialog) .grid-table th.exp-table-actions-col {
+		width: 0;
+		min-width: 0;
+		max-width: 0;
+		padding: 0;
+		border: 0;
+		overflow: hidden;
+		position: static;
+		box-shadow: none;
+		background: transparent;
+	}
+
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) td.actions-cell,
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) td.exp-table-actions-col,
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) td.admin-ot-audit__actions,
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) td.admin-tariff-rules__row-actions,
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) td.layer-card__history-actions,
+	:is(#app-content.exp-app, .exp-dialog) .grid-table td.actions-cell,
+	:is(#app-content.exp-app, .exp-dialog) .grid-table td.exp-table-actions-col {
+		position: sticky;
+		inset-inline-end: 0;
+		width: 0;
+		min-width: 0;
+		max-width: none;
+		padding: 0;
+		overflow: visible;
+		background: transparent;
+		box-shadow: none;
+		z-index: 2;
+	}
+
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) td.actions-cell > .exp-row-actions,
+	:is(#app-content.exp-app, .exp-dialog) .grid-table td.actions-cell > .exp-row-actions,
+	:is(#app-content.exp-app, .exp-dialog) .exp-table td.actions-cell > .exp-row-actions {
+		width: 0;
+		min-width: 0;
+		overflow: visible;
+	}
+
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) td.actions-cell .exp-table-actions,
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) td.exp-table-actions-col .exp-table-actions,
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) td.admin-ot-audit__actions .exp-table-actions,
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) td.admin-tariff-rules__row-actions .exp-table-actions,
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) td.layer-card__history-actions .exp-table-actions,
+	:is(#app-content.exp-app, .exp-dialog) .grid-table td.actions-cell .exp-table-actions,
+	:is(#app-content.exp-app, .exp-dialog) .grid-table td.exp-table-actions-col .exp-table-actions {
+		position: absolute;
+		inset-inline-end: 0;
+		top: 0;
+		bottom: 0;
+		transform: none;
+		z-index: 2;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: nowrap;
+		align-items: center;
+		justify-content: flex-end;
+		gap: var(--exp-space-2, 0.5rem);
+		margin: 0;
+		max-width: none;
+		padding-block: 0;
+		padding-inline: 1.25rem var(--exp-space-3, 0.75rem);
+		overflow: hidden;
+		border: 0;
+		border-radius: 0;
+		box-shadow: none;
+		background-color: var(--exp-bg-card, var(--color-main-background));
+		background-image: linear-gradient(
+			to inline-end,
+			transparent,
+			var(--exp-bg-card, var(--color-main-background)) 1rem
+		);
+	}
+
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) td.actions-cell .exp-table-actions > .btn,
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) td.actions-cell .exp-table-actions > .exp-btn,
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) td.actions-cell .exp-table-actions > a,
+	:is(#app-content.exp-app, .exp-dialog) .grid-table td.actions-cell .exp-table-actions > .btn,
+	:is(#app-content.exp-app, .exp-dialog) .grid-table td.actions-cell .exp-table-actions > .exp-btn,
+	:is(#app-content.exp-app, .exp-dialog) .grid-table td.actions-cell .exp-table-actions > a {
+		flex: 0 0 auto;
+		width: auto;
+		max-width: none;
+		white-space: nowrap;
+	}
+}
+
+@media (min-width: 769px) and (hover: hover) {
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) td.actions-cell .exp-table-actions,
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) td.exp-table-actions-col .exp-table-actions,
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) td.admin-ot-audit__actions .exp-table-actions,
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) td.admin-tariff-rules__row-actions .exp-table-actions,
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) td.layer-card__history-actions .exp-table-actions,
+	:is(#app-content.exp-app, .exp-dialog) .grid-table td.actions-cell .exp-table-actions,
+	:is(#app-content.exp-app, .exp-dialog) .grid-table td.exp-table-actions-col .exp-table-actions {
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.12s linear;
+	}
+
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) tbody tr:hover td.actions-cell .exp-table-actions,
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) tbody tr:focus-within td.actions-cell .exp-table-actions,
+	:is(#app-content.exp-app, .exp-dialog) .grid-table tbody tr:hover td.actions-cell .exp-table-actions,
+	:is(#app-content.exp-app, .exp-dialog) .grid-table tbody tr:focus-within td.actions-cell .exp-table-actions {
+		opacity: 1;
+		pointer-events: auto;
+		background-color: var(--color-background-hover, var(--exp-bg-card, var(--color-main-background)));
+		background-image: linear-gradient(
+			to inline-end,
+			transparent,
+			var(--color-background-hover, var(--exp-bg-card, var(--color-main-background))) 1rem
+		);
+	}
+
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) tbody tr.exp-row-actions-dismissed td.actions-cell .exp-table-actions,
+	:is(#app-content.exp-app, .exp-dialog) .grid-table tbody tr.exp-row-actions-dismissed td.actions-cell .exp-table-actions {
+		opacity: 0;
+		pointer-events: none;
+	}
+}
+
+@media (min-width: 769px) and (hover: hover) and (prefers-reduced-motion: reduce) {
+	:is(#app-content.exp-app, .exp-dialog) :is(.table, .exp-table) td.actions-cell .exp-table-actions,
+	:is(#app-content.exp-app, .exp-dialog) .grid-table td.actions-cell .exp-table-actions {
+		transition: none;
+	}
+}
+
+/* Truncated text columns — do not steal space from actions */
+#app-content.exp-app .table td.description-cell,
+#app-content.exp-app .table td.reason-cell {
+	max-width: min(20rem, 30vw);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+#app-content.exp-app .exp-table-meta {
+	margin: var(--exp-space-3, 0.75rem) 0 0;
+	font-size: var(--exp-fs-sm, 0.875rem);
+	color: var(--exp-muted, var(--color-text-maxcontrast));
+}
+
+/* Report preview + dynamic HTML tables */
+#app-content.exp-app .report-preview-content .table-container,
+#app-content.exp-app .report-preview-content .report-table {
+	margin-top: var(--exp-space-3, 0.75rem);
+}
+
+#app-content.exp-app .report-preview-content .report-table {
+	border-collapse: collapse;
+	font-size: var(--exp-fs-sm, 0.875rem);
+}
+
+#app-content.exp-app .report-preview-content .table-container .report-table {
+	margin-bottom: 0;
+}
+
+/* Notification matrices — not row lists; keep compact grid */
+#app-content.exp-app .exp-table--matrix {
+	font-size: var(--exp-fs-sm, 0.875rem);
+}
+
+#app-content.exp-app .exp-table--matrix th,
+#app-content.exp-app .exp-table--matrix td {
+	text-align: center;
+	vertical-align: middle;
+	padding: var(--exp-space-2, 0.5rem);
+}
+
+#app-content.exp-app .exp-table--matrix thead th {
+	position: static;
+	box-shadow: none;
+}
+
+@media (max-width: 768.98px) {
+	/* Dense list tables without card reflow: horizontal scroll */
+	#app-content.exp-app .table-container .table:not(.exp-table--matrix):not(.exp-table--responsive),
+	#app-content.exp-app .table-container .grid-table:not(.exp-table--matrix):not(.exp-table--responsive) {
+		min-width: 36rem;
+	}
+
+	#app-content.exp-app .table .exp-table-actions,
+	#app-content.exp-app .exp-table .exp-table-actions {
+		justify-content: flex-start;
+	}
+
+	/* Card reflow: every field + action reachable without sideways scrolling */
+	#app-content.exp-app .table-container:has(.exp-table--responsive) {
+		overflow-x: visible;
+	}
+
+	#app-content.exp-app .table.exp-table--responsive,
+	#app-content.exp-app .table.exp-table--responsive tbody,
+	#app-content.exp-app .table.exp-table--responsive tr,
+	#app-content.exp-app .table.exp-table--responsive td {
+		display: block;
+		width: 100%;
+	}
+
+	#app-content.exp-app .table.exp-table--responsive {
+		min-width: 0;
+		border-collapse: collapse;
+	}
+
+	#app-content.exp-app .table.exp-table--responsive thead {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+		border: 0;
+	}
+
+	#app-content.exp-app .table.exp-table--responsive tbody tr {
+		margin-bottom: var(--exp-space-4, 1rem);
+		padding: var(--exp-space-3, 0.75rem) var(--exp-space-4, 1rem);
+		border: 1px solid var(--exp-border, var(--color-border));
+		border-radius: var(--exp-radius-sm, 8px);
+		background: var(--exp-bg-card, var(--color-main-background));
+	}
+
+	#app-content.exp-app .table.exp-table--responsive tbody tr:last-child {
+		margin-bottom: 0;
+	}
+
+	#app-content.exp-app .table.exp-table--responsive tbody td {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: var(--exp-space-4, 1rem);
+		padding: var(--exp-space-2, 0.5rem) 0;
+		border-bottom: 1px solid var(--exp-border, var(--color-border));
+		text-align: right;
+		max-width: none;
+		overflow: visible;
+		white-space: normal;
+		text-overflow: clip;
+	}
+
+	#app-content.exp-app .table.exp-table--responsive tbody td:last-child {
+		border-bottom: none;
+		padding-bottom: 0;
+	}
+
+	#app-content.exp-app .table.exp-table--responsive tbody td::before {
+		content: attr(data-label);
+		flex: 0 0 auto;
+		text-align: left;
+		font-weight: 600;
+		color: var(--exp-muted, var(--color-text-maxcontrast));
+	}
+
+	#app-content.exp-app .table.exp-table--responsive tbody td.description-cell,
+	#app-content.exp-app .table.exp-table--responsive tbody td.reason-cell,
+	#app-content.exp-app .table.exp-table--responsive tbody td.actions-cell,
+	#app-content.exp-app .table.exp-table--responsive tbody td.admin-ot-audit__actions,
+	#app-content.exp-app .table.exp-table--responsive tbody td.admin-tariff-rules__row-actions,
+	#app-content.exp-app .table.exp-table--responsive tbody td.layer-card__history-actions {
+		flex-direction: column;
+		align-items: stretch;
+		text-align: left;
+	}
+
+	#app-content.exp-app .table.exp-table--responsive tbody td.actions-cell .exp-table-actions {
+		width: 100%;
+		justify-content: stretch;
+		flex-direction: column;
+	}
+
+	#app-content.exp-app .table.exp-table--responsive tbody td.actions-cell .exp-table-actions .btn,
+	#app-content.exp-app .table.exp-table--responsive tbody td.actions-cell .btn,
+	#app-content.exp-app .table.exp-table--responsive tbody td.admin-ot-audit__actions .btn,
+	#app-content.exp-app .table.exp-table--responsive tbody td.admin-tariff-rules__row-actions .btn,
+	#app-content.exp-app .table.exp-table--responsive tbody td.layer-card__history-actions .btn {
+		width: 100%;
+		justify-content: center;
+		min-height: 44px;
+	}
+
+	#app-content.exp-app .table.exp-table--responsive tbody td.actions-cell .btn-icon {
+		width: 46px;
+		height: 46px;
+		min-width: 46px;
+		min-height: 46px;
+		align-self: flex-end;
+	}
+
+	#app-content.exp-app .table.exp-table--responsive tbody td[colspan] {
+		display: block;
+		justify-content: center;
+		text-align: center;
+	}
+
+	#app-content.exp-app .table.exp-table--responsive tbody td[colspan]::before {
+		content: none;
+	}
+}
+
+@media (forced-colors: active) {
+	#app-content.exp-app .table-container,
+	#app-content.exp-app .table-responsive,
+	#app-content.exp-app .exp-table-wrap {
+		border-color: CanvasText;
+	}
+
+	#app-content.exp-app .table--hover tbody tr:hover,
+	#app-content.exp-app .grid-table.table--hover tbody tr:hover {
+		background: Highlight;
+		color: HighlightText;
+	}
+}

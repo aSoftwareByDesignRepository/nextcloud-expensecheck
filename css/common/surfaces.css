@@ -1,0 +1,979 @@
+/* ExpenseCheck app surfaces — tokens live in css/common/tokens.css
+ * (spacing/type scale, NC theme colors, tint + control vars).
+ * Mobile-first; ≥768px / ≥1024px widen. WCAG 2.1 AA: 44px touch targets,
+ * visible focus, forced-colors + reduced-motion variants at the bottom.
+ */
+
+/*
+ * The HTML `hidden` attribute alone loses to component display rules
+ * (DESIGN-SYSTEM §3: NC `section { display:block }` and flex utilities win).
+ * One scoped guard keeps every toggle honest.
+ */
+#app-content.exp-app [hidden],
+.exp-dialog [hidden] {
+	display: none !important;
+}
+
+/* ── Layout primitives ─────────────────────────────────────── */
+
+#app-content.exp-app .exp-card-grid {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: var(--exp-space-4);
+	margin-block: var(--exp-space-4);
+}
+
+@media (min-width: 769px) {
+	#app-content.exp-app .exp-card-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+#app-content.exp-app .exp-panel {
+	background: var(--exp-bg-card);
+	border: 1px solid var(--exp-border);
+	border-radius: var(--exp-radius-lg);
+	padding: var(--exp-space-4);
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-3);
+	min-width: 0; /* grid overflow guard */
+}
+
+#app-content.exp-app .exp-panel--wide {
+	grid-column: 1 / -1;
+}
+
+#app-content.exp-app .exp-panel__title {
+	display: flex;
+	align-items: center;
+	gap: var(--exp-space-2);
+	margin: 0;
+	font-size: var(--exp-fs-lg);
+	line-height: var(--exp-line-tight);
+}
+
+#app-content.exp-app .exp-panel__title svg {
+	width: var(--exp-icon-md);
+	height: var(--exp-icon-md);
+	stroke-width: var(--exp-icon-stroke);
+	color: var(--exp-muted);
+	flex-shrink: 0;
+}
+
+/* ── Stat strip ────────────────────────────────────────────── */
+
+#app-content.exp-app .exp-stat-row {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: var(--exp-space-3);
+	margin-block: var(--exp-space-4);
+}
+
+@media (min-width: 769px) {
+	#app-content.exp-app .exp-stat-row {
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+	}
+}
+
+#app-content.exp-app a.exp-stat {
+	text-decoration: none;
+	color: inherit;
+}
+#app-content.exp-app a.exp-stat:hover,
+#app-content.exp-app a.exp-stat:focus-visible {
+	border-color: var(--color-primary, var(--color-primary-element));
+}
+
+#app-content.exp-app .exp-stat {
+	background: var(--exp-bg-card);
+	border: 1px solid var(--exp-border);
+	border-left: 4px solid var(--exp-border-strong);
+	border-radius: var(--exp-radius-md);
+	padding: var(--exp-space-3) var(--exp-space-4);
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-1);
+}
+
+#app-content.exp-app .exp-stat--warn { border-left-color: var(--color-warning, #eca700); }
+#app-content.exp-app .exp-stat--danger { border-left-color: var(--color-error, #e9322d); }
+
+#app-content.exp-app .exp-stat__value {
+	font-size: var(--exp-fs-2xl);
+	font-weight: 700;
+	line-height: var(--exp-line-tight);
+	font-variant-numeric: var(--exp-tab-num);
+}
+
+#app-content.exp-app .exp-stat__label {
+	font-size: var(--exp-fs-sm);
+	color: var(--exp-muted);
+}
+
+/* ── Badges (variants beyond the shared --neutral) ─────────── */
+
+#app-content.exp-app .exp-badge--success {
+	background: var(--exp-tint-success);
+	color: var(--color-success-text, var(--color-success));
+}
+
+#app-content.exp-app .exp-badge--warn {
+	background: var(--exp-tint-warning);
+	color: var(--color-warning-text, var(--color-warning, #8a6d00));
+}
+
+#app-content.exp-app .exp-badge--danger {
+	background: var(--exp-tint-danger);
+	color: var(--color-error-text, var(--color-error));
+}
+
+/* ── Buttons (variants beyond shared primary/secondary/danger/ghost/sm) ── */
+
+#app-content.exp-app .exp-btn--warn {
+	background: var(--exp-tint-warning);
+	color: var(--color-warning-text, var(--color-warning, #8a6d00));
+	border: 1px solid var(--exp-border-strong);
+}
+
+#app-content.exp-app .exp-btn--small {
+	min-height: 36px;
+	padding: var(--exp-space-1) var(--exp-space-3);
+	font-size: var(--exp-fs-sm);
+}
+
+#app-content.exp-app .exp-list-cards {
+	list-style: none;
+	margin: var(--exp-space-3) 0 0;
+	padding: 0;
+	border-top: 1px solid var(--exp-border);
+}
+
+#app-content.exp-app .exp-list-cards > li {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: var(--exp-space-2) var(--exp-space-4);
+	padding: var(--exp-space-3) var(--exp-space-1);
+	border-bottom: 1px solid var(--exp-border);
+}
+
+#app-content.exp-app .exp-list-cards > li > :first-child {
+	flex: 1 1 16rem;
+	min-width: 0;
+}
+
+#app-content.exp-app .exp-btn-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--exp-space-3);
+}
+
+/* ── Form primitives ───────────────────────────────────────── */
+
+:is(#app-content.exp-app, .exp-dialog) .exp-fieldset {
+	border: 1px solid var(--exp-border);
+	border-radius: var(--exp-radius-md);
+	padding: var(--exp-space-4);
+	margin: 0 0 var(--exp-space-4);
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-4);
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-fieldset legend {
+	font-weight: 600;
+	/* NC core centres legends on #body-public — pin ours to the start edge */
+	text-align: start;
+	padding: 0 var(--exp-space-2);
+}
+
+/* Stacked forms: the form owns the field rhythm. Without this, sibling
+   .exp-field blocks have 0px between them while label→input inside each
+   field is larger — labels visually attach to the previous control. */
+:is(#app-content.exp-app, .exp-dialog) .exp-form {
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-3);
+}
+/* Column stretch would balloon lone submit buttons to full width — keep
+   actions content-sized; .exp-form-actions rows handle grouped buttons. */
+:is(#app-content.exp-app, .exp-dialog) .exp-form > .exp-btn {
+	align-self: flex-start;
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-field {
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-1);
+	min-width: 0;
+	flex: 1 1 auto;
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-field-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--exp-space-3);
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-field-row > .exp-field {
+	flex: 1 1 180px;
+	min-width: 0;
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-label {
+	font-weight: 600;
+	font-size: var(--exp-fs-sm);
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-input,
+:is(#app-content.exp-app, .exp-dialog) .exp-select,
+:is(#app-content.exp-app, .exp-dialog) .exp-textarea {
+	width: 100%;
+	min-height: var(--exp-touch);
+	padding: var(--exp-space-2) var(--exp-space-3);
+	border: 1px solid var(--exp-form-border);
+	border-radius: var(--exp-radius-sm);
+	background-color: var(--exp-bg-card);
+	color: var(--exp-text);
+	font-size: var(--exp-fs-md);
+	font-family: inherit;
+	box-sizing: border-box;
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-textarea {
+	min-height: 5.5rem;
+	resize: vertical;
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-input:focus-visible,
+:is(#app-content.exp-app, .exp-dialog) .exp-select:focus-visible,
+:is(#app-content.exp-app, .exp-dialog) .exp-textarea:focus-visible {
+	outline: var(--exp-focus);
+	outline-offset: var(--exp-focus-offset);
+	border-color: var(--exp-primary);
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-input[aria-invalid="true"],
+:is(#app-content.exp-app, .exp-dialog) .exp-select[aria-invalid="true"],
+:is(#app-content.exp-app, .exp-dialog) .exp-textarea[aria-invalid="true"] {
+	border-color: var(--color-error);
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-input--amount { max-width: 11rem; font-variant-numeric: var(--exp-tab-num); }
+:is(#app-content.exp-app, .exp-dialog) .exp-input--currency { max-width: 5.5rem; text-transform: uppercase; }
+
+:is(#app-content.exp-app, .exp-dialog) .exp-field__hint {
+	margin: 0;
+	font-size: var(--exp-fs-sm);
+	color: var(--exp-muted);
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-form-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--exp-space-3);
+	margin-block-start: var(--exp-space-4);
+}
+
+/* Checkbox chips (lead-day pickers) — large touch targets, no color-only cue */
+
+:is(#app-content.exp-app, .exp-dialog) .exp-check-row {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--exp-space-2);
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-check {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--exp-space-2);
+	min-height: var(--exp-touch);
+	padding: var(--exp-space-1) var(--exp-space-3);
+	border: 1px solid var(--exp-control-border);
+	border-radius: var(--exp-radius-pill);
+	cursor: pointer;
+	background: var(--exp-bg-card);
+	font-size: var(--exp-fs-md);
+	user-select: none;
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-check input {
+	width: 1.125rem;
+	height: 1.125rem;
+	accent-color: var(--exp-primary);
+	margin: 0;
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-check:has(input:checked) {
+	background: var(--exp-tint-info);
+	border-color: var(--exp-primary);
+	font-weight: 600;
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-check:focus-within {
+	outline: var(--exp-focus);
+	outline-offset: var(--exp-focus-offset);
+}
+
+/* Inline add-forms (cost rows, pickers) */
+
+:is(#app-content.exp-app, .exp-dialog) .exp-inline-form {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--exp-space-2);
+	align-items: center;
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-inline-form .exp-input { flex: 1 1 140px; width: auto; }
+:is(#app-content.exp-app, .exp-dialog) .exp-inline-form .exp-select { width: auto; }
+
+/* ── Toolbar (search + filters above lists) ────────────────── */
+
+#app-content.exp-app .exp-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: var(--exp-space-3);
+	margin-block: var(--exp-space-4);
+}
+
+#app-content.exp-app .exp-toolbar__search { flex: 1 1 220px; }
+#app-content.exp-app .exp-toolbar__actions {
+	display: flex;
+	gap: var(--exp-space-2);
+	margin-inline-start: auto;
+}
+#app-content.exp-app .exp-toolbar__archived { align-self: center; }
+
+/* ── Tables ────────────────────────────────────────────────── */
+
+#app-content.exp-app .exp-table-wrap {
+	overflow-x: auto;
+	border: 1px solid var(--exp-border);
+	border-radius: var(--exp-radius-md);
+	background: var(--exp-bg-card);
+}
+
+#app-content.exp-app .exp-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: var(--exp-fs-md);
+}
+
+#app-content.exp-app .exp-table th {
+	text-align: start;
+	font-weight: 600;
+	font-size: var(--exp-fs-sm);
+	color: var(--exp-muted);
+	padding: var(--exp-space-3) var(--exp-space-4);
+	border-bottom: 1px solid var(--exp-border-strong);
+	white-space: nowrap;
+}
+
+#app-content.exp-app .exp-table td {
+	padding: var(--exp-space-3) var(--exp-space-4);
+	border-bottom: 1px solid var(--exp-border);
+	vertical-align: middle;
+}
+
+#app-content.exp-app .exp-table tbody tr:last-child td { border-bottom: none; }
+#app-content.exp-app .exp-table tbody tr:hover { background: var(--exp-bg-soft); }
+#app-content.exp-app .exp-table--compact td,
+#app-content.exp-app .exp-table--compact th {
+	padding: var(--exp-space-2) var(--exp-space-3);
+}
+
+#app-content.exp-app .exp-table__actions {
+	text-align: end;
+	white-space: nowrap;
+}
+
+#app-content.exp-app .exp-table__actions .exp-btn { margin-inline-start: var(--exp-space-1); }
+#app-content.exp-app .exp-num { font-variant-numeric: var(--exp-tab-num); text-align: end; }
+
+/* ── Deadline list (dashboard panels) ──────────────────────── */
+
+#app-content.exp-app .exp-deadline-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+#app-content.exp-app .exp-deadline-list__item + .exp-deadline-list__item {
+	border-top: 1px solid var(--exp-border);
+}
+
+#app-content.exp-app .exp-deadline-list__link,
+#app-content.exp-app .exp-deadline-list__item {
+	display: flex;
+	align-items: center;
+	gap: var(--exp-space-3);
+	padding: var(--exp-space-3) var(--exp-space-2);
+	min-height: var(--exp-touch);
+	border-radius: var(--exp-radius-sm);
+}
+
+#app-content.exp-app .exp-deadline-list__link {
+	text-decoration: none;
+	color: var(--exp-text);
+}
+
+#app-content.exp-app .exp-deadline-list__link:hover {
+	background: var(--exp-bg-soft);
+}
+
+#app-content.exp-app .exp-deadline-list__link:focus-visible {
+	outline: var(--exp-focus);
+	outline-offset: var(--exp-focus-offset);
+}
+
+#app-content.exp-app .exp-deadline-list__title {
+	font-weight: 600;
+	flex-shrink: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+#app-content.exp-app .exp-deadline-list__meta {
+	font-size: var(--exp-fs-sm);
+	color: var(--exp-muted);
+	/* Long meta text must ellipsize — without min-width:0 the flex item
+	   can't shrink below content width and shoves the status badge
+	   (flex-shrink:0, margin-inline-start:auto) fully off the card. */
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+#app-content.exp-app .exp-deadline-list__link .exp-badge,
+#app-content.exp-app .exp-deadline-list__item > .exp-badge {
+	margin-inline-start: auto;
+	flex-shrink: 0;
+}
+
+/* ── Contract hero (detail header) ─────────────────────────── */
+
+#app-content.exp-app .exp-hero {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--exp-space-4);
+	align-items: flex-start;
+	justify-content: space-between;
+	background: var(--exp-bg-card);
+	border: 1px solid var(--exp-border);
+	border-radius: var(--exp-radius-lg);
+	padding: var(--exp-space-5);
+}
+
+#app-content.exp-app .exp-hero__main { min-width: 0; flex: 1 1 240px; }
+
+#app-content.exp-app .exp-hero__title {
+	margin: 0 0 var(--exp-space-1);
+	font-size: var(--exp-fs-xl);
+	line-height: var(--exp-line-tight);
+	/* Headings keep normal word breaks — anywhere tears mid-word on
+	   full lines (family defect nw-vis-mobile-h1-midword-break). */
+	overflow-wrap: break-word;
+	hyphens: auto;
+}
+
+#app-content.exp-app .exp-hero__meta {
+	margin: 0 0 var(--exp-space-2);
+	color: var(--exp-muted);
+}
+
+#app-content.exp-app .exp-hero__badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--exp-space-2);
+}
+
+#app-content.exp-app .exp-hero__deadline {
+	flex: 0 1 auto;
+	min-width: 200px;
+	background: var(--exp-bg-soft);
+	border: 1px solid var(--exp-border);
+	border-radius: var(--exp-radius-md);
+	padding: var(--exp-space-3) var(--exp-space-4);
+}
+
+#app-content.exp-app .exp-hero__cancel-by {
+	margin: 0;
+	font-size: var(--exp-fs-lg);
+	font-weight: 700;
+	display: flex;
+	align-items: center;
+	gap: var(--exp-space-2);
+}
+
+#app-content.exp-app .exp-hero__deadline-note {
+	margin: var(--exp-space-1) 0 0;
+	font-size: var(--exp-fs-sm);
+	color: var(--exp-muted);
+}
+
+#app-content.exp-app .exp-detail-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--exp-space-2);
+	margin-block: var(--exp-space-3);
+}
+
+/* ── Definition list (detail facts) ────────────────────────── */
+
+#app-content.exp-app .exp-dl {
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+#app-content.exp-app .exp-dl__row {
+	display: flex;
+	gap: var(--exp-space-3);
+	padding: var(--exp-space-2) 0;
+	border-bottom: 1px solid var(--exp-border);
+}
+
+#app-content.exp-app .exp-dl__row:last-child { border-bottom: none; }
+
+#app-content.exp-app .exp-dl__row dt {
+	flex: 0 0 9rem;
+	font-weight: 600;
+	color: var(--exp-muted);
+	font-size: var(--exp-fs-sm);
+	align-self: center;
+	/* NC core pins dl dt at 130px + nowrap + end-align (apps.css); the pin
+	   clips real labels. Logical-start text + wrap; flex-basis owns the box. */
+	width: auto;
+	max-width: 100%;
+	padding: 0;
+	text-align: start;
+	white-space: normal;
+	overflow-wrap: anywhere;
+}
+
+#app-content.exp-app .exp-dl__row dd {
+	margin: 0;
+	flex: 1;
+	overflow-wrap: anywhere;
+}
+
+#app-content.exp-app .exp-cost-rollup {
+	margin: 0;
+	font-size: var(--exp-fs-lg);
+	font-weight: 700;
+	font-variant-numeric: var(--exp-tab-num);
+}
+
+/* ── Document + event lists ────────────────────────────────── */
+
+#app-content.exp-app .exp-doc-list,
+#app-content.exp-app .exp-event-list {
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+#app-content.exp-app .exp-doc-list { list-style: none; }
+#app-content.exp-app .exp-event-list { padding-inline-start: var(--exp-space-5); }
+
+#app-content.exp-app .exp-doc-list__item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--exp-space-2);
+	padding: var(--exp-space-2) 0;
+	border-bottom: 1px solid var(--exp-border);
+}
+
+#app-content.exp-app .exp-doc-list__item:last-child { border-bottom: none; }
+#app-content.exp-app .exp-doc-list__name {
+	font-weight: 600;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	flex: 1 1 160px;
+}
+
+#app-content.exp-app .exp-event-list__item {
+	padding: var(--exp-space-1) 0;
+	display: flex;
+	gap: var(--exp-space-3);
+	align-items: baseline;
+}
+
+#app-content.exp-app .exp-event-list__type { font-weight: 600; }
+
+/* ── Pickers (combobox + chips) ────────────────────────────── */
+
+:is(#app-content.exp-app, .exp-dialog) .exp-picker {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-2);
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-picker__chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--exp-space-2);
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-picker__chips:empty { display: none; }
+
+:is(#app-content.exp-app, .exp-dialog) .exp-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--exp-space-1);
+	padding: var(--exp-space-1) var(--exp-space-2) var(--exp-space-1) var(--exp-space-3);
+	border: 1px solid var(--exp-border-strong);
+	border-radius: var(--exp-radius-pill);
+	background: var(--exp-bg-soft);
+	font-size: var(--exp-fs-sm);
+	max-width: 100%;
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-chip__label {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-chip__remove {
+	min-width: var(--exp-touch);
+	min-height: var(--exp-touch);
+	margin: calc(-1 * var(--exp-space-1)) calc(-1 * var(--exp-space-1)) calc(-1 * var(--exp-space-1)) 0;
+	border: none;
+	background: transparent;
+	color: var(--exp-muted);
+	font-size: var(--exp-fs-lg);
+	line-height: 1;
+	cursor: pointer;
+	border-radius: var(--exp-radius-pill);
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-chip__remove:hover { color: var(--exp-danger-ink); }
+:is(#app-content.exp-app, .exp-dialog) .exp-chip__remove:focus-visible {
+	outline: var(--exp-focus);
+	outline-offset: var(--exp-focus-offset);
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-picker__results {
+	position: absolute;
+	inset-inline: 0;
+	top: 100%;
+	z-index: 20;
+	margin: var(--exp-space-1) 0 0;
+	padding: var(--exp-space-1);
+	list-style: none;
+	background: var(--exp-bg-card);
+	border: 1px solid var(--exp-border-strong);
+	border-radius: var(--exp-radius-md);
+	box-shadow: var(--exp-shadow-md);
+	max-height: 16rem;
+	overflow-y: auto;
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-picker__result {
+	padding: var(--exp-space-2) var(--exp-space-3);
+	min-height: var(--exp-touch);
+	display: flex;
+	align-items: center;
+	border-radius: var(--exp-radius-sm);
+	cursor: pointer;
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-picker__result:hover,
+:is(#app-content.exp-app, .exp-dialog) .exp-picker__result:focus {
+	background: var(--exp-tint-info);
+	outline: none;
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-picker__empty {
+	padding: var(--exp-space-2) var(--exp-space-3);
+	min-height: var(--exp-touch);
+	display: flex;
+	align-items: center;
+	border-radius: var(--exp-radius-sm);
+	color: var(--exp-muted);
+	font-style: italic;
+	cursor: default;
+}
+
+/* ── Callouts (reuses tint tokens; border + icon, not color-only) ── */
+
+:is(#app-content.exp-app, .exp-dialog) .exp-callout {
+	border: 1px solid var(--exp-border);
+	border-inline-start: 4px solid var(--exp-primary);
+	border-radius: var(--exp-radius-md);
+	padding: var(--exp-space-4);
+	margin-block: var(--exp-space-4);
+	background: var(--exp-tint-info);
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-callout--warning {
+	border-inline-start-color: var(--color-warning, #eca700);
+	background: var(--exp-tint-warning);
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-callout__title {
+	margin: 0 0 var(--exp-space-2);
+	font-size: var(--exp-fs-lg);
+}
+
+/* ── Misc text / state helpers ─────────────────────────────── */
+
+:is(#app-content.exp-app, .exp-dialog) .exp-empty {
+	padding: var(--exp-space-5);
+	text-align: center;
+	color: var(--exp-muted);
+	background: var(--exp-bg-soft);
+	border: 1px dashed var(--exp-border-strong);
+	border-radius: var(--exp-radius-md);
+	margin: 0;
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-loading {
+	padding: var(--exp-space-5);
+	color: var(--exp-muted);
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-muted { color: var(--exp-muted); }
+:is(#app-content.exp-app, .exp-dialog) .exp-text--danger { color: var(--exp-danger-ink); }
+
+:is(#app-content.exp-app, .exp-dialog) .exp-link {
+	color: var(--exp-primary);
+	text-decoration: none;
+	font-weight: 600;
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-link:hover { text-decoration: underline; }
+:is(#app-content.exp-app, .exp-dialog) .exp-link:focus-visible {
+	outline: var(--exp-focus);
+	outline-offset: var(--exp-focus-offset);
+	border-radius: var(--exp-radius-sm);
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-copy-row {
+	display: flex;
+	gap: var(--exp-space-2);
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-copy-row .exp-input { flex: 1; }
+
+#app-content.exp-app .exp-steps {
+	margin: 0;
+	padding-inline-start: var(--exp-space-5);
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-2);
+}
+
+:is(#app-content.exp-app, .exp-dialog) .exp-import-result { margin-block-start: var(--exp-space-4); }
+
+/* ── Native dialog (party modal) ───────────────────────────── */
+
+dialog.exp-dialog {
+	border: 1px solid var(--exp-border-strong);
+	border-radius: var(--exp-radius-lg);
+	padding: var(--exp-space-5);
+	width: min(34rem, calc(100vw - 2 * var(--exp-space-4)));
+	max-height: 85dvh;
+	overflow-y: auto;
+	background: var(--exp-bg-card);
+	color: var(--exp-text);
+}
+
+dialog.exp-dialog::backdrop {
+	background: var(--exp-scrim);
+}
+
+dialog.exp-dialog form {
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-3);
+}
+
+.exp-dialog__title {
+	margin: 0 0 var(--exp-space-2);
+	font-size: var(--exp-fs-xl);
+}
+
+/* ── Responsive: tables scroll; hero + toolbar stack on phones ── */
+
+@media (max-width: 768.98px) {
+	/* ≤768px (Nextcloud mobile boundary): row-action buttons get the same
+	   44px touch floor as primary controls — 36px is a desktop-pointer
+	   compromise, unusable on touchscreens. */
+	.exp-btn--small { min-height: var(--exp-touch, 44px); min-width: var(--exp-touch, 44px); }
+	/* Filter chips are buttons too — same 44px floor on touch. */
+	.exp-chip--filter { min-height: var(--exp-touch, 44px); }
+
+	#app-content.exp-app .exp-hero { flex-direction: column; }
+	#app-content.exp-app .exp-hero__deadline { width: 100%; }
+	#app-content.exp-app .exp-dl__row { flex-direction: column; gap: 0; }
+	#app-content.exp-app .exp-dl__row dt { flex-basis: auto; }
+	:is(#app-content.exp-app, .exp-dialog) .exp-inline-form { flex-direction: column; align-items: stretch; }
+	:is(#app-content.exp-app, .exp-dialog) .exp-inline-form .exp-input,
+	:is(#app-content.exp-app, .exp-dialog) .exp-inline-form .exp-select { width: 100%; max-width: 100%; }
+}
+
+/* ── Forced colors + reduced motion ────────────────────────── */
+
+@media (forced-colors: active) {
+	#app-content.exp-app .exp-panel,
+	#app-content.exp-app .exp-stat,
+	#app-content.exp-app .exp-hero,
+	:is(#app-content.exp-app, .exp-dialog) .exp-check,
+	:is(#app-content.exp-app, .exp-dialog) .exp-chip,
+	:is(#app-content.exp-app, .exp-dialog) .exp-callout,
+	:is(#app-content.exp-app, .exp-dialog) .exp-picker__results {
+		border: 1px solid ButtonBorder;
+	}
+	:is(#app-content.exp-app, .exp-dialog) .exp-check:has(input:checked) {
+		outline: 2px solid Highlight;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	#app-content.exp-app .exp-deadline-list__link,
+	:is(#app-content.exp-app, .exp-dialog) .exp-picker__result,
+	:is(#app-content.exp-app, .exp-dialog) .exp-chip__remove {
+		transition: none;
+	}
+}
+
+/* ── Shell additions: dialog internals + filter summary ────── */
+
+.exp-dialog__form {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	min-width: 0;
+}
+
+.exp-dialog__head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: var(--exp-space-3);
+	padding-block-end: var(--exp-space-3);
+	border-bottom: 1px solid var(--exp-border);
+}
+
+.exp-dialog__close {
+	/* 44px touch target, icon-only */
+	min-width: var(--exp-touch, 44px);
+	min-height: var(--exp-touch, 44px);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-size: var(--exp-fs-xl);
+	line-height: 1;
+	background: transparent;
+	border: 1px solid transparent;
+	border-radius: var(--exp-radius-sm);
+	color: var(--exp-muted);
+	cursor: pointer;
+}
+
+.exp-dialog__close:hover {
+	background: var(--exp-bg-soft);
+	color: var(--exp-text);
+}
+
+.exp-dialog__close:focus-visible {
+	outline: 3px solid var(--color-primary-element);
+	outline-offset: -2px;
+}
+
+/* Overlay armor (overlay_toast_button_armor_gap): the close is a <button> on
+ * a body-mounted overlay — core repaints width/margin/padding/border on
+ * button:not(.button-vue,[class^=vs__]) (0,1,1) and margin on
+ * :not(.app-navigation-entry-button) (0,2,1). Pin the repainted properties
+ * !important on overlay-scoped selectors. */
+dialog.exp-dialog button.exp-dialog__close,
+.exp-dialog button.exp-dialog__close,
+[role="dialog"] button.exp-dialog__close,
+[role="alertdialog"] button.exp-dialog__close {
+	width: auto !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	background: transparent !important;
+	border: 1px solid transparent !important;
+	border-radius: var(--exp-radius-sm);
+	min-width: var(--exp-touch);
+	min-height: var(--exp-touch);
+}
+
+.exp-dialog__body {
+	padding-block: var(--exp-space-4);
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-4);
+	overflow-y: auto;
+	min-height: 0;
+}
+
+.exp-dialog__text {
+	margin: 0;
+	color: var(--exp-text);
+	line-height: var(--exp-line-base, 1.45);
+}
+
+.exp-dialog__actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: var(--exp-space-3);
+	padding-block-start: var(--exp-space-4);
+	border-top: 1px solid var(--exp-border);
+}
+
+dialog.exp-dialog--wide {
+	width: min(52rem, calc(100vw - 2 * var(--exp-space-4)));
+}
+
+/* Active-filter summary under a exp-filter-panel (§3.6b) */
+#app-content.exp-app .exp-filter-summary {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--exp-space-2);
+	padding: var(--exp-space-3) var(--exp-space-5);
+	border-top: 1px dashed var(--exp-border);
+}
+
+#app-content.exp-app .exp-filter-summary__label {
+	font-size: var(--exp-fs-sm);
+	font-weight: 600;
+	color: var(--exp-muted);
+}
+
+#app-content.exp-app .exp-chip--filter {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--exp-space-1);
+	min-height: 32px;
+	padding: 0 var(--exp-space-3);
+	border: 1px solid var(--exp-form-border, var(--color-border-maxcontrast));
+	border-radius: 999px;
+	background: var(--exp-bg-soft);
+	color: var(--exp-text);
+	font-size: var(--exp-fs-sm);
+	cursor: pointer;
+}
+
+#app-content.exp-app .exp-chip--filter:hover { background: var(--exp-bg-hover, var(--color-background-hover)); }
+
+@media (max-width: 768.98px) {
+	.exp-dialog__actions { flex-direction: column-reverse; align-items: stretch; }
+	.exp-dialog__actions .exp-btn { width: 100%; }
+}

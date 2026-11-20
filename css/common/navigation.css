@@ -1,0 +1,231 @@
+/**
+ * ExpenseCheck sidebar — SnackCheck/DeskCheck family chrome (brand + icon rows).
+ *
+ * Responsive: desktop (≥1024) sticky sidebar here. Phone/tablet drawer is
+ * owned by css/common/mobile-nav.css + js/common/mobile-nav.js (in-page Menu;
+ * #content overflow:hidden clips core #app-navigation-toggle — AZC#33).
+ */
+
+/* Base chrome (all viewports). Width/position for the in-flow desktop shell
+ * are applied at min-width: 1024px; mobile drawer rules live in mobile-nav.css. */
+#content.app-expensecheck > #app-navigation.exp-nav,
+#app-navigation.exp-nav {
+	display: flex;
+	flex-direction: column;
+	align-self: stretch;
+	min-height: 0;
+	max-height: none;
+	background: var(--exp-bg-card, var(--color-main-background));
+	border-inline-end: 1px solid var(--exp-border);
+	overflow: hidden;
+	box-sizing: border-box;
+	z-index: 100;
+}
+
+/* ≥1024px: restore sticky sidebar in the grid track (NC desktop layout) */
+@media (min-width: 1024px) {
+	#content.app-expensecheck > #app-navigation.exp-nav,
+	#app-navigation.exp-nav {
+		position: relative !important;
+		transform: none !important;
+		flex: 0 0 var(--exp-nav-width, 280px);
+		width: var(--exp-nav-width, 280px);
+		min-width: var(--exp-nav-width, 280px);
+		max-width: var(--exp-nav-width, 280px);
+		height: 100%;
+		overflow: hidden;
+	}
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-brand {
+	display: flex;
+	align-items: center;
+	gap: var(--exp-space-3);
+	padding: var(--exp-space-4);
+	border-bottom: 1px solid var(--exp-border);
+	flex-shrink: 0;
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-brand__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: var(--exp-touch, 44px);
+	height: var(--exp-touch, 44px);
+	border-radius: var(--exp-radius-md);
+	background: var(--exp-tint-info);
+	color: var(--exp-primary, var(--color-primary-element));
+	flex-shrink: 0;
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-brand__icon-svg,
+#content.app-expensecheck #app-navigation.exp-nav .exp-brand__icon .exp-icon {
+	width: 1.5rem;
+	height: 1.5rem;
+	display: block;
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-brand__text {
+	min-width: 0;
+	display: grid;
+	gap: var(--exp-space-1);
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-brand__title {
+	margin: 0;
+	font-size: var(--exp-fs-md);
+	font-weight: 700;
+	line-height: var(--exp-line-tight);
+	color: var(--exp-text, var(--color-main-text));
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-brand__subtitle {
+	margin: 0;
+	color: var(--exp-muted);
+	font-size: var(--exp-fs-xs);
+	line-height: var(--exp-line-base);
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-brand .exp-badge {
+	justify-self: start;
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-nav__body {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-nav__group {
+	padding: 0 var(--exp-space-2);
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-nav__divider {
+	border: 0;
+	border-top: 1px solid var(--exp-border);
+	margin: var(--exp-space-2) var(--exp-space-2);
+}
+
+/* group + divider adjacency already draws the separator — avoid double lines */
+#content.app-expensecheck #app-navigation.exp-nav .exp-nav__divider + .exp-nav__group,
+#content.app-expensecheck #app-navigation.exp-nav .exp-nav__divider:first-child {
+	margin-top: 0;
+	border-top: 0;
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-nav__group + .exp-nav__group {
+	margin-top: var(--exp-space-2);
+	padding-top: var(--exp-space-2);
+	border-top: 1px solid var(--exp-border);
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-nav__group-label {
+	margin: var(--exp-space-2) var(--exp-space-2) var(--exp-space-1);
+	font-size: var(--exp-fs-xs);
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--exp-muted);
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-nav__list {
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-1);
+	list-style: none;
+	margin: 0;
+	padding: var(--exp-space-1) var(--exp-space-2) var(--exp-space-2);
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-nav__item {
+	min-width: 0;
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-nav__link {
+	display: grid;
+	grid-template-columns: 1.5rem minmax(0, 1fr);
+	gap: var(--exp-space-2);
+	align-items: center;
+	min-height: var(--exp-touch-lg, 48px);
+	padding: var(--exp-space-2) var(--exp-space-3);
+	border-radius: var(--exp-radius-sm);
+	text-decoration: none;
+	color: var(--exp-text, var(--color-main-text));
+	box-sizing: border-box;
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-nav__link:hover {
+	background: var(--exp-bg-soft, var(--color-background-hover));
+	text-decoration: none;
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-nav__link.is-active,
+#content.app-expensecheck #app-navigation.exp-nav .exp-nav__item.is-active .exp-nav__link {
+	background: var(--exp-tint-info);
+	color: var(--exp-text, var(--color-main-text));
+	font-weight: 700;
+	box-shadow: inset 3px 0 0 var(--exp-primary, var(--color-primary-element));
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-nav__link:focus-visible {
+	outline: var(--exp-focus, 3px solid var(--color-primary-element));
+	outline-offset: var(--exp-focus-offset, 2px);
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-nav__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.5rem;
+	height: 1.5rem;
+	color: inherit;
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-nav__icon .exp-icon {
+	width: 1.25rem;
+	height: 1.25rem;
+	display: block;
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-nav__label {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	min-width: 0;
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-nav__name {
+	display: block;
+	font-size: var(--exp-fs-md);
+	line-height: var(--exp-line-tight);
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-nav__hint {
+	display: block;
+	font-size: var(--exp-fs-xs);
+	color: var(--exp-muted);
+	font-weight: 400;
+	line-height: var(--exp-line-base);
+}
+
+#content.app-expensecheck #app-navigation.exp-nav .exp-nav__item.is-active .exp-nav__hint,
+#content.app-expensecheck #app-navigation.exp-nav .exp-nav__link.is-active .exp-nav__hint {
+	color: var(--exp-text, var(--color-main-text));
+	font-weight: 500;
+}
+
+/* Help footer sticks under scrollable body */
+#content.app-expensecheck #app-navigation.exp-nav .exp-nav-footer {
+	flex-shrink: 0;
+	margin-top: auto;
+	border-top: 1px solid var(--exp-border);
+}
+
+@media (forced-colors: active) {
+	#content.app-expensecheck #app-navigation.exp-nav .exp-nav__link.is-active,
+	#content.app-expensecheck #app-navigation.exp-nav .exp-nav__item.is-active .exp-nav__link {
+		outline: 2px solid CanvasText;
+		box-shadow: none;
+	}
+}
