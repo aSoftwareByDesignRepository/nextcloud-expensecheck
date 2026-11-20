@@ -201,6 +201,11 @@
 "ExpenseCheck: %n expense claims awaiting your decision": "ExpenseCheck: %n expense claims awaiting your decision",
 "The following expense claims are waiting for your approval:": "The following expense claims are waiting for your approval:",
 "… and %n more": "… and %n more",
-"Review: %1$s": "Review: %1$s"
+"Review: %1$s": "Review: %1$s",
+"Format": "Format",
+"Export reimbursable": "Export reimbursable",
+"Export card-reconciliation": "Export card-reconciliation",
+"Preparing export…": "Preparing export…",
+"Export is being generated…": "Export is being generated…"
 }
 }

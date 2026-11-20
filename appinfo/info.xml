@@ -102,6 +102,7 @@ Wir verbessern diese App mit Rückmeldungen aus der Praxis. Fehlerberichte, Stol
 	</commands>
 	<background-jobs>
 		<job>OCA\ExpenseCheck\BackgroundJob\DigestMailJob</job>
+		<job>OCA\ExpenseCheck\BackgroundJob\ExportGenerateJob</job>
 		<job>OCA\ExpenseCheck\BackgroundJob\RetentionCleanupJob</job>
 		<job>OCA\ExpenseCheck\BackgroundJob\IdempotencyPurgeJob</job>
 	</background-jobs>

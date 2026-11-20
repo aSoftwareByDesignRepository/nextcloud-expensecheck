@@ -201,6 +201,11 @@
 "ExpenseCheck: %n expense claims awaiting your decision": "ExpenseCheck: %n Ausgabeanträge warten auf Ihre Entscheidung",
 "The following expense claims are waiting for your approval:": "Die folgenden Ausgabeanträge warten auf Ihre Genehmigung:",
 "… and %n more": "… und %n weitere",
-"Review: %1$s": "Prüfen: %1$s"
+"Review: %1$s": "Prüfen: %1$s",
+"Format": "Format",
+"Export reimbursable": "Erstattungsfähige exportieren",
+"Export card-reconciliation": "Kartenabgleich exportieren",
+"Preparing export…": "Export wird vorbereitet…",
+"Export is being generated…": "Export wird erstellt…"
 }
 }

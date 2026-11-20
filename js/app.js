@@ -111,10 +111,12 @@
 		// '/api' matches contractcheck, '/api/v1' privacycheck).
 		return fetch(appBase() + (boot.apiBase || '/api') + path, init).then(function (res) {
 			return res.json().catch(function () { return {}; }).then(function (body) {
-				if (!res.ok || body.success === false) {
+				if (!res.ok || body.success === false || body.ok === false) {
 					throw new ApiError(body, res.status);
 				}
-				return body.data;
+				// Envelope tolerance: {success,data} is the canonical shape;
+				// flat {ok:true,<key>:…} payloads hand the whole body through.
+				return body.data !== undefined ? body.data : body;
 			});
 		});
 	}

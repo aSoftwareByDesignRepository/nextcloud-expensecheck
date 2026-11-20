@@ -182,6 +182,59 @@
 					]
 				}
 			]
+		},
+		{
+			"id": "export-channel-format",
+			"param": "channel+format",
+			"description": "Batch export takes channel (reimbursable|nonreimbursable) + format (csv|ods); above export_async_rows the server returns 202 {request_id,token} — the client must poll /api/settlements/exports/{id} (EXPORT_NOT_READY→409) then GET the single-use download URL with the token.",
+			"errorCodes": [
+				"EXPORT_NOT_READY",
+				"VALIDATION_FAILED",
+				"NOT_FOUND"
+			],
+			"server": [
+				{
+					"file": "lib/Controller/SettlementApiController.php",
+					"needles": [
+						"channel",
+						"format",
+						"request_id",
+						"token",
+						"download"
+					]
+				},
+				{
+					"file": "lib/Service/ExportService.php",
+					"needles": [
+						"export_async_rows",
+						"EXPORT_NOT_READY",
+						"token_hash",
+						"expires_at"
+					]
+				}
+			],
+			"web": [
+				{
+					"file": "templates/body/settlement-detail.php",
+					"needles": [
+						"exp-export-format",
+						"exp-export-reimb",
+						"exp-export-nonreimb",
+						"data-channel"
+					]
+				},
+				{
+					"file": "js/pages/app-views.js",
+					"needles": [
+						"channel=",
+						"format=",
+						"request_id",
+						"download?token=",
+						"exp-export-format"
+					]
+				}
+			],
+			"mobile": null
 		}
 	]
 }

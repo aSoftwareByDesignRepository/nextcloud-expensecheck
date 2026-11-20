@@ -89,6 +89,8 @@ settingsApi#save|POST|/api/settings|
 settlementApi#closePeriod|POST|/api/periods/{id}/close|
 settlementApi#createPeriod|POST|/api/periods|
 settlementApi#exportBatch|GET|/api/settlements/batches/{id}/export|
+settlementApi#exportDownload|GET|/api/settlements/exports/{requestId}/download|
+settlementApi#exportStatus|GET|/api/settlements/exports/{requestId}|
 settlementApi#listBatches|GET|/api/settlements/batches|
 settlementApi#listPeriods|GET|/api/periods|
 settlementApi#queue|GET|/api/settlements|

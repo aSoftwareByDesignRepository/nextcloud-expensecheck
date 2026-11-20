@@ -43,11 +43,15 @@ class SettlementService
 	/**
 	 * @param list<int> $claimIds approved claims to settle in one batch
 	 * @param string $paidRef external payment reference (free text, recorded)
+	 * @param string $format default export format for this batch (csv|ods)
 	 */
-	public function settle(array $claimIds, string $paidRef, string $actorUid): SettlementBatch
+	public function settle(array $claimIds, string $paidRef, string $actorUid, string $format = 'csv'): SettlementBatch
 	{
 		if (!$this->access->isFinance($actorUid)) {
 			throw new ClaimNotFoundException();
+		}
+		if (!in_array($format, ExportService::FORMATS, true)) {
+			throw new ValidationException(['format' => 'invalid']);
 		}
 		if ($claimIds === [] || count($claimIds) > 500) {
 			throw new ValidationException(['claims' => 'invalid']);
@@ -64,7 +68,7 @@ class SettlementService
 			$batch = new SettlementBatch();
 			$batch->setCreatedBy($actorUid);
 			$batch->setCreatedAt($now);
-			$batch->setFormat('csv');
+			$batch->setFormat($format);
 			$batch->setRowCount(0);
 			$batch = $this->batches->insert($batch);
 

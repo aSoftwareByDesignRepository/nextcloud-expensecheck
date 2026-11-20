@@ -12,7 +12,7 @@ use OCA\ExpenseCheck\Exception\DomainException;
 use OCA\ExpenseCheck\Exception\ValidationException;
 use OCA\ExpenseCheck\Service\AccessControlService;
 use OCA\ExpenseCheck\Service\ClaimSerializer;
-use OCA\ExpenseCheck\Service\CsvExporter;
+use OCA\ExpenseCheck\Service\ExportService;
 use OCA\ExpenseCheck\Service\PeriodService;
 use OCA\ExpenseCheck\Service\SettlementService;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
@@ -28,6 +28,7 @@ class SettlementApiController extends AApiController
 		IRequest $request,
 		AccessControlService $access,
 		private readonly SettlementService $settlement,
+		private readonly ExportService $exports,
 		private readonly SettlementBatchMapper $batches,
 		private readonly SettlementRowMapper $rows,
 		private readonly PeriodService $periods,
@@ -63,7 +64,8 @@ class SettlementApiController extends AApiController
 		if (!is_array($ids)) {
 			throw new ValidationException(['claim_ids' => 'invalid']);
 		}
-		$batch = $this->settlement->settle($ids, $this->str($b, 'paid_ref', 191), $this->uid());
+		$batch = $this->settlement->settle($ids, $this->str($b, 'paid_ref', 191), $this->uid(),
+			$this->str($b, 'format', 8) ?: 'csv');
 		return new JSONResponse(['ok' => true, 'batch' => $this->batchDto($batch)], 201);
 	}
 
@@ -109,19 +111,44 @@ class SettlementApiController extends AApiController
 			throw new DomainException('BATCH_NOT_FOUND', 'Batch not found.', 404);
 		}
 		$channel = (string)$this->request->getParam('channel', 'reimbursable');
-		if (!in_array($channel, ['reimbursable', 'nonreimbursable'], true)) {
+		$format = (string)$this->request->getParam('format', 'csv');
+		if (!in_array($channel, ExportService::CHANNELS, true)) {
 			throw new ValidationException(['channel' => 'invalid']);
 		}
-		$rows = $this->settlement->exportRows($batch->getId())[$channel];
-		$header = ['claim_no', 'owner', 'title', 'currency', 'amount_minor', 'submitted', 'decided', 'paid_ref', 'paid_at'];
-		$body = array_map(fn ($r) => [
-			$r['claim_no'], $r['owner'], $r['title'], $r['currency'],
-			number_format($r['amount_minor'] / 100, 2, '.', ''),
-			$r['submitted'], $r['decided'], $r['paid_ref'], $r['paid_at'],
-		], $rows);
-		$csv = CsvExporter::render($header, $body);
-		$resp = new DataDownloadResponse($csv, 'settlement-' . $batch->getId() . '-' . $channel . '.csv', 'text/csv');
-		return $resp;
+		if (!in_array($format, ExportService::FORMATS, true)) {
+			throw new ValidationException(['format' => 'invalid']);
+		}
+		$result = $this->exports->requestExport($batch, $channel, $format, $this->uid());
+		if ($result['async']) {
+			return new JSONResponse([
+				'ok' => true, 'async' => true,
+				'request_id' => $result['request_id'],
+				'token' => $result['token'],
+			], 202);
+		}
+		return new DataDownloadResponse($result['payload'], $result['filename'], $result['mime']);
+	}
+
+	/** Async export poll → EXPORT_NOT_READY (409) or {state:ready}. */
+	#[NoCSRFRequired]
+	#[NoAdminRequired]
+	public function exportStatus(): JSONResponse
+	{
+		$this->assertFinance();
+		return new JSONResponse(['ok' => true] + $this->exports->poll($this->request->getParam('requestId', '')));
+	}
+
+	/** Single-use 15-min download — regenerates bytes, consumes token. */
+	#[NoCSRFRequired]
+	#[NoAdminRequired]
+	public function exportDownload()
+	{
+		$this->assertFinance();
+		$result = $this->exports->download(
+			(string)$this->request->getParam('requestId', ''),
+			(string)$this->request->getParam('token', ''),
+			$this->uid());
+		return new DataDownloadResponse($result['payload'], $result['filename'], $result['mime']);
 	}
 
 	#[NoCSRFRequired]
@@ -193,6 +220,7 @@ class SettlementApiController extends AApiController
 			'row_count' => $b->getRowCount(),
 			'file_hash' => $b->getFileHash(),
 			'period_id' => $b->getPeriodId(),
+			'format' => $b->getFormat(),
 		];
 	}
 }

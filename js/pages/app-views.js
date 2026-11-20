@@ -399,8 +399,9 @@
 		form.addEventListener('submit', function (ev) {
 			ev.preventDefault();
 			var ref = document.getElementById('exp-paid-ref').value;
+			var format = document.getElementById('exp-settle-format').value;
 			var ids = Object.keys(selected).map(Number);
-			api('/settlements', { method: 'POST', json: { claim_ids: ids, paid_ref: ref } })
+			api('/settlements', { method: 'POST', json: { claim_ids: ids, paid_ref: ref, format: format } })
 				.then(function () { E.toast('success', t('Batch settled.')); location.reload(); },
 					E.handleError);
 		});
@@ -408,7 +409,8 @@
 			batches.innerHTML = '';
 			((data && data.batches) || []).forEach(function (b) {
 				var a = el('a', { class: 'exp-card', href: '#' });
-				a.textContent = (b.reference || ('#' + b.id)) + ' · ' + fmtDateTime(b.settled_at);
+				a.textContent = '#' + b.id + ' · ' + fmtDateTime(b.created_at)
+					+ ' · ' + t('{n} rows', { n: b.row_count }) + ' · ' + String(b.format || 'csv').toUpperCase();
 				a.addEventListener('click', function (ev) {
 					ev.preventDefault();
 					location.href = E.appBase() + '/settlements/' + b.id;
@@ -421,19 +423,89 @@
 	views['settlement-detail'] = function (root) {
 		var id = root.getAttribute('data-exp-batch-id');
 		var body = document.getElementById('exp-batch-body');
-		var r = document.getElementById('exp-export-reimb');
-		var n = document.getElementById('exp-export-nonreimb');
-		r.href = E.appBase() + '/api/settlements/batches/' + id + '/export?kind=reimbursable';
-		n.href = E.appBase() + '/api/settlements/batches/' + id + '/export?kind=nonreimbursable';
-		api('/settlements/batches/' + id).then(function (b) {
+		var status = document.getElementById('exp-export-status');
+		var fmt = document.getElementById('exp-export-format');
+
+		function saveBlob(blob, filename) {
+			var a = document.createElement('a');
+			a.href = URL.createObjectURL(blob);
+			a.download = filename;
+			document.body.appendChild(a);
+			a.click();
+			setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 100);
+		}
+
+		function downloadExport(channel) {
+			status.textContent = t('Preparing export…');
+			fetch(E.appBase() + '/api/settlements/batches/' + id + '/export?channel=' + channel + '&format=' + fmt.value, {
+				credentials: 'same-origin'
+			}).then(function (res) {
+				if (res.status === 202) {
+					return res.json().then(function (d) { return pollExport(d, status); });
+				}
+				if (!res.ok) {
+					return res.json().then(function (d) { throw new Error(d.error || 'EXPORT_FAILED'); });
+				}
+				var name = (res.headers.get('content-disposition') || '').split('filename=')[1] || ('export.' + fmt.value);
+				return res.blob().then(function (blob) {
+					saveBlob(blob, name.replace(/"/g, ''));
+					status.textContent = '';
+				});
+			}, E.handleError).catch(function (err) {
+				status.textContent = '';
+				E.handleError(err);
+			});
+		}
+
+		function pollExport(d, statusEl) {
+			statusEl.textContent = t('Export is being generated…');
+			var timer = setInterval(function () {
+				fetch(E.appBase() + '/api/settlements/exports/' + encodeURIComponent(d.request_id), { credentials: 'same-origin' })
+					.then(function (res) {
+						if (res.status === 409) { return; } // EXPORT_NOT_READY
+						clearInterval(timer);
+						if (!res.ok) {
+							return res.json().then(function (e) { throw new Error(e.error || 'EXPORT_FAILED'); });
+						}
+						statusEl.textContent = '';
+						location.href = E.appBase() + '/api/settlements/exports/' + encodeURIComponent(d.request_id)
+							+ '/download?token=' + encodeURIComponent(d.token);
+					})
+					.catch(function (err) { clearInterval(timer); statusEl.textContent = ''; E.handleError(err); });
+			}, 2000);
+		}
+
+		document.getElementById('exp-export-reimb').addEventListener('click', function () { downloadExport('reimbursable'); });
+		document.getElementById('exp-export-nonreimb').addEventListener('click', function () { downloadExport('nonreimbursable'); });
+		api('/settlements/batches/' + id).then(function (d) {
 			body.innerHTML = '';
+			var b = (d && d.batch) || {};
 			var dl = el('dl', { class: 'exp-detail-dl' });
-			[['Reference', b.reference], ['Settled at', fmtDateTime(b.settled_at)],
-			 ['Total', money(b.total_minor, b.currency)], ['Rows', b.row_count]].forEach(function (p) {
+			[[t('Created by'), b.created_by], [t('Created at'), fmtDateTime(b.created_at)],
+			 [t('Rows'), b.row_count], [t('Format'), String(b.format || 'csv').toUpperCase()],
+			 [t('Integrity (SHA-256)'), b.file_hash]].forEach(function (p) {
 				dl.appendChild(el('dt', { text: p[0] }));
-				dl.appendChild(el('dd', { text: String(p[1] === null || p[1] === undefined ? '—' : p[1]) }));
+				dl.appendChild(el('dd', { text: String(p[1] === null || p[1] === undefined || p[1] === '' ? '—' : p[1]) }));
 			});
 			body.appendChild(dl);
+			var rows = (d && d.rows) || [];
+			if (rows.length) {
+				var table = el('table', { class: 'exp-table' });
+				var thead = el('thead');
+				thead.appendChild(el('tr', {}, [t('Claim'), t('Payment reference'), t('Paid at')]
+					.map(function (h) { return el('th', { scope: 'col', text: h }); })));
+				table.appendChild(thead);
+				var tb = el('tbody');
+				rows.forEach(function (row) {
+					tb.appendChild(el('tr', {}, [
+						el('td', { 'data-cell': t('Claim'), text: '#' + row.claim_id }),
+						el('td', { 'data-cell': t('Payment reference'), text: row.paid_ref || '—' }),
+						el('td', { 'data-cell': t('Paid at'), text: fmtDateTime(row.paid_at) })
+					]));
+				});
+				table.appendChild(tb);
+				body.appendChild(table);
+			}
 		}, E.handleError);
 	};
 
