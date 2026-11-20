@@ -206,6 +206,18 @@
 "Export reimbursable": "Export reimbursable",
 "Export card-reconciliation": "Export card-reconciliation",
 "Preparing export…": "Preparing export…",
-"Export is being generated…": "Export is being generated…"
+"Export is being generated…": "Export is being generated…",
+"Export format": "Export format",
+"CSV": "CSV",
+"ODS (LibreOffice)": "ODS (LibreOffice)",
+"Export": "Export",
+"Download export": "Download export",
+"Export failed.": "Export failed.",
+"Created by": "Created by",
+"Created at": "Created at",
+"Rows": "Rows",
+"Integrity (SHA-256)": "Integrity (SHA-256)",
+"Paid at": "Paid at",
+"{n} rows": "{n} rows"
 }
 }

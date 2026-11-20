@@ -80,22 +80,32 @@ class ClaimApiController extends AApiController
 				return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($existing), 'deduplicated' => true]);
 			}
 		}
-		$claim = $this->lifecycle->createDraft(
-			$this->uid(),
-			$this->str($b, 'title', 191),
-			strtoupper($this->str($b, 'currency', 3)) ?: 'EUR',
-			$requestKey !== '' ? $this->uid() . ':' . $requestKey : null,
-		);
-		// Lines may be supplied at create-time (web form + mobile companion both
-		// send them atomically). Same validation path as the line endpoints.
-		if (isset($b['lines'])) {
-			if (!is_array($b['lines'])) {
-				throw new ValidationException(['lines' => 'invalid']);
+		// One transaction for draft + lines: a line-validation failure must
+		// not leave an orphan draft behind (the request_key dedupe would then
+		// replay a half-built claim).
+		$this->db->beginTransaction();
+		try {
+			$claim = $this->lifecycle->createDraft(
+				$this->uid(),
+				$this->str($b, 'title', 191),
+				strtoupper($this->str($b, 'currency', 3)) ?: 'EUR',
+				$requestKey !== '' ? $this->uid() . ':' . $requestKey : null,
+			);
+			// Lines may be supplied at create-time (web form + mobile companion
+			// both send them atomically). Same validation path as line writes.
+			if (isset($b['lines'])) {
+				if (!is_array($b['lines'])) {
+					throw new ValidationException(['lines' => 'invalid']);
+				}
+				foreach ($b['lines'] as $lp) {
+					$this->lineService->addLine($claim, (array)$lp, (array)($lp['allocations'] ?? []), $this->uid());
+				}
+				$claim = $this->claims->findByIdRaw($claim->getId());
 			}
-			foreach ($b['lines'] as $lp) {
-				$this->lineService->addLine($claim, (array)$lp, (array)($lp['allocations'] ?? []), $this->uid());
-			}
-			$claim = $this->claims->findByIdRaw($claim->getId());
+			$this->db->commit();
+		} catch (\Throwable $e) {
+			$this->db->rollBack();
+			throw $e;
 		}
 		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim)], Http::STATUS_CREATED);
 	}

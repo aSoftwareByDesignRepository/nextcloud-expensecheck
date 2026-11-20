@@ -266,26 +266,6 @@ class ClaimLineService
 				throw new DomainException('CAP_EXCEEDED', 'The amount exceeds this category\'s hard limit.', 422);
 			}
 		}
-		// Category-gated rules that need the resolved amount (§10.4 dictionary):
-		// allow_lines fence, justification threshold, hard cap.
-		if ($category !== null) {
-			$allowed = array_map('trim', explode(',', $category->getAllowLines()));
-			if (!in_array($type, $allowed, true)) {
-				throw new ValidationException(['line_type' => 'not_allowed']);
-			}
-			$threshold = $category->getJustificationThresholdMinor();
-			if ($threshold !== null && $line->getAmountMinor() >= $threshold) {
-				$minLen = max(1, $category->getJustificationMinLength());
-				if (mb_strlen((string)$line->getJustification()) < $minLen) {
-					throw new DomainException('JUSTIFICATION_REQUIRED',
-						'This category needs a justification (min ' . $minLen . ' characters) above the threshold.', 422);
-				}
-			}
-			$max = $category->getMaxAmountMinor();
-			if ($max !== null && $line->getAmountMinor() > $max && $category->getMaxIsHard() === 1) {
-				throw new DomainException('CAP_EXCEEDED', 'The amount exceeds this category\'s hard limit.', 422);
-			}
-		}
 		if ($line->getCreatedAt() === null) {
 			$line->setCreatedAt($this->timeFactory->getDateTime());
 		}
