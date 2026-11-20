@@ -13,6 +13,7 @@ use OCA\ExpenseCheck\Exception\ClaimNotFoundException;
 use OCA\ExpenseCheck\Service\AccessControlService;
 use OCA\ExpenseCheck\Service\ChainRoutingService;
 use OCA\ExpenseCheck\Service\ClaimLifecycleService;
+use OCA\ExpenseCheck\Service\ClaimLineService;
 use OCA\ExpenseCheck\Service\ClaimNumberService;
 use OCA\ExpenseCheck\Service\ExpChainService;
 use OCA\ExpenseCheck\Service\NotificationService;
@@ -43,6 +44,7 @@ final class ClaimLifecycleServiceTest extends TestCase
 		$this->svc = new ClaimLifecycleService(
 			$this->claims,
 			$this->createStub(ClaimLineMapper::class),
+			$this->createStub(ClaimLineService::class),
 			$this->decisions,
 			$this->createStub(DelegateMapper::class),
 			$this->createStub(ClaimNumberService::class),

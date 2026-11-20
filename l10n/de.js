@@ -3,7 +3,7 @@ OC.L10N.register(
 	{
 	"%1$d of %2$d device slots in use." : "%1$d von %2$d Geräteplätzen belegt.",
 	"%1$d of %2$d seats assigned" : "%1$d von %2$d Plätzen belegt",
-	"A license key is stored, but this server cannot verify its signature with the vendor public key. The companion apps will reject the license until the key was signed with the matching vendor signing key. Re-apply a correctly signed license, or contact support if this persists after an app update." : "Ein Lizenzschlüssel ist hinterlegt, aber dieser Server kann die Signatur nicht mit dem öffentlichen Herstellerschlüssel prüfen. Die Begleit-Apps lehnen die Lizenz ab, bis der Schlüssel mit dem passenden Signierschlüssel erstellt wurde. Hinterlege eine korrekt signierte Lizenz erneut oder kontaktiere den Support, falls das nach einem App-Update weiterhin auftritt.",
+	"A license key is stored, but this server cannot verify its signature with the vendor public key. The companion apps will reject the license until the key was signed with the matching vendor signing key. Re-apply a correctly signed license, or contact support if this persists after an app update." : "Ein Lizenzschlüssel ist hinterlegt, aber dieser Server kann die Signatur nicht mit dem öffentlichen Herstellerschlüssel prüfen. Die Begleit-Apps lehnen die Lizenz ab, bis der Schlüssel mit dem passenden Signierschlüssel erstellt wurde. Hinterlegen Sie eine korrekt signierte Lizenz erneut oder kontaktieren Sie den Support, falls das nach einem App-Update weiterhin auftritt.",
 	"Actions" : "Aktionen",
 	"Active" : "Aktiv",
 	"Active session context" : "Aktiver Sitzungskontext",

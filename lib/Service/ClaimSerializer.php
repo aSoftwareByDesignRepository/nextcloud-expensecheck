@@ -100,6 +100,9 @@ class ClaimSerializer
 			'attendees' => $l->getAttendees(),
 			'occasion' => $l->getOccasion(),
 			'tip_minor' => $l->getTipMinor(),
+			'policy_flags' => $l->getPolicyFlags() !== null ? json_decode($l->getPolicyFlags(), true) : [],
+			'source_app' => $l->getSourceApp(),
+			'source_ref' => $l->getSourceRef(),
 			'allocations' => array_map(fn ($a) => [
 				'cost_center_id' => $a->getCostCenterId(),
 				'share_percent' => $a->getSharePercent(),

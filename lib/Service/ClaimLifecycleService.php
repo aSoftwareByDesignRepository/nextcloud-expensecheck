@@ -56,6 +56,7 @@ class ClaimLifecycleService
 	public function __construct(
 		private readonly ClaimMapper $claims,
 		private readonly ClaimLineMapper $lines,
+		private readonly ClaimLineService $lineService,
 		private readonly StepDecisionMapper $decisions,
 		private readonly DelegateMapper $delegates,
 		private readonly ClaimNumberService $numbers,
@@ -167,6 +168,10 @@ class ClaimLifecycleService
 				throw new DomainException('CLAIM_EMPTY', 'Line ' . $l->getId() . ' has no category.', 422);
 			}
 		}
+		// MH-02/MH-06b: receipt-required categories need evidence; advisory
+		// policy flags are computed server-side, never client-supplied.
+		$this->lineService->assertReceiptEvidence($claim);
+		$this->lineService->computePolicyFlags($claim);
 		$totals = MoneyMathService::claimTotals(array_map(fn ($l) => [
 			'amount_minor' => $l->getAmountMinor(),
 			'reimbursable' => $l->getReimbursable(),

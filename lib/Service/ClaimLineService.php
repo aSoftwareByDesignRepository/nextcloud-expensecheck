@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\ExpenseCheck\Service;
 
+use OCA\ExpenseCheck\Db\AttachmentMapper;
 use OCA\ExpenseCheck\Db\CategoryMapper;
 use OCA\ExpenseCheck\Db\Claim;
 use OCA\ExpenseCheck\Db\ClaimAllocation;
@@ -34,6 +35,7 @@ class ClaimLineService
 		private readonly ClaimMapper $claims,
 		private readonly ClaimAllocationMapper $allocations,
 		private readonly CategoryMapper $categories,
+		private readonly AttachmentMapper $attachments,
 		private readonly RateCatalogService $rates,
 		private readonly PeriodService $periods,
 		private readonly MoneyMathService $money,
@@ -140,12 +142,26 @@ class ClaimLineService
 			$fields['occurred_on'] = 'invalid_date';
 		}
 		$categoryId = (int)($p['category_id'] ?? 0);
-		if ($categoryId <= 0 || $this->categories->findById($categoryId) === null) {
+		$category = $categoryId > 0 ? $this->categories->findById($categoryId) : null;
+		if ($category === null) {
 			$fields['category_id'] = 'invalid';
 		}
 		$merchant = mb_substr(trim((string)($p['merchant'] ?? '')), 0, 191) ?: null;
 		$description = mb_substr(trim((string)($p['description'] ?? '')), 0, 2000) ?: null;
 		$justification = mb_substr(trim((string)($p['justification'] ?? '')), 0, 2000) ?: null;
+		// MH-06c: categories flagged requires_attendees (Bewirtung-class) need
+		// the participant list AND the business occasion — both are the
+		// compliance surface, missing either is a hard field error.
+		if ($category !== null && $category->getRequiresAttendees() === 1) {
+			$attendeesRaw = trim((string)($p['attendees'] ?? ''));
+			$occasionRaw = trim((string)($p['occasion'] ?? ''));
+			if ($attendeesRaw === '') {
+				$fields['attendees'] = 'required';
+			}
+			if ($occasionRaw === '') {
+				$fields['occasion'] = 'required';
+			}
+		}
 		if ($fields !== []) {
 			throw new ValidationException($fields);
 		}
@@ -230,11 +246,117 @@ class ClaimLineService
 			$line->setForeignCurrency(null);
 			$line->setForeignFx(null);
 		}
+		// Category-gated rules that need the resolved amount (§10.4 dictionary):
+		// allow_lines fence, justification threshold, hard cap.
+		if ($category !== null) {
+			$allowed = array_map('trim', explode(',', $category->getAllowLines()));
+			if (!in_array($type, $allowed, true)) {
+				throw new ValidationException(['line_type' => 'not_allowed']);
+			}
+			$threshold = $category->getJustificationThresholdMinor();
+			if ($threshold !== null && $line->getAmountMinor() >= $threshold) {
+				$minLen = max(1, $category->getJustificationMinLength());
+				if (mb_strlen((string)$line->getJustification()) < $minLen) {
+					throw new DomainException('JUSTIFICATION_REQUIRED',
+						'This category needs a justification (min ' . $minLen . ' characters) above the threshold.', 422);
+				}
+			}
+			$max = $category->getMaxAmountMinor();
+			if ($max !== null && $line->getAmountMinor() > $max && $category->getMaxIsHard() === 1) {
+				throw new DomainException('CAP_EXCEEDED', 'The amount exceeds this category\'s hard limit.', 422);
+			}
+		}
+		// Category-gated rules that need the resolved amount (§10.4 dictionary):
+		// allow_lines fence, justification threshold, hard cap.
+		if ($category !== null) {
+			$allowed = array_map('trim', explode(',', $category->getAllowLines()));
+			if (!in_array($type, $allowed, true)) {
+				throw new ValidationException(['line_type' => 'not_allowed']);
+			}
+			$threshold = $category->getJustificationThresholdMinor();
+			if ($threshold !== null && $line->getAmountMinor() >= $threshold) {
+				$minLen = max(1, $category->getJustificationMinLength());
+				if (mb_strlen((string)$line->getJustification()) < $minLen) {
+					throw new DomainException('JUSTIFICATION_REQUIRED',
+						'This category needs a justification (min ' . $minLen . ' characters) above the threshold.', 422);
+				}
+			}
+			$max = $category->getMaxAmountMinor();
+			if ($max !== null && $line->getAmountMinor() > $max && $category->getMaxIsHard() === 1) {
+				throw new DomainException('CAP_EXCEEDED', 'The amount exceeds this category\'s hard limit.', 422);
+			}
+		}
 		if ($line->getCreatedAt() === null) {
 			$line->setCreatedAt($this->timeFactory->getDateTime());
 		}
 		$line->setUpdatedAt($this->timeFactory->getDateTime());
 		return $line;
+	}
+
+	/**
+	 * MH-06b — server-computed policy_flags, written at submit (never
+	 * client-supplied): over_threshold (amount above category cap — soft or
+	 * hard), deviates_default (Standardkosten prefill changed),
+	 * dup_receipt_hash (same sha256 filed on another claim), weekend_date.
+	 * Rendered as chips on the approver card — advisory, never a verdict.
+	 */
+	public function computePolicyFlags(Claim $claim): void
+	{
+		$claimHashes = [];
+		foreach ($this->attachments->findByClaim($claim->getId()) as $att) {
+			if ($att->getSha256() !== '') {
+				$claimHashes[] = $att->getSha256();
+			}
+		}
+		foreach ($this->lines->findByClaim($claim->getId()) as $line) {
+			$flags = [];
+			$cat = $this->categories->findById($line->getCategoryId());
+			if ($cat !== null) {
+				$max = $cat->getMaxAmountMinor();
+				if ($max !== null && $line->getAmountMinor() > $max) {
+					$flags[] = 'over_threshold';
+				}
+				$def = $cat->getDefaultAmountMinor();
+				if ($def !== null && $line->getAmountMinor() !== $def) {
+					$flags[] = 'deviates_default';
+				}
+			}
+			$dow = $line->getOccurredOn() !== null ? (int)$line->getOccurredOn()->format('N') : 0;
+			if ($dow >= 6) {
+				$flags[] = 'weekend_date';
+			}
+			if ($claimHashes !== []) {
+				foreach ($claimHashes as $sha) {
+					if ($this->attachments->findOtherClaimsByHash($sha, $claim->getId()) !== []) {
+						$flags[] = 'dup_receipt_hash';
+						break;
+					}
+				}
+			}
+			$line->setPolicyFlags($flags === [] ? null : json_encode(array_values(array_unique($flags))));
+			$this->lines->update($line);
+		}
+	}
+
+	/**
+	 * RECEIPT_REQUIRED gate for submit: a receipt-required category line must
+	 * have evidence — a line-level attachment or any filed claim-level
+	 * attachment (combined invoices cover several lines legitimately).
+	 */
+	public function assertReceiptEvidence(Claim $claim): void
+	{
+		$claimAttachments = $this->attachments->findByClaim($claim->getId());
+		foreach ($this->lines->findByClaim($claim->getId()) as $line) {
+			$cat = $this->categories->findById($line->getCategoryId());
+			if ($cat === null || $cat->getReceiptRequired() !== 1) {
+				continue;
+			}
+			if ($claimAttachments !== []) {
+				continue;
+			}
+			throw new DomainException('RECEIPT_REQUIRED',
+				'Category ' . $cat->getCode() . ' requires a receipt attachment.', 422);
+		}
 	}
 
 	/** Form-encoded booleans arrive as strings — "false"/"0" must not be truthy. */
