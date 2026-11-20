@@ -45,6 +45,8 @@ class MobileApiController extends AApiController
 		private readonly ClaimMapper $claims,
 		private readonly ClaimLineMapper $lines,
 		private readonly AttachmentMapper $attachments,
+		private readonly \OCA\ExpenseCheck\Service\ClaimLineService $lineService,
+		private readonly \OCP\IDBConnection $db,
 		private readonly ClaimLifecycleService $lifecycle,
 		private readonly ApprovalService $approvals,
 		private readonly AttachmentService $attachmentService,
@@ -112,12 +114,30 @@ class MobileApiController extends AApiController
 				return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($existing), 'deduplicated' => true]);
 			}
 		}
-		$claim = $this->lifecycle->createDraft(
-			$this->uid(),
-			$this->str($b, 'title', 191),
-			strtoupper($this->str($b, 'currency', 3)) ?: 'EUR',
-			$requestKey !== '' ? $this->uid() . ':' . $requestKey : null,
-		);
+		// Identical body contract to web create() (AC-M1): lines supplied
+		// atomically, same validation path — never silently dropped.
+		$this->db->beginTransaction();
+		try {
+			$claim = $this->lifecycle->createDraft(
+				$this->uid(),
+				$this->str($b, 'title', 191),
+				strtoupper($this->str($b, 'currency', 3)) ?: 'EUR',
+				$requestKey !== '' ? $this->uid() . ':' . $requestKey : null,
+			);
+			if (isset($b['lines'])) {
+				if (!is_array($b['lines'])) {
+					throw new ValidationException(['lines' => 'invalid']);
+				}
+				foreach ($b['lines'] as $lp) {
+					$this->lineService->addLine($claim, (array)$lp, (array)($lp['allocations'] ?? []), $this->uid());
+				}
+				$claim = $this->claims->findByIdRaw($claim->getId());
+			}
+			$this->db->commit();
+		} catch (\Throwable $e) {
+			$this->db->rollBack();
+			throw $e;
+		}
 		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim)], Http::STATUS_CREATED);
 	}
 
