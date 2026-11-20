@@ -56,10 +56,10 @@ class ClaimLineService
 	 * @param array<string,mixed> $p controller input
 	 * @param list<array<string,mixed>> $allocs
 	 */
-	public function addLine(Claim $claim, array $p, array $allocs, string $actorUid): ClaimLine
+	public function addLine(Claim $claim, array $p, array $allocs, string $actorUid, bool $lateSyncAccept = false): ClaimLine
 	{
 		$this->assertEditable($claim);
-		$line = $this->buildLine($claim, new ClaimLine(), $p);
+		$line = $this->buildLine($claim, new ClaimLine(), $p, $lateSyncAccept);
 		$resolved = $this->money->resolveAllocations($allocs, $line->getAmountMinor());
 
 		$this->db->beginTransaction();
@@ -82,13 +82,13 @@ class ClaimLineService
 		}
 	}
 
-	public function updateLine(Claim $claim, ClaimLine $line, array $p, array $allocs, string $actorUid): ClaimLine
+	public function updateLine(Claim $claim, ClaimLine $line, array $p, array $allocs, string $actorUid, bool $lateSyncAccept = false): ClaimLine
 	{
 		$this->assertEditable($claim);
 		if ($line->getClaimId() !== $claim->getId()) {
 			throw new DomainException('CLAIM_NOT_FOUND', 'Line does not belong to claim.', 404);
 		}
-		$line = $this->buildLine($claim, $line, $p);
+		$line = $this->buildLine($claim, $line, $p, $lateSyncAccept);
 		$resolved = $this->money->resolveAllocations($allocs, $line->getAmountMinor());
 		$this->db->beginTransaction();
 		try {
@@ -125,7 +125,7 @@ class ClaimLineService
 		}
 	}
 
-	private function buildLine(Claim $claim, ClaimLine $line, array $p): ClaimLine
+	private function buildLine(Claim $claim, ClaimLine $line, array $p, bool $lateSyncAccept = false): ClaimLine
 	{
 		$fields = [];
 		$type = (string)($p['line_type'] ?? '');
@@ -165,7 +165,20 @@ class ClaimLineService
 		if ($fields !== []) {
 			throw new ValidationException($fields);
 		}
-		$this->periods->assertLineDateAllowed($occurredOn);
+		// Edge 41 / §13.3 late-sync acceptance: on the sync channel a draft
+		// whose occurred_on fell into a since-closed period (or outside a
+		// rate window, below) is accepted as draft data and stamped
+		// late_sync — submit re-validates and surfaces PERIOD_CLOSED /
+		// RATE_MISSING. Interactive creates keep the hard block.
+		$lateSync = false;
+		try {
+			$this->periods->assertLineDateAllowed($occurredOn);
+		} catch (DomainException $e) {
+			if (!$lateSyncAccept || $e->getErrorCode() !== 'PERIOD_CLOSED') {
+				throw $e;
+			}
+			$lateSync = true;
+		}
 
 		$line->setClaimId($claim->getId());
 		$line->setLineType($type);
@@ -212,13 +225,25 @@ class ClaimLineService
 			if ($rateCode === '') {
 				throw new ValidationException(['rate_code' => 'required']);
 			}
-			$rate = $this->rates->resolve($type, $rateCode, $occurredOn); // RATE_MISSING thrown inside
-			$snap = RateCatalogService::snapshot($rate);
-			$line->setRateId($snap['rate_id']);
-			$line->setRateCode($snap['rate_code']);
-			$line->setRateMinor($snap['rate_minor']);
-			$line->setRateName($snap['rate_name']);
-			$line->setAmountMinor(MoneyMathService::quantityTimesRate($qtyScaled, $snap['rate_minor']));
+			try {
+				$rate = $this->rates->resolve($type, $rateCode, $occurredOn); // RATE_MISSING thrown inside
+				$snap = RateCatalogService::snapshot($rate);
+				$line->setRateId($snap['rate_id']);
+				$line->setRateCode($snap['rate_code']);
+				$line->setRateMinor($snap['rate_minor']);
+				$line->setRateName($snap['rate_name']);
+				$line->setAmountMinor(MoneyMathService::quantityTimesRate($qtyScaled, $snap['rate_minor']));
+			} catch (DomainException $e) {
+				if (!$lateSyncAccept || $e->getErrorCode() !== 'RATE_MISSING') {
+					throw $e;
+				}
+				// Late sync: keep the requested code + qty so submit can
+				// re-resolve; amount stays 0 and submit fails closed on the
+				// missing rate snapshot (RATE_MISSING, fail-closed above).
+				$line->setRateCode($rateCode);
+				$line->setAmountMinor(0);
+				$lateSync = true;
+			}
 			$line->setDistanceSource(mb_substr(trim((string)($p['distance_source'] ?? 'manual')), 0, 16) ?: 'manual');
 		}
 
@@ -266,11 +291,32 @@ class ClaimLineService
 				throw new DomainException('CAP_EXCEEDED', 'The amount exceeds this category\'s hard limit.', 422);
 			}
 		}
+		if ($lateSync) {
+			$existing = $line->getPolicyFlags() !== null ? (json_decode($line->getPolicyFlags(), true) ?: []) : [];
+			if (!in_array('late_sync', $existing, true)) {
+				$existing[] = 'late_sync';
+			}
+			$line->setPolicyFlags(json_encode($existing));
+		}
 		if ($line->getCreatedAt() === null) {
 			$line->setCreatedAt($this->timeFactory->getDateTime());
 		}
 		$line->setUpdatedAt($this->timeFactory->getDateTime());
 		return $line;
+	}
+
+	/**
+	 * Edge 41: submit-time period re-validation. A late-synced draft may
+	 * carry occurred_on inside a since-closed period — draft acceptance is
+	 * lenient, submit is not.
+	 */
+	public function assertLineDatesAllowed(Claim $claim): void
+	{
+		foreach ($this->lines->findByClaim($claim->getId()) as $l) {
+			if ($l->getOccurredOn() !== null) {
+				$this->periods->assertLineDateAllowed($l->getOccurredOn());
+			}
+		}
 	}
 
 	/**
@@ -290,6 +336,11 @@ class ClaimLineService
 		}
 		foreach ($this->lines->findByClaim($claim->getId()) as $line) {
 			$flags = [];
+			// late_sync is stamped at sync-accept time and survives re-computation.
+			$existing = $line->getPolicyFlags() !== null ? (json_decode($line->getPolicyFlags(), true) ?: []) : [];
+			if (in_array('late_sync', $existing, true)) {
+				$flags[] = 'late_sync';
+			}
 			$cat = $this->categories->findById($line->getCategoryId());
 			if ($cat !== null) {
 				$max = $cat->getMaxAmountMinor();

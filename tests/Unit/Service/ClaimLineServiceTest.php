@@ -223,4 +223,53 @@ class ClaimLineServiceTest extends TestCase {
 		$this->svc->assertReceiptEvidence($this->draftClaim());
 		$this->addToAssertionCount(1);
 	}
+
+	private function closedPeriodSvc(): ClaimLineService {
+		$periods = $this->createMock(PeriodService::class);
+		$periods->method('assertLineDateAllowed')->willThrowException(
+			new DomainException('PERIOD_CLOSED', 'closed', 422));
+		$db = $this->createMock(IDBConnection::class);
+		$time = $this->createMock(ITimeFactory::class);
+		$time->method('getDateTime')->willReturn(new \DateTime('2026-12-01'));
+		$this->categories->method('findById')->willReturn($this->category([]));
+		return new ClaimLineService(
+			$this->lines, $this->claims,
+			$this->createMock(ClaimAllocationMapper::class),
+			$this->categories, $this->attachments,
+			$this->createMock(RateCatalogService::class),
+			$periods, $this->money,
+			$this->createMock(ExpChainService::class), $db, $time,
+		);
+	}
+
+	public function testLateSyncInteractivePathStillBlocksClosedPeriod(): void {
+		$svc = $this->closedPeriodSvc();
+		$this->expectException(DomainException::class);
+		$this->expectExceptionMessage('closed');
+		$svc->addLine($this->draftClaim(), $this->receiptParams(), [], 'u1');
+	}
+
+	public function testLateSyncAcceptsClosedPeriodAndStampsFlag(): void {
+		$svc = $this->closedPeriodSvc();
+		$line = $svc->addLine($this->draftClaim(), $this->receiptParams(), [], 'u1', true);
+		$flags = json_decode((string)$line->getPolicyFlags(), true);
+		$this->assertContains('late_sync', $flags);
+		$this->assertSame('receipt', $line->getLineType());
+	}
+
+	public function testComputePolicyFlagsPreservesLateSync(): void {
+		$line = new ClaimLine();
+		$line->setClaimId(7);
+		$line->setLineType('receipt');
+		$line->setCategoryId(3);
+		$line->setAmountMinor(1000);
+		$line->setReimbursable(1);
+		$line->setOccurredOn(new \DateTime('2026-12-01'));
+		$line->setPolicyFlags(json_encode(['late_sync']));
+		$this->lines->method('findByClaim')->willReturn([$line]);
+		$this->attachments->method('findByClaim')->willReturn([]);
+		$this->categories->method('findById')->willReturn($this->category([]));
+		$this->svc->computePolicyFlags($this->draftClaim());
+		$this->assertContains('late_sync', json_decode((string)$line->getPolicyFlags(), true));
+	}
 }

@@ -129,7 +129,9 @@ class MobileApiController extends AApiController
 					throw new ValidationException(['lines' => 'invalid']);
 				}
 				foreach ($b['lines'] as $lp) {
-					$this->lineService->addLine($claim, (array)$lp, (array)($lp['allocations'] ?? []), $this->uid());
+					// Sync channel: late-synced drafts are accepted with the
+					// late_sync policy flag instead of hard-blocked (edge 41).
+					$this->lineService->addLine($claim, (array)$lp, (array)($lp['allocations'] ?? []), $this->uid(), true);
 				}
 				$claim = $this->claims->findByIdRaw($claim->getId());
 			}

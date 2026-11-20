@@ -168,6 +168,9 @@ class ClaimLifecycleService
 				throw new DomainException('CLAIM_EMPTY', 'Line ' . $l->getId() . ' has no category.', 422);
 			}
 		}
+		// Edge 41: drafts accepted late-sync lenient are re-validated here —
+		// a since-closed period surfaces PERIOD_CLOSED instead of slipping through.
+		$this->lineService->assertLineDatesAllowed($claim);
 		// MH-02/MH-06b: receipt-required categories need evidence; advisory
 		// policy flags are computed server-side, never client-supplied.
 		$this->lineService->assertReceiptEvidence($claim);
