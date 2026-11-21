@@ -25,6 +25,7 @@ return [
 		['name' => 'page#settingsSection', 'url' => '/settings/{section}', 'verb' => 'GET',
 			'requirements' => ['section' => 'access|categories|rates|cost-centers|chains|periods|delegates|manager-map|fx-rates|general|diagnostics|license|transfer|support']],
 		['name' => 'page#license', 'url' => '/license', 'verb' => 'GET'],
+		['name' => 'page#getTheApp', 'url' => '/get-the-app', 'verb' => 'GET'],
 
 		// ── Claims API ──────────────────────────────────────────────
 		['name' => 'claimApi#list', 'url' => '/api/claims', 'verb' => 'GET'],

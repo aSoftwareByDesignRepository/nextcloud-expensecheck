@@ -106,14 +106,7 @@ Wir verbessern diese App mit Rückmeldungen aus der Praxis. Fehlerberichte, Stol
 		<job>OCA\ExpenseCheck\BackgroundJob\RetentionCleanupJob</job>
 		<job>OCA\ExpenseCheck\BackgroundJob\IdempotencyPurgeJob</job>
 	</background-jobs>
-	<navigations>
-		<navigation>
-			<name>ExpenseCheck</name>
-			<route>expensecheck.page.index</route>
-			<icon>app.svg</icon>
-			<order>10</order>
-		</navigation>
-	</navigations>
+
 	<settings>
 		<admin-section>OCA\ExpenseCheck\Settings\AdminSection</admin-section>
 		<admin>OCA\ExpenseCheck\Settings\AdminSettings</admin>

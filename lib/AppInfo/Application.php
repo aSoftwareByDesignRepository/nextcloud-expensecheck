@@ -156,5 +156,14 @@ class Application extends App implements IBootstrap
 
 	public function boot(IBootContext $context): void
 	{
+		$app = $context->getAppContainer();
+		\OCA\ExpenseCheck\Support\NavGate::register(
+			$app,
+			'expensecheck.page.index',
+			'app.svg',
+			'ExpenseCheck',
+			10,
+			static fn(string $uid): bool => $app->get(\OCA\ExpenseCheck\Service\AccessControlService::class)->canUseApp($uid),
+		);
 	}
 }

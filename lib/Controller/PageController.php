@@ -47,6 +47,7 @@ class PageController extends Controller
 		'chains' => ['template' => 'admin-chains', 'icon' => 'repeat', 'title' => 'Chains', 'help' => 'Approval chains and routing.'],
 		'settings' => ['template' => 'settings', 'icon' => 'settings', 'title' => 'Settings', 'help' => 'ExpenseCheck configuration.'],
 		'license' => ['template' => 'license', 'icon' => 'shield', 'title' => 'License', 'help' => 'Mobile companion license (EXP2) and seats.'],
+		'get-the-app' => ['template' => 'get-the-app', 'icon' => 'download', 'title' => 'Get the App', 'help' => 'Official Android companion — seats on this Nextcloud, listing when public.'],
 	];
 
 	public function __construct(
@@ -80,6 +81,9 @@ class PageController extends Controller
 		if ($pageId === 'license') {
 			Util::addStyle(Application::APP_ID, 'common/license-page');
 			Util::addScript(Application::APP_ID, 'common/license-page');
+		}
+		if ($pageId === 'get-the-app') {
+			Util::addStyle(Application::APP_ID, 'get-the-app');
 		}
 		if (($params['settingsSection'] ?? '') === 'transfer') {
 			Util::addStyle(Application::APP_ID, 'common/transfer');
@@ -172,6 +176,9 @@ class PageController extends Controller
 				['id' => 'reports', 'label' => $this->l10n->t('Reports'), 'href' => $this->urlGenerator->linkToRoute('expensecheck.page.reports'), 'icon' => 'activity', 'active' => $active === 'reports'],
 			]];
 		}
+		$groups[] = ['label' => $this->l10n->t('Mobile'), 'items' => [
+			['id' => 'get-the-app', 'label' => $this->l10n->t('Get the App'), 'href' => $this->urlGenerator->linkToRoute('expensecheck.page.getTheApp'), 'icon' => 'download', 'active' => $active === 'get-the-app'],
+		]];
 		if ($this->access->isAppAdmin($uid)) {
 			$groups[] = ['label' => $this->l10n->t('Admin'), 'items' => [
 				['id' => 'categories', 'label' => $this->l10n->t('Categories'), 'href' => $this->urlGenerator->linkToRoute('expensecheck.page.categories'), 'icon' => 'grid', 'active' => $active === 'categories'],
@@ -459,6 +466,18 @@ class PageController extends Controller
 			);
 		}
 		return $this->render('settings', $params);
+	}
+
+	#[NoAdminRequired] #[NoCSRFRequired]
+	public function getTheApp(): TemplateResponse|NotFoundResponse
+	{
+		$links = new \OCA\ExpenseCheck\Support\MobileAppLinks();
+		$lang = method_exists($this->l10n, 'getLanguageCode') ? (string)$this->l10n->getLanguageCode() : 'en';
+		return $this->render('get-the-app', [
+			'mobilePlayStoreUrl' => $links->playStoreUrl(),
+			'mobileProductPage' => $links->productPageUrl($lang),
+			'mobilePrivacyPage' => $links->privacyPageUrl($lang),
+		]);
 	}
 
 	#[NoAdminRequired] #[NoCSRFRequired]
