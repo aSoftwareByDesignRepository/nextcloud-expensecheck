@@ -82,8 +82,14 @@ class ClaimApiController extends AApiController
 	public function list(): JSONResponse
 	{
 		$status = $this->request->getParam('status');
-		$rows = $this->claims->findByUser($this->uid(), is_string($status) && $status !== '' ? $status : null);
-		return new JSONResponse(['ok' => true, 'claims' => array_map(fn ($c) => $this->serializer->summaryFor($c, $this->uid()), $rows)]);
+		$status = is_string($status) && $status !== '' ? $status : null;
+		$uid = $this->uid();
+		$scopeAll = $this->request->getParam('scope') === 'all'
+			&& ($this->access->isAppAdmin($uid) || $this->access->isFinance($uid) || $this->access->isAuditor($uid));
+		$rows = $scopeAll
+			? $this->claims->findFiltered($status, null, null)
+			: $this->claims->findByUser($uid, $status);
+		return new JSONResponse(['ok' => true, 'claims' => array_map(fn ($c) => $this->serializer->summaryFor($c, $uid), $rows)]);
 	}
 
 	#[NoCSRFRequired]

@@ -27,11 +27,36 @@
 		draft: 'neutral', submitted: 'info', changes_requested: 'warn',
 		approved: 'success', rejected: 'danger', settled: 'success', cancelled: 'neutral'
 	};
+	var STATUS_LABEL = {
+		draft: 'Draft', submitted: 'Submitted', changes_requested: 'Changes requested',
+		approved: 'Approved', rejected: 'Rejected', settled: 'Settled', cancelled: 'Cancelled'
+	};
+	var EVENT_LABEL = {
+		created: 'Created', line_added: 'Line added', submitted: 'Submitted',
+		decision: 'Decision', settled: 'Settled', erasure: 'Data erased', withdrawn: 'Withdrawn'
+	};
+	function statusLabel(s) { return STATUS_LABEL[s] ? t(STATUS_LABEL[s]) : (s || ''); }
+	function eventLabel(s) { return EVENT_LABEL[s] ? t(EVENT_LABEL[s]) : (s || ''); }
+	var RATE_TYPE_LABEL = { receipt: 'Receipt', mileage: 'Mileage', per_diem: 'Per diem', flat: 'Flat rate' };
+	function rateTypeLabel(r) { return RATE_TYPE_LABEL[r] ? t(RATE_TYPE_LABEL[r]) : (r || ''); }
+	function adminDeleteBtn(confirmText, endpoint, onDone) {
+		var del = el('button', { type: 'button', class: 'exp-btn exp-btn--danger', text: t('Delete') });
+		del.addEventListener('click', function () {
+			E.confirmDialog(confirmText).then(function (ok) {
+				if (!ok) return;
+				api(endpoint, { method: 'DELETE' }).then(function () {
+					E.toast('success', t('Deleted.'));
+					onDone();
+				}, E.handleError);
+			});
+		});
+		return del;
+	}
 	function claimRow(c) {
 		var card = el('article', { class: 'exp-card', role: 'listitem' });
 		card.appendChild(el('div', { class: 'exp-card__head' }, [
 			el('strong', { text: c.claim_no || c.claimNo || ('#' + c.id) }),
-			E.badge(STATUS_VARIANT[c.status] || 'neutral', c.status || '')
+			E.badge(STATUS_VARIANT[c.status] || 'neutral', statusLabel(c.status))
 		]));
 		card.appendChild(el('p', { class: 'exp-card__title', text: c.title || '' }));
 		var meta = [];
@@ -591,10 +616,10 @@
 			document.getElementById('exp-detail-no').textContent = c.claim_no || ('#' + c.id);
 			body.innerHTML = '';
 			var dl = el('dl', { class: 'exp-detail-dl' });
-			[['Status', c.status], ['Title', c.title], ['Purpose', c.purpose],
-			 ['Reimbursable', money(c.reimbursable_total_minor, c.currency)],
-			 ['Non-reimbursable', money(c.nonreimbursable_total_minor, c.currency)],
-			 ['Owner', c.owner_uid]].forEach(function (p) {
+			[[t('Status'), statusLabel(c.status)], [t('Title'), c.title], [t('Purpose'), c.purpose],
+			 [t('Reimbursable'), money(c.reimbursable_total_minor, c.currency)],
+			 [t('Non-reimbursable'), money(c.nonreimbursable_total_minor, c.currency)],
+			 [t('Claimant'), c.owner_uid]].forEach(function (p) {
 				dl.appendChild(el('dt', { text: p[0] }));
 				dl.appendChild(el('dd', { text: String(p[1] === null || p[1] === undefined ? '—' : p[1]) }));
 			});
@@ -639,8 +664,8 @@
 			evs.forEach(function (ev2) {
 				eventsHost.appendChild(el('div', { class: 'exp-timeline__item' }, [
 					el('span', { class: 'exp-timeline__when', text: fmtDateTime(ev2.created_at) }),
-					el('span', { text: (ev2.actor || '') + ' ' + (ev2.event || '') +
-						(ev2.from_status ? ' ' + ev2.from_status + '→' + ev2.to_status : '') })
+					el('span', { text: (ev2.actor || '') + ' ' + eventLabel(ev2.event) +
+						(ev2.from_status ? ' ' + statusLabel(ev2.from_status) + '→' + statusLabel(ev2.to_status) : '') })
 				]));
 			});
 			actions.innerHTML = '';
@@ -739,9 +764,25 @@
 			return listFetch(list, empty, function () { return api('/receipts-inbox'); }, function (data) {
 				var items = (data && data.receipts) || [];
 				items.forEach(function (r) {
+					var dl = el('a', {
+						class: 'exp-btn exp-btn--ghost',
+						href: E.appBase() + (E.boot.apiBase || '/api') + '/receipts-inbox/' + r.id + '/download',
+						text: t('Download')
+					});
+					var del = el('button', { type: 'button', class: 'exp-btn exp-btn--danger', text: t('Delete') });
+					del.addEventListener('click', function () {
+						E.confirmDialog(t('Delete this receipt? It will not be attached to any claim.')).then(function (ok) {
+							if (!ok) return;
+							api('/receipts-inbox/' + r.id, { method: 'DELETE' }).then(function () {
+								E.toast('success', t('Receipt deleted.'));
+								load();
+							}, E.handleError);
+						});
+					});
 					list.appendChild(el('div', { class: 'exp-card', role: 'listitem' }, [
 						el('strong', { text: r.original_name || ('#' + r.id) }),
-						el('p', { class: 'exp-card__meta', text: fmtDateTime(r.captured_at || r.uploaded_at) + ' · ' + (r.mime || '') })
+						el('p', { class: 'exp-card__meta', text: fmtDateTime(r.captured_at || r.uploaded_at) + ' · ' + (r.mime || '') }),
+						el('div', { class: 'exp-detail-actions' }, [dl, del])
 					]));
 				});
 				return items.length;
@@ -760,11 +801,21 @@
 		load();
 	};
 
-	views.all = function () {
+	views.all = function (root) {
 		var list = document.getElementById('exp-all-list');
-		listFetch(list, null, function () { return api('/claims?scope=all'); },
-			function (data) { var items = (data && data.claims) || []; renderList(list, null, items); return items.length; },
-			document.getElementById('exp-all-count'))();
+		var bar = root.querySelector('[data-exp-filter="status"]');
+		var status = '';
+		var group = window.CheckViewComponents && window.CheckViewComponents.pillGroup(bar, function (v) {
+			status = v;
+			load();
+		});
+		function load() {
+			var qs = status ? '&status=' + encodeURIComponent(status) : '';
+			return listFetch(list, null, function () { return api('/claims?scope=all' + qs); },
+				function (data) { var items = (data && data.claims) || []; renderList(list, null, items); return items.length; },
+				document.getElementById('exp-all-count'))();
+		}
+		if (!group || !bar) { load(); }
 	};
 
 	views.settlements = function () {
@@ -999,9 +1050,13 @@
 				return listFetch(list, null, function () { return api(ep); }, function (data) {
 					var items = (data && (data.categories || data.cost_centers)) || [];
 					items.forEach(function (c) {
+						if (c.deleted) return;
 						list.appendChild(el('div', { class: 'exp-card' }, [
 							el('strong', { text: c.code + ' — ' + c.name }),
-							el('p', { class: 'exp-card__meta', text: c.active ? t('Active') : t('Inactive') })
+							el('p', { class: 'exp-card__meta', text: c.active ? t('Active') : t('Inactive') }),
+							el('div', { class: 'exp-detail-actions' }, [
+								adminDeleteBtn(t('Delete {name}? It stays visible on existing claims.', { name: c.name }), ep + '/' + c.id, load)
+							])
 						]));
 					});
 				})();
@@ -1025,7 +1080,10 @@
 				((data && data.rates) || []).forEach(function (rt) {
 					list.appendChild(el('div', { class: 'exp-card' }, [
 						el('strong', { text: rt.code + ' — ' + rt.name }),
-						el('p', { class: 'exp-card__meta', text: money(rt.rate_minor, rt.currency) + ' · ' + rt.rate_type + ' · ' + fmtDate(rt.effective_from) })
+						el('p', { class: 'exp-card__meta', text: money(rt.rate_minor, rt.currency) + ' · ' + rateTypeLabel(rt.rate_type) + ' · ' + fmtDate(rt.effective_from) }),
+						el('div', { class: 'exp-detail-actions' }, [
+							adminDeleteBtn(t('Delete rate {name}?', { name: rt.name }), '/admin/rates/' + rt.id, load)
+						])
 					]));
 				});
 			})();
@@ -1044,18 +1102,151 @@
 
 	views['admin-chains'] = function () {
 		var list = document.getElementById('exp-chains-list');
-		listFetch(list, null, function () { return api('/admin/chains'); }, function (data) {
-			((data && data.chains) || []).forEach(function (ch) {
-				list.appendChild(el('div', { class: 'exp-card' }, [
-					el('strong', { text: ch.name }),
-					el('p', { class: 'exp-card__meta', text: (ch.steps || []).map(function (s) { return s.approver_uid; }).join(' → ') })
-				]));
-			});
-		})();
+		function load() {
+			return listFetch(list, null, function () { return api('/admin/chains'); }, function (data) {
+				((data && data.chains) || []).forEach(function (ch) {
+					var del = adminDeleteBtn(t('Delete chain {name}?', { name: ch.name }), '/admin/chains/' + ch.id, load);
+					list.appendChild(el('div', { class: 'exp-card' }, [
+						el('strong', { text: ch.name }),
+						el('p', { class: 'exp-card__meta', text: (ch.steps || []).map(function (s) { return s.approver_uid; }).join(' → ') }),
+						el('div', { class: 'exp-detail-actions' }, [del])
+					]));
+				});
+			})();
+		}
+		load();
 	};
 
-	views.settings = function () {
+	function renderAccessSettings(body) {
+		listFetch(body, null, function () { return api('/admin/access'); }, function (data) {
+			var acc = (data && data.access) || {};
+			var form = el('form', { class: 'exp-form' });
+			form.appendChild(el('h3', { class: 'exp-section-h', text: t('Who can use ExpenseCheck') }));
+			var cards = el('div', { class: 'exp-choice-cards', role: 'radiogroup', 'aria-label': t('Access mode') });
+			var current = acc.restriction_enabled ? 'restricted' : 'open';
+			function modeCard(value, title, hint) {
+				var input = el('input', { type: 'radio', name: 'exp-access-mode', value: value });
+				input.checked = (current === value);
+				return el('label', { class: 'exp-choice-card' }, [
+					input,
+					el('span', { class: 'exp-choice-card__copy' }, [
+						el('span', { class: 'exp-choice-card__title', text: title }),
+						el('span', { class: 'exp-choice-card__hint', text: hint })
+					])
+				]);
+			}
+			cards.appendChild(modeCard('open',
+				t('Open — everyone on this instance'),
+				t('Any signed-in user can file and view their own claims.')));
+				cards.appendChild(modeCard('restricted',
+				t('Restricted — listed people only'),
+				t('Only the users and groups below — plus app admins — can open the app.')));
+			form.appendChild(cards);
+
+			function directoryPicker(id, labelText, endpoint, initial) {
+				var wrap = el('div', { class: 'exp-field' });
+				wrap.appendChild(el('label', { class: 'exp-label', 'for': id, text: labelText }));
+				var chips = el('ul', { class: 'exp-chip-list' });
+				var sel = {};
+				function addChip(cid) {
+					if (!cid || sel[cid] !== undefined) return;
+					sel[cid] = true;
+					var li = el('li', { class: 'exp-chip' });
+					li.appendChild(el('span', { text: cid }));
+					var rm = el('button', { type: 'button', class: 'exp-chip__remove', 'aria-label': t('Remove'), text: '×' });
+					rm.addEventListener('click', function () { delete sel[cid]; li.remove(); });
+					li.appendChild(rm);
+					chips.appendChild(li);
+				}
+				(initial || []).forEach(addChip);
+				var box = el('input', {
+					class: 'exp-input', id: id, type: 'search', role: 'combobox',
+					'aria-expanded': 'false', 'aria-autocomplete': 'list',
+					'aria-controls': id + '-list', autocomplete: 'off',
+					placeholder: t('Search…')
+				});
+				var sug = el('ul', { class: 'exp-picker', id: id + '-list', role: 'listbox', hidden: 'hidden' });
+				var gen = 0, active = -1, results = [];
+				function closeList() { sug.hidden = true; box.setAttribute('aria-expanded', 'false'); active = -1; }
+				function paint() {
+					sug.innerHTML = '';
+					active = -1;
+					if (!results.length) { closeList(); return; }
+					results.forEach(function (r, i) {
+						var opt = el('li', {
+							class: 'exp-picker__item', role: 'option', id: id + '-opt-' + i,
+							'aria-selected': 'false',
+							text: r.name && r.name !== r.id ? r.name + ' (' + r.id + ')' : r.id
+						});
+						opt.addEventListener('mousedown', function (e) { e.preventDefault(); addChip(r.id); box.value = ''; closeList(); });
+						sug.appendChild(opt);
+					});
+					sug.hidden = false;
+					box.setAttribute('aria-expanded', 'true');
+				}
+				var deb = null;
+				box.addEventListener('input', function () {
+					clearTimeout(deb);
+					var q = box.value.trim();
+					var myGen = ++gen;
+					deb = setTimeout(function () {
+						api(endpoint + '?q=' + encodeURIComponent(q)).then(function (d) {
+							if (myGen !== gen) return; // stale-response guard
+							results = ((d && (d.users || d.groups)) || []).map(function (u) { return { id: u.uid || u.gid, name: u.name }; });
+							paint();
+						}, closeList);
+					}, 200);
+				});
+				box.addEventListener('keydown', function (e) {
+					var opts = sug.querySelectorAll('.exp-picker__item');
+					if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+						if (!opts.length) return;
+						e.preventDefault();
+						active = e.key === 'ArrowDown' ? (active + 1) % opts.length : (active - 1 + opts.length) % opts.length;
+						opts.forEach(function (o, i) { o.setAttribute('aria-selected', i === active ? 'true' : 'false'); });
+						box.setAttribute('aria-activedescendant', opts[active].id);
+					} else if (e.key === 'Enter' && active >= 0 && results[active]) {
+						e.preventDefault();
+						addChip(results[active].id); box.value = ''; closeList();
+					} else if (e.key === 'Escape') { closeList(); }
+				});
+				box.addEventListener('blur', function () { setTimeout(closeList, 150); });
+				wrap.appendChild(chips);
+				wrap.appendChild(box);
+				wrap.appendChild(sug);
+				return { wrap: wrap, ids: function () { return Object.keys(sel); } };
+			}
+
+			var users = directoryPicker('exp-acc-users', t('Allowed users'), '/admin/directory/users', acc.allowed_user_ids);
+			var groups = directoryPicker('exp-acc-groups', t('Allowed groups'), '/admin/directory/groups', acc.allowed_group_ids);
+			var admins = directoryPicker('exp-acc-admins', t('App admins'), '/admin/directory/users', acc.app_admin_user_ids);
+			[users, groups, admins].forEach(function (p) { form.appendChild(p.wrap); });
+			var save = el('button', { type: 'submit', class: 'exp-btn exp-btn--primary', text: t('Save') });
+			form.appendChild(save);
+			form.addEventListener('submit', function (ev) {
+				ev.preventDefault();
+				save.disabled = true;
+				var mode = form.querySelector('input[name="exp-access-mode"]:checked');
+				api('/admin/access', {
+					method: 'POST', json: {
+						restriction_enabled: mode && mode.value === 'restricted' ? '1' : '0',
+						allowed_user_ids: users.ids(),
+						allowed_group_ids: groups.ids(),
+						app_admin_user_ids: admins.ids()
+					}
+				}).then(function () {
+					E.toast('success', t('Access policy saved.'));
+					save.disabled = false;
+				}, function (e) { save.disabled = false; E.handleError(e); });
+			});
+			body.appendChild(form);
+		})();
+	}
+
+	views.settings = function (root) {
 		var body = document.getElementById('exp-settings-body');
+		var section = (root && root.dataset ? root.dataset.expSection : '') || 'general';
+		if (section === 'access') { renderAccessSettings(body); return; }
 		listFetch(body, null, function () { return api('/settings'); }, function (data) {
 			// Envelope is {ok, settings:{…}, roles:{…}} — the registry keys
 			// live one level down; the whole body is the flat-ok shape.
@@ -1065,11 +1256,21 @@
 				'allow_self_approve', 'attachment_max_mb', 'inbox_purge_days',
 				'retention_years', 'digest_cadence'];
 			var BOOL_KEYS = ['enable_mileage_claims', 'allow_route_evidence', 'allow_self_approve'];
+			var LABELS = {
+				org_currency: t('Default currency'),
+				enable_mileage_claims: t('Allow mileage claims'),
+				allow_route_evidence: t('Allow route evidence'),
+				allow_self_approve: t('Allow self-approval'),
+				attachment_max_mb: t('Max attachment size (MB)'),
+				inbox_purge_days: t('Receipt inbox purge (days)'),
+				retention_years: t('Retention (years)'),
+				digest_cadence: t('Digest cadence')
+			};
 			KEYS.forEach(function (k) {
 				if (!(k in s)) return;
 				var wrap = el('div', { class: 'exp-field' });
 				var id = 'exp-set-' + k;
-				wrap.appendChild(el('label', { class: 'exp-label', 'for': id, text: k.replace(/_/g, ' ') }));
+				wrap.appendChild(el('label', { class: 'exp-label', 'for': id, text: LABELS[k] || k.replace(/_/g, ' ') }));
 				if (BOOL_KEYS.indexOf(k) !== -1) {
 					// Design-system: hidden '0' + checkbox '1' — FormData last-wins.
 					var hid = el('input', { type: 'hidden', name: k, value: '0' });
@@ -1201,9 +1402,15 @@
 
 	views.license = function () {
 		var body = document.getElementById('exp-license-body');
-		listFetch(body, null, function () { return api('/admin/license'); }, function (d) {
-			body.appendChild(el('p', { text: t('Status') + ': ' + (d.status || t('none')) }));
-			if (d.seats !== undefined) body.appendChild(el('p', { text: t('Seats') + ': ' + d.seats }));
+		listFetch(body, null, function () { return api('/license'); }, function (d) {
+			var lic = d && d.license;
+			if (!lic) {
+				body.appendChild(el('p', { class: 'exp-muted', text: t('No license installed') }));
+				return;
+			}
+			body.appendChild(el('p', { text: t('Status') + ': ' + (lic.valid ? t('Valid') : t('Expired')) }));
+			if (lic.valid_until) body.appendChild(el('p', { text: t('Valid until') + ': ' + fmtDate(lic.valid_until) }));
+			if (lic.mobile_seats !== undefined && lic.mobile_seats !== null) body.appendChild(el('p', { text: t('Mobile seats') + ': ' + lic.mobile_seats }));
 		})();
 	};
 

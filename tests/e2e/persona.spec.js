@@ -113,6 +113,27 @@ test.describe('persona sweep — nav/API parity per role', () => {
 		expect(body.ok).toBe(true)
 	})
 
+	test('scope=all: finance sees org claims, member stays own-scoped', async () => {
+		// Employee drafts a claim admin cannot own
+		const created = await emp.request.post(`${APP}/api/claims`, {
+			data: { title: `Scope probe ${Date.now()}`, request_key: `scope-${Date.now()}` },
+		})
+		expect(created.status()).toBe(200)
+		const { claim } = await created.json()
+		// Admin's plain list = own claims only — must not contain it
+		const mine = await (await admin.request.get(`${APP}/api/claims`)).json()
+		expect(mine.claims.map((c) => c.id)).not.toContain(claim.id)
+		// Admin + scope=all = org visibility — must contain it
+		const all = await (await admin.request.get(`${APP}/api/claims?scope=all`)).json()
+		expect(all.claims.map((c) => c.id)).toContain(claim.id)
+		// Status filter composes with scope=all
+		const filtered = await (await admin.request.get(`${APP}/api/claims?scope=all&status=draft`)).json()
+		expect(filtered.claims.map((c) => c.id)).toContain(claim.id)
+		// Member scope=all does NOT escalate: no claim owned by anyone else
+		const empAll = await (await emp.request.get(`${APP}/api/claims?scope=all`)).json()
+		expect(empAll.claims.every((c) => c.owner === claim.owner)).toBe(true)
+	})
+
 	test('admin+finance: all four nav groups visible', async () => {
 		const resp = await admin.goto(`${APP}/`)
 		expect(resp?.status()).toBe(200)

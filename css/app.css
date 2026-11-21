@@ -348,3 +348,47 @@
 	min-height: 0; cursor: help; font: inherit;
 }
 .exp-glossary-term:focus-visible { outline: 2px solid var(--color-primary-element); outline-offset: 2px; }
+
+/* ---------- Removable chips + directory picker (§3.13 access door) ---------- */
+.exp-chip-list {
+	display: flex; flex-wrap: wrap; gap: var(--exp-space-2, 8px);
+	list-style: none; margin: 0 0 var(--exp-space-2, 8px); padding: 0;
+}
+.exp-chip {
+	display: inline-flex; align-items: center; gap: var(--exp-space-1, 4px);
+	min-height: 44px; padding: var(--exp-space-1, 4px) var(--exp-space-1, 4px) var(--exp-space-1, 4px) var(--exp-space-3, 12px);
+	border: 1px solid var(--exp-form-border, var(--color-border-maxcontrast));
+	border-radius: var(--exp-radius-pill, 999px);
+	background: var(--exp-bg-card, var(--color-main-background));
+	color: var(--exp-text, var(--color-main-text));
+	font-size: var(--exp-fs-sm, 0.875rem);
+}
+.exp-chip__remove {
+	display: inline-flex; align-items: center; justify-content: center;
+	min-width: 44px; min-height: 44px; margin: calc(-1 * var(--exp-space-1, 4px));
+	border: 0; border-radius: var(--exp-radius-pill, 999px);
+	background: none; color: var(--exp-muted, var(--color-text-maxcontrast));
+	font-size: 1.25rem; line-height: 1; cursor: pointer;
+}
+.exp-chip__remove:hover, .exp-chip__remove:focus-visible {
+	background: var(--exp-tint-danger, var(--color-error));
+	color: var(--exp-danger-ink, var(--color-error-text, var(--color-error)));
+}
+.exp-picker {
+	position: absolute; z-index: 20; inset-inline: 0; top: 100%;
+	max-height: 16rem; overflow-y: auto;
+	list-style: none; margin: var(--exp-space-1, 4px) 0 0; padding: 0;
+	background: var(--exp-bg-card, var(--color-main-background));
+	border: 1px solid var(--exp-form-border, var(--color-border-maxcontrast));
+	border-radius: var(--exp-radius-md, 8px);
+	box-shadow: var(--exp-shadow-md, 0 8px 24px rgba(0,0,0,.12));
+}
+.exp-picker__item {
+	display: flex; align-items: center; min-height: 44px;
+	padding: var(--exp-space-2, 8px) var(--exp-space-3, 12px);
+	color: var(--exp-text, var(--color-main-text)); cursor: pointer;
+}
+.exp-picker__item:hover, .exp-picker__item[aria-selected='true'] {
+	background: var(--color-background-hover);
+}
+.exp-field:has(.exp-picker) { position: relative; }

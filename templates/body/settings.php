@@ -4,7 +4,7 @@ $expSection = (string)($_['settingsSection'] ?? 'general');
 $expSectionLabels = (array)($_['settingsSectionLabels'] ?? []);
 $expSectionUrls = (array)($_['settingsSectionUrls'] ?? []);
 ?>
-<section class="exp-surface" data-exp-view="settings" aria-labelledby="exp-set-h">
+<section class="exp-surface" data-exp-view="settings" data-exp-section="<?php p($expSection); ?>" aria-labelledby="exp-set-h">
 	<h2 id="exp-set-h"><?php p($l->t('Settings')); ?></h2>
 	<?php if ($expSectionLabels !== []): ?>
 		<nav class="exp-settings-nav" aria-label="<?php p($l->t('Settings pages')); ?>">
