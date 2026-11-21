@@ -31,10 +31,16 @@ re-synced or a new copy lands.
 | F25 drive segments → mileage drafts | `mobilitycheck` `check:drive-segments` producer surface | contract v1 |
 | `check:expense-claims` ingress (this app produces; siblings consume) | this app `IngressApiController` | v1 |
 
+## Ported back upstream (this app → shared pack)
+
+| Change | Destination | Date |
+|--------|-------------|------|
+| `ApiError`: `error_code` field + `code` alias; `ok` envelope tolerance (`body.data !== undefined ? body.data : body`); `{P}ErrorCopy` hook in `handleError` (§9.2) | `_shared/check-shell/js/app.js.tpl` — siblings inherit on their next re-sync | 2026-11-21 |
+
 ## Not yet ported (open §15.2 rows)
 
 | Need | Planned source | Status |
 |------|----------------|--------|
 | Settlement PDF (per-claimant sums + appended receipts) | AZC `MonthClosurePdfDocumentBuilder` | open |
-| Approver digest mail service | AZC `ManagerPendingApprovalMailService` | open — NC notification channel shipped; mail channel pending |
-| ODS export builder | TCK `OdsBuilder` | open — CSV ships, ODS pending |
+| ~~Approver digest mail service~~ | AZC `ManagerPendingApprovalMailService` | **done** — `DigestMailService` + `DigestMailJob` (daily/weekly/off, UNIQUE dedupe_key, delegate fan-out) |
+| ~~ODS export builder~~ | TCK `OdsBuilder` | **done** — ported into `ExportService` (deterministic meta date, injection-safe) |

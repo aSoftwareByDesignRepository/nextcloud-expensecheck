@@ -47,7 +47,8 @@
       "ready": "section[data-exp-view='claim-form']",
       "states": [
         "current"
-      ]
+      ],
+      "dark": true
     },
     {
       "id": "claim-detail",
@@ -55,7 +56,8 @@
       "ready": "section[data-exp-view='claim-detail']",
       "states": [
         "populated"
-      ]
+      ],
+      "dark": true
     },
     {
       "id": "inbox",
@@ -64,7 +66,8 @@
       "listSel": "#exp-inbox-list",
       "states": [
         "populated"
-      ]
+      ],
+      "dark": true
     },
     {
       "id": "receipts",
@@ -73,7 +76,8 @@
       "listSel": "#exp-receipts-list",
       "states": [
         "populated"
-      ]
+      ],
+      "dark": true
     },
     {
       "id": "all-claims",
@@ -82,7 +86,8 @@
       "listSel": "#exp-all-list",
       "states": [
         "populated"
-      ]
+      ],
+      "dark": true
     },
     {
       "id": "settlements",
@@ -91,7 +96,8 @@
       "listSel": "#exp-batches-list",
       "states": [
         "populated"
-      ]
+      ],
+      "dark": true
     },
     {
       "id": "settlement-detail",
@@ -99,7 +105,8 @@
       "ready": "section[data-exp-view='settlement-detail']",
       "states": [
         "populated"
-      ]
+      ],
+      "dark": true
     },
     {
       "id": "reports",
@@ -107,7 +114,8 @@
       "ready": "section[data-exp-view='reports']",
       "states": [
         "current"
-      ]
+      ],
+      "dark": true
     },
     {
       "id": "categories",
@@ -116,7 +124,8 @@
       "listSel": "#exp-cat-list",
       "states": [
         "populated"
-      ]
+      ],
+      "dark": true
     },
     {
       "id": "rates",
@@ -125,7 +134,8 @@
       "listSel": "#exp-rates-list",
       "states": [
         "populated"
-      ]
+      ],
+      "dark": true
     },
     {
       "id": "cost-centers",
@@ -134,7 +144,8 @@
       "listSel": "#exp-cc-list",
       "states": [
         "populated"
-      ]
+      ],
+      "dark": true
     },
     {
       "id": "chains",
@@ -143,7 +154,8 @@
       "listSel": "#exp-chains-list",
       "states": [
         "populated"
-      ]
+      ],
+      "dark": true
     },
     {
       "id": "settings",
@@ -151,7 +163,8 @@
       "ready": "section[data-exp-view='settings']",
       "states": [
         "current"
-      ]
+      ],
+      "dark": true
     },
     {
       "id": "settings-transfer",
@@ -159,7 +172,8 @@
       "ready": "section[data-exp-view='settings']",
       "states": [
         "current"
-      ]
+      ],
+      "dark": true
     },
     {
       "id": "license",

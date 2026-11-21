@@ -1042,25 +1042,29 @@
 
 	views.settings = function () {
 		var body = document.getElementById('exp-settings-body');
-		listFetch(body, null, function () { return api('/settings'); }, function (s) {
+		listFetch(body, null, function () { return api('/settings'); }, function (data) {
+			// Envelope is {ok, settings:{…}, roles:{…}} — the registry keys
+			// live one level down; the whole body is the flat-ok shape.
+			var s = (data && data.settings) || {};
 			var form = el('form', { class: 'exp-form' });
 			var KEYS = ['org_currency', 'enable_mileage_claims', 'allow_route_evidence',
 				'allow_self_approve', 'attachment_max_mb', 'inbox_purge_days',
 				'retention_years', 'digest_cadence'];
+			var BOOL_KEYS = ['enable_mileage_claims', 'allow_route_evidence', 'allow_self_approve'];
 			KEYS.forEach(function (k) {
 				if (!(k in s)) return;
 				var wrap = el('div', { class: 'exp-field' });
 				var id = 'exp-set-' + k;
 				wrap.appendChild(el('label', { class: 'exp-label', 'for': id, text: k.replace(/_/g, ' ') }));
-				var v = s[k];
-				if (v === true || v === false || v === 1 || v === 0) {
+				if (BOOL_KEYS.indexOf(k) !== -1) {
+					// Design-system: hidden '0' + checkbox '1' — FormData last-wins.
 					var hid = el('input', { type: 'hidden', name: k, value: '0' });
 					var cb = el('input', { type: 'checkbox', id: id, name: k, value: '1' });
-					cb.checked = !!v && v !== '0';
+					cb.checked = s[k] === '1' || s[k] === 1 || s[k] === true;
 					wrap.appendChild(hid);
 					wrap.appendChild(cb);
 				} else {
-					wrap.appendChild(el('input', { class: 'exp-input', id: id, name: k, value: String(v) }));
+					wrap.appendChild(el('input', { class: 'exp-input', id: id, name: k, value: String(s[k]) }));
 				}
 				form.appendChild(wrap);
 			});
@@ -1076,6 +1080,108 @@
 				}, E.handleError);
 			});
 			body.appendChild(form);
+
+			// Edge 38 / §12.4b: with MobilityCheck installed, an unset
+			// coexistence mode is a double-payment surface — the admin must
+			// pick a pipeline explicitly; never auto-configured, never blocked.
+			function renderCoex() {
+				api('/integrations/summary').then(function (sum) {
+				var mc = (sum && sum.siblings && sum.siblings.mobilitycheck) || {};
+				if (!mc.installed) return;
+				var co = (sum && sum.coexistence) || {};
+				var mode = co.mode || 'unset';
+
+				var section = el('section', { class: 'exp-section', 'aria-labelledby': 'exp-coex-title' });
+				section.appendChild(el('h2', { id: 'exp-coex-title', text: t('MobilityCheck coexistence') }));
+
+				var unset = mode === 'unset';
+				var callout = el('aside', {
+					class: 'exp-license-callout ' + (unset ? 'exp-license-callout--warning' : 'exp-license-callout--info'),
+					role: unset ? 'alert' : 'note'
+				});
+				var cbody = el('div', { class: 'exp-license-callout__body' });
+				cbody.appendChild(el('h3', {
+					class: 'exp-license-callout__title',
+					text: unset
+						? t('Two apps can submit vehicle expenses')
+						: (mode === 'a'
+							? t('Mode A — MobilityCheck settles vehicle money')
+							: t('Mode B — ExpenseCheck is the single claims pipeline'))
+				}));
+				cbody.appendChild(el('p', {
+					class: 'exp-license-callout__text',
+					text: unset
+						? t('ExpenseCheck and MobilityCheck are both installed and no coexistence mode is configured. Pick one pipeline so a trip can never be claimed twice — nothing is blocked until you choose.')
+						: (mode === 'a'
+							? t('Mileage claims are disabled here; drivers claim private-car kilometres in MobilityCheck. Applies to new claims only.')
+							: t('Drivers claim kilometres here, linked to MobilityCheck trips. Disable MobilityCheck\u2019s own expense submit in its settings.'))
+				}));
+				var help = el('a', {
+					href: 'https://nextcloud.software-by-design.de/',
+					target: '_blank', rel: 'noopener noreferrer',
+					class: 'exp-license-callout__link',
+					text: t('Handbook: choosing a mode')
+				});
+				cbody.appendChild(help);
+				callout.appendChild(cbody);
+				section.appendChild(callout);
+
+				var cards = el('div', { class: 'exp-choice-cards', role: 'radiogroup', 'aria-label': t('Coexistence mode') });
+				function modeCard(value, title, hint) {
+					var input = el('input', { type: 'radio', name: 'exp-coex-mode', value: value });
+					input.checked = (mode === value);
+					var label = el('label', { class: 'exp-choice-card' }, [
+						input,
+						el('span', { class: 'exp-choice-card__copy' }, [
+							el('span', { class: 'exp-choice-card__title', text: title }),
+							el('span', { class: 'exp-choice-card__hint', text: hint })
+						])
+					]);
+					return label;
+				}
+				cards.appendChild(modeCard('a',
+					t('Mode A — MobilityCheck settles'),
+					t('Mileage claims are turned off here. Drivers submit private-car kilometres in MobilityCheck\u2019s own module.')));
+				cards.appendChild(modeCard('b',
+					t('Mode B — ExpenseCheck settles'),
+					t('One approval queue and one settlement for all employee money. Requires MobilityCheck\u2019s own expense submit to be switched off there.')));
+				section.appendChild(cards);
+
+				var mcState = el('p', { class: 'exp-field-hint' });
+				mcState.appendChild(document.createTextNode(
+					mc.expense_submit_enabled
+						? t('MobilityCheck\u2019s own expense submit is currently ON — switch it off under MobilityCheck → Settings for Mode B.')
+						: t('MobilityCheck\u2019s own expense submit is off.')));
+				var mcLink = el('a', {
+					href: (window.OC && OC.generateUrl) ? OC.generateUrl('/apps/mobilitycheck/settings') : '/apps/mobilitycheck/settings',
+					text: t('Open MobilityCheck settings')
+				});
+				mcState.appendChild(document.createTextNode(' '));
+				mcState.appendChild(mcLink);
+				section.appendChild(mcState);
+
+				var apply = el('button', { type: 'button', class: 'exp-btn exp-btn--primary', text: t('Apply mode') });
+				apply.addEventListener('click', function () {
+					var picked = section.querySelector('input[name="exp-coex-mode"]:checked');
+					if (!picked) return;
+					apply.disabled = true;
+					api('/settings', { method: 'POST', json: {
+						mc_coexistence_mode: picked.value,
+						enable_mileage_claims: picked.value === 'a' ? '0' : '1'
+					} }).then(function () {
+						var mil = document.getElementById('exp-set-enable_mileage_claims');
+						if (mil) mil.checked = picked.value !== 'a';
+						E.toast('success', t('Coexistence mode saved.'));
+						// Re-render the section with the new state.
+						section.remove();
+						renderCoex();
+					}, function (err) { apply.disabled = false; E.handleError(err); });
+				});
+				section.appendChild(apply);
+				body.appendChild(section);
+				}, function () { /* summary endpoint absent → standalone, nothing to show */ });
+			}
+			renderCoex();
 		})();
 	};
 

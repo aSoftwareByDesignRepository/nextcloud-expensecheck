@@ -184,8 +184,10 @@
 		if (e && e.fields && Object.keys(e.fields).length && window.CheckFieldErrors) {
 			CheckFieldErrors.markValidationFields(e.fields);
 		}
-		// §9.2: known codes get the contracted sentence + recovery, localized.
-		var copy = (e && window.EXPErrorCopy) ? EXPErrorCopy.describe(e.code) : null;
+		// §9.2 error-copy contract: when the app ships an error-copy pack
+		// (EXPErrorCopy.describe(code) → {sentence, recovery}), known codes
+		// render the contracted localized sentence, not the raw message.
+		var copy = (e && window.EXPErrorCopy) ? window.EXPErrorCopy.describe(e.code) : null;
 		var msg = copy
 			? copy.sentence + ' ' + copy.recovery
 			: ((e && e.message) ? e.message : t('Something went wrong.'));

@@ -61,6 +61,8 @@ final class TransferManifest extends AbstractTransferManifest
 			'transfer_receipts' => 'internal',
 			'transfer_job_state' => 'internal',
 			'transfer_last_import_at' => 'internal',
+			'upgrade_backup_last_snapshot_id' => 'internal',
+			'upgrade_backup_max_snapshots' => 'internal',
 		]);
 	}
 
