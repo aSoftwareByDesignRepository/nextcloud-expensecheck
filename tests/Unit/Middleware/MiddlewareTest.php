@@ -18,6 +18,7 @@ use OCA\ExpenseCheck\Service\LicenseService;
 use OCP\AppFramework\Http;
 use OCP\IRequest;
 use OCP\IUser;
+use OCP\IURLGenerator;
 use OCP\IUserSession;
 use OCP\L10N\IFactory;
 
@@ -188,7 +189,8 @@ final class MiddlewareTest extends TestCase
 		$session = $this->createStub(IUserSession::class);
 		$session->method('getUser')->willReturn(null);
 		$mw = new AppAccessMiddleware($session, $this->createStub(AccessControlService::class),
-			$this->requestWith('/x'), $this->logger);
+			$this->requestWith('/x'), $this->logger, $this->createStub(IFactory::class),
+			$this->createStub(IURLGenerator::class));
 		$mw->beforeController(new \OCA\ExpenseCheck\Controller\StubController(), 'm');
 		$this->assertTrue(true);
 	}
@@ -199,7 +201,8 @@ final class MiddlewareTest extends TestCase
 		$session->method('getUser')->willReturn($this->user('restricted'));
 		$access = $this->createStub(AccessControlService::class);
 		$access->method('canUseApp')->willReturn(false);
-		$mw = new AppAccessMiddleware($session, $access, $this->requestWith('/x'), $this->logger);
+		$mw = new AppAccessMiddleware($session, $access, $this->requestWith('/x'), $this->logger,
+			$this->createStub(IFactory::class), $this->createStub(IURLGenerator::class));
 		$this->expectException(AppAccessDeniedException::class);
 		$mw->beforeController(new \OCA\ExpenseCheck\Controller\StubController(), 'm');
 	}
@@ -207,11 +210,30 @@ final class MiddlewareTest extends TestCase
 	public function testAccessDeniedMapsTo403(): void
 	{
 		$mw = new AppAccessMiddleware($this->createStub(IUserSession::class),
-			$this->createStub(AccessControlService::class), $this->requestWith('/x'), $this->logger);
+			$this->createStub(AccessControlService::class), $this->requestWith('/apps/expensecheck/api/claims'),
+			$this->logger, $this->createStub(IFactory::class), $this->createStub(IURLGenerator::class));
 		$res = $mw->afterException(new \stdClass(), 'm', new AppAccessDeniedException('restriction'));
 		$this->assertSame(Http::STATUS_FORBIDDEN, $res->getStatus());
 		$this->assertSame('APP_ACCESS_DENIED', $res->getData()['error']['code']);
 		$this->assertSame('restriction', $res->getData()['error']['reason']);
+	}
+
+	public function testAccessDeniedRendersTemplateForPageRequest(): void
+	{
+		$l10n = $this->createStub(\OCP\IL10N::class);
+		$l10n->method('t')->willReturnCallback(static fn (string $s): string => $s);
+		$factory = $this->createStub(IFactory::class);
+		$factory->method('get')->willReturn($l10n);
+		$urls = $this->createStub(IURLGenerator::class);
+		$urls->method('linkToDefaultPageUrl')->willReturn('/');
+		$mw = new AppAccessMiddleware($this->createStub(IUserSession::class),
+			$this->createStub(AccessControlService::class), $this->requestWith('/apps/expensecheck/claims'),
+			$this->logger, $factory, $urls);
+		$res = $mw->afterException(new \stdClass(), 'm', new AppAccessDeniedException('restriction'));
+		$this->assertSame(Http::STATUS_FORBIDDEN, $res->getStatus());
+		$this->assertInstanceOf(\OCP\AppFramework\Http\TemplateResponse::class, $res);
+		$this->assertSame('access-denied', $res->getTemplateName());
+		$this->assertSame('restriction', AccessControlService::DENIAL_RESTRICTION);
 	}
 
 	// ── ClientLicenseMiddleware ───────────────────────────────────────────

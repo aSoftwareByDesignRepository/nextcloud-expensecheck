@@ -1329,7 +1329,7 @@
 						? t('ExpenseCheck and MobilityCheck are both installed and no coexistence mode is configured. Pick one pipeline so a trip can never be claimed twice — nothing is blocked until you choose.')
 						: (mode === 'a'
 							? t('Mileage claims are disabled here; drivers claim private-car kilometres in MobilityCheck. Applies to new claims only.')
-							: t('Drivers claim kilometres here, linked to MobilityCheck trips. Disable MobilityCheck\u2019s own expense submit in its settings.'))
+							: t('Drivers claim kilometres here, linked to MobilityCheck trips. Disable MobilityCheck’s own expense submit in its settings.'))
 				}));
 				var help = el('a', {
 					href: 'https://nextcloud.software-by-design.de/',
@@ -1356,17 +1356,17 @@
 				}
 				cards.appendChild(modeCard('a',
 					t('Mode A — MobilityCheck settles'),
-					t('Mileage claims are turned off here. Drivers submit private-car kilometres in MobilityCheck\u2019s own module.')));
+					t('Mileage claims are turned off here. Drivers submit private-car kilometres in MobilityCheck’s own module.')));
 				cards.appendChild(modeCard('b',
 					t('Mode B — ExpenseCheck settles'),
-					t('One approval queue and one settlement for all employee money. Requires MobilityCheck\u2019s own expense submit to be switched off there.')));
+					t('One approval queue and one settlement for all employee money. Requires MobilityCheck’s own expense submit to be switched off there.')));
 				section.appendChild(cards);
 
 				var mcState = el('p', { class: 'exp-field-hint' });
 				mcState.appendChild(document.createTextNode(
 					mc.expense_submit_enabled
-						? t('MobilityCheck\u2019s own expense submit is currently ON — switch it off under MobilityCheck → Settings for Mode B.')
-						: t('MobilityCheck\u2019s own expense submit is off.')));
+						? t('MobilityCheck’s own expense submit is currently ON — switch it off under MobilityCheck → Settings for Mode B.')
+						: t('MobilityCheck’s own expense submit is off.')));
 				var mcLink = el('a', {
 					href: (window.OC && OC.generateUrl) ? OC.generateUrl('/apps/mobilitycheck/settings') : '/apps/mobilitycheck/settings',
 					text: t('Open MobilityCheck settings')
