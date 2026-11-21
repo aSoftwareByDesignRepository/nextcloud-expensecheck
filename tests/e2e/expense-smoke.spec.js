@@ -24,7 +24,7 @@ const routes = [
 	{ path: '/settings', ready: '#exp-settings-body' },
 	{ path: '/settings/general', ready: '#exp-settings-body' },
 	{ path: '/settings/transfer', ready: '#exp-transfer-export-card' },
-	{ path: '/license', ready: '#exp-license-body' },
+	{ path: '/license', ready: '#exp-license-page' },
 ]
 
 test.describe.configure({ mode: 'serial' })

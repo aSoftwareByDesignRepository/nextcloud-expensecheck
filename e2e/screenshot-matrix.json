@@ -178,7 +178,7 @@
     {
       "id": "license",
       "path": "/license",
-      "ready": "section[data-exp-view='license']",
+      "ready": "#exp-license-page",
       "states": [
         "current"
       ],

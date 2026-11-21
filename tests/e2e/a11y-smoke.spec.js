@@ -23,7 +23,7 @@ const routes = [
 	{ path: '/chains', ready: '#exp-chains-list' },
 	{ path: '/settings', ready: '#exp-settings-body' },
 	{ path: '/settings/transfer', ready: '#exp-transfer-export-card' },
-	{ path: '/license', ready: '#exp-license-body' },
+	{ path: '/license', ready: '#exp-license-page' },
 ]
 
 async function axeMain(page) {

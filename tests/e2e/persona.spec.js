@@ -43,10 +43,11 @@ test.describe('persona sweep — nav/API parity per role', () => {
 	let empCtx
 	/** @type {import('@playwright/test').Page} */
 	let emp
+	let empCreds
 
 	test.beforeAll(async ({ browser }) => {
 		const adminCreds = credsFromEnv('E2E') || credsFromEnv('ADMIN')
-		const empCreds = credsFromEnv('E2E_NOACCESS')
+		empCreds = credsFromEnv('E2E_NOACCESS')
 		test.skip(!adminCreds, 'Requires NC_E2E_* or NC_ADMIN_* credentials')
 		test.skip(!empCreds, 'Requires NC_E2E_NOACCESS_* credentials (employee persona)')
 		adminCtx = await browser.newContext({ viewport: { width: 1280, height: 900 } })
@@ -62,12 +63,12 @@ test.describe('persona sweep — nav/API parity per role', () => {
 		await empCtx?.close()
 	})
 
-	test('employee: nav exposes Work group only — no Approve/Finance/Admin', async () => {
+	test('employee: nav exposes Work + Mobile groups — no Approve/Finance/Admin', async () => {
 		const resp = await emp.goto(`${APP}/`)
 		expect(resp?.status()).toBe(200)
 		const labels = (await navGroupLabels(emp)).map((s) => s.trim())
-		expect(labels).toEqual(['Work'])
-		await expect(emp.locator('.exp-nav__list .exp-nav__link')).toHaveCount(4) // Overview, My claims, New claim, Receipts
+		expect(labels).toEqual(['Work', 'Mobile'])
+		await expect(emp.locator('.exp-nav__list .exp-nav__link')).toHaveCount(5) // Overview, My claims, New claim, Receipts, Get the App
 	})
 
 	for (const path of [...ADMIN_ONLY_PAGES, ...FINANCE_PAGES]) {
@@ -114,11 +115,17 @@ test.describe('persona sweep — nav/API parity per role', () => {
 	})
 
 	test('scope=all: finance sees org claims, member stays own-scoped', async () => {
-		// Employee drafts a claim admin cannot own
+		// Employee drafts a claim admin cannot own — Basic auth so the
+		// session-CSRF middleware exempts it (ambient session POSTs need a
+		// requesttoken; page.request does not carry one).
 		const created = await emp.request.post(`${APP}/api/claims`, {
+			headers: {
+				Authorization: 'Basic ' + Buffer.from(`${empCreds.username}:${empCreds.password}`).toString('base64'),
+				'Content-Type': 'application/json',
+			},
 			data: { title: `Scope probe ${Date.now()}`, request_key: `scope-${Date.now()}` },
 		})
-		expect(created.status()).toBe(200)
+		expect([200, 201]).toContain(created.status())
 		const { claim } = await created.json()
 		// Admin's plain list = own claims only — must not contain it
 		const mine = await (await admin.request.get(`${APP}/api/claims`)).json()
@@ -152,13 +159,19 @@ test.describe('persona sweep — nav/API parity per role', () => {
 
 	// Suite runs under the global instance lease (global-setup) — the door
 	// flip is safe inside it. Restore must run even on assertion failure.
-	test('door closed: employee → APP_ACCESS_DENIED 403, then restored', async () => {
+	test('door closed: employee → 403 denied page (HTML) + JSON on API, then restored', async () => {
 		try {
 			occ(['config:app:set', 'expensecheck', 'access_restriction_enabled', '--value=1'])
 			occ(['config:app:set', 'expensecheck', 'access_allowed_user_ids', '--value=["expe2eweb"]'])
+			// Page navigation → styled HTML denied surface (sibling parity)
 			const resp = await emp.goto(`${APP}/`)
 			expect(resp?.status()).toBe(403)
-			const body = await resp?.json()
+			expect(resp?.headers()['content-type']).toContain('text/html')
+			await expect(emp.locator('body')).toContainText(/denied|eingeschränkt|no access/i)
+			// API request → machine-readable JSON contract
+			const apiResp = await emp.request.get(`${APP}/api/claims`)
+			expect(apiResp.status()).toBe(403)
+			const body = await apiResp.json()
 			expect(body.error.code).toBe('APP_ACCESS_DENIED')
 			// Allowed user still works while the door is shut
 			const ok = await admin.goto(`${APP}/`)

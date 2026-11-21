@@ -16,7 +16,7 @@ const routes = [
 	{ path: '/receipts', ready: '#exp-receipts-list' },
 	{ path: '/settlements', ready: '#exp-settle-list' },
 	{ path: '/categories', ready: '#exp-cat-list' },
-	{ path: '/license', ready: '#exp-license-body' },
+	{ path: '/license', ready: '#exp-license-page' },
 ]
 
 const widths = [320, 375, 768, 1024, 1280]
