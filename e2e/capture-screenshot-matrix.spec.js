@@ -188,12 +188,11 @@ async function driveEmpty(page, surface) {
 	if (surface.emptyDriver !== 'statusFilter') {
 		throw new Error(`surface ${surface.id}: unknown emptyDriver ${surface.emptyDriver}`)
 	}
-	const sel = page.locator(surface.filterSel)
-	await expect(sel).toBeVisible({ timeout: 15_000 })
+	const bar = page.locator(surface.filterSel)
+	await expect(bar).toBeVisible({ timeout: 15_000 })
 	// 'settled' — the fixture claim is a draft, so this yields the honest
-	// zero-row render through the app's own filter control.
-	await sel.selectOption('settled')
-	await sel.evaluate((el) => el.dispatchEvent(new Event('change', { bubbles: true })))
+	// zero-row render through the app's own filter control (recipe-B pills).
+	await bar.locator('button[data-value="settled"]').click()
 	await expect(page.locator('#exp-claims-empty'))
 		.toBeVisible({ timeout: 20_000 })
 }

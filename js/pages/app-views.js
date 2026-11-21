@@ -80,15 +80,22 @@
 	views.claims = function (root) {
 		var list = document.getElementById('exp-claims-list');
 		var empty = document.getElementById('exp-claims-empty');
-		var sel = root.querySelector('[data-exp-filter="status"]');
+		var bar = root.querySelector('[data-exp-filter="status"]');
+		var status = '';
+		var group = window.CheckViewComponents && window.CheckViewComponents.pillGroup(bar, function (v) {
+			status = v;
+			load();
+		});
 		function load() {
-			var qs = sel && sel.value ? '?status=' + encodeURIComponent(sel.value) : '';
+			var qs = status ? '?status=' + encodeURIComponent(status) : '';
 			return listFetch(list, empty, function () { return api('/claims' + qs); },
 				function (data) { var items = (data && data.claims) || []; renderList(list, empty, items); return items.length; },
 				document.getElementById('exp-claims-count'))();
 		}
-		if (sel) sel.addEventListener('change', load);
-		load();
+		// pillGroup's initial activation already fired the first load via
+		// onSelect; without the pack (missing sync) the bar stays inert —
+		// fall back to an unfiltered load so the list still renders.
+		if (!group || !bar) { load(); }
 	};
 
 	views['claim-form'] = function () {
