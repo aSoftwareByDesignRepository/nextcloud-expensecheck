@@ -29,6 +29,7 @@ use OCP\IDBConnection;
 class ClaimLineService
 {
 	public const LINE_TYPES = ['receipt', 'mileage', 'per_diem', 'flat'];
+	public const DISTANCE_SOURCES = ['manual', 'gps', 'mc_segment'];
 
 	public function __construct(
 		private readonly ClaimLineMapper $lines,
@@ -61,6 +62,7 @@ class ClaimLineService
 		$this->assertEditable($claim);
 		$line = $this->buildLine($claim, new ClaimLine(), $p, $lateSyncAccept);
 		$resolved = $this->money->resolveAllocations($allocs, $line->getAmountMinor());
+		$this->assertSourceUnclaimed($line);
 
 		$this->db->beginTransaction();
 		try {
@@ -78,6 +80,11 @@ class ClaimLineService
 			return $line;
 		} catch (\Throwable $e) {
 			$this->db->rollBack();
+			// TOCTOU: uniq(source_app, source_ref) can still fire between the
+			// pre-check and the insert — surface the same 409, never a 500.
+			if ($this->isUniqueViolation($e)) {
+				$this->throwAlreadyClaimed($line);
+			}
 			throw $e;
 		}
 	}
@@ -90,6 +97,7 @@ class ClaimLineService
 		}
 		$line = $this->buildLine($claim, $line, $p, $lateSyncAccept);
 		$resolved = $this->money->resolveAllocations($allocs, $line->getAmountMinor());
+		$this->assertSourceUnclaimed($line);
 		$this->db->beginTransaction();
 		try {
 			$line->setUpdatedAt($this->timeFactory->getDateTime());
@@ -102,6 +110,9 @@ class ClaimLineService
 			return $line;
 		} catch (\Throwable $e) {
 			$this->db->rollBack();
+			if ($this->isUniqueViolation($e)) {
+				$this->throwAlreadyClaimed($line);
+			}
 			throw $e;
 		}
 	}
@@ -123,6 +134,35 @@ class ClaimLineService
 			$this->db->rollBack();
 			throw $e;
 		}
+	}
+
+	/**
+	 * Edge 37: a sibling source ref can only ever fund ONE line globally —
+	 * two lines on the same claim still double-count the km, so the
+	 * exclusion is the line's own id, never its claim. The uniq index is
+	 * the backstop, this check is the honest 409.
+	 */
+	private function assertSourceUnclaimed(ClaimLine $line): void
+	{
+		if ($line->getSourceApp() === null || $line->getSourceRef() === null) {
+			return;
+		}
+		$existing = $this->lines->findClaimBySource((string)$line->getSourceApp(), (string)$line->getSourceRef());
+		if ($existing !== null && $existing['line_id'] !== $line->getId()) {
+			throw new DomainException('ALREADY_CLAIMED',
+				'This ' . $line->getSourceApp() . ' entry was already claimed in ' . $existing['claim_no'] . '.', 409);
+		}
+	}
+
+	private function throwAlreadyClaimed(ClaimLine $line): void
+	{
+		$this->assertSourceUnclaimed($line);
+	}
+
+	private function isUniqueViolation(\Throwable $e): bool
+	{
+		$msg = strtolower($e->getMessage());
+		return str_contains($msg, 'unique') || str_contains($msg, 'duplicate');
 	}
 
 	private function buildLine(Claim $claim, ClaimLine $line, array $p, bool $lateSyncAccept = false): ClaimLine
@@ -196,7 +236,11 @@ class ClaimLineService
 		// Money: receipt = explicit amount; rated types = qty × snapshot rate.
 		if ($type === 'receipt') {
 			$amount = MoneyMathService::toMinor((string)($p['amount'] ?? ''), 2);
-			if ($amount <= 0) {
+			// Edge 20: negative lines exist only on explicit correction claims
+			// (storno, corrects_claim_no) and F26 deduction claims — never on
+			// a standard claim where they would be an unsigned give-away.
+			$negativeAllowed = in_array($claim->getKind(), ['correction', 'deduction'], true);
+			if ($amount === 0 || ($amount < 0 && !$negativeAllowed)) {
 				throw new ValidationException(['amount' => 'invalid_amount']);
 			}
 			$line->setAmountMinor($amount);
@@ -244,7 +288,29 @@ class ClaimLineService
 				$line->setAmountMinor(0);
 				$lateSync = true;
 			}
-			$line->setDistanceSource(mb_substr(trim((string)($p['distance_source'] ?? 'manual')), 0, 16) ?: 'manual');
+			// §10.1 enumerates the provenance values — anything else is a
+			// contract violation, not a free-form label.
+			$distanceSource = mb_substr(trim((string)($p['distance_source'] ?? 'manual')), 0, 16) ?: 'manual';
+			if (!in_array($distanceSource, self::DISTANCE_SOURCES, true)) {
+				throw new ValidationException(['distance_source' => 'invalid']);
+			}
+			// mc_segment provenance is only honest when the line carries the
+			// sibling evidence link it claims to derive from.
+			if ($distanceSource === 'mc_segment'
+				&& (($p['source_app'] ?? '') !== 'mobilitycheck' || trim((string)($p['source_ref'] ?? '')) === '')) {
+				throw new ValidationException(['source_ref' => 'required']);
+			}
+			$line->setDistanceSource($distanceSource);
+			// Edge 32: GPS gaps (tunnel, permission revoked mid-ride) — the
+			// companion flags an estimate; preserved through submit like
+			// late_sync so the approver keeps seeing the provenance.
+			if ($this->truthy($p['distance_estimated'] ?? false)) {
+				$existing = $line->getPolicyFlags() !== null ? (json_decode($line->getPolicyFlags(), true) ?: []) : [];
+				if (!in_array('distance_estimated', $existing, true)) {
+					$existing[] = 'distance_estimated';
+				}
+				$line->setPolicyFlags(json_encode($existing));
+			}
 		}
 
 		// Optional foreign-currency evidence (spec §9): stored as presented;
@@ -336,10 +402,13 @@ class ClaimLineService
 		}
 		foreach ($this->lines->findByClaim($claim->getId()) as $line) {
 			$flags = [];
-			// late_sync is stamped at sync-accept time and survives re-computation.
+			// late_sync + distance_estimated are stamped at write time and
+			// survive re-computation (edge 41 + edge 32 provenance).
 			$existing = $line->getPolicyFlags() !== null ? (json_decode($line->getPolicyFlags(), true) ?: []) : [];
-			if (in_array('late_sync', $existing, true)) {
-				$flags[] = 'late_sync';
+			foreach (['late_sync', 'distance_estimated'] as $preserved) {
+				if (in_array($preserved, $existing, true)) {
+					$flags[] = $preserved;
+				}
 			}
 			$cat = $this->categories->findById($line->getCategoryId());
 			if ($cat !== null) {

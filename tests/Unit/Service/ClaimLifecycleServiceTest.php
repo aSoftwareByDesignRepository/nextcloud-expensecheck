@@ -194,4 +194,349 @@ final class ClaimLifecycleServiceTest extends TestCase
 		$this->assertNull(\OCA\ExpenseCheck\Service\ChainRoutingService::nextStep($snapshot, 3));
 		$this->assertSame([3, 2, 1], \OCA\ExpenseCheck\Service\ChainRoutingService::stepNos($snapshot));
 	}
+
+	private function makeSvc(array $over = []): ClaimLifecycleService
+	{
+		$time = $this->createStub(ITimeFactory::class);
+		$time->method('getDateTime')->willReturn(new \DateTime('2026-01-01 00:00:00'));
+		return new ClaimLifecycleService(
+			$this->claims,
+			$over['lines'] ?? $this->createStub(ClaimLineMapper::class),
+			$over['lineService'] ?? $this->createStub(ClaimLineService::class),
+			$this->decisions,
+			$this->createStub(DelegateMapper::class),
+			$over['numbers'] ?? $this->createStub(ClaimNumberService::class),
+			$over['routing'] ?? $this->routing,
+			$over['settings'] ?? $this->createStub(SettingsService::class),
+			$over['chain'] ?? $this->createStub(ExpChainService::class),
+			$this->access,
+			$this->createStub(IDBConnection::class),
+			$time,
+			$this->createStub(LoggerInterface::class),
+			new PostCommitEffectQueue($this->createStub(IDBConnection::class), $this->createStub(LoggerInterface::class)),
+			$this->createStub(NotificationService::class),
+		);
+	}
+
+	private function line(int $id, string $type = 'receipt', int $catId = 3, int $amount = 1000): \OCA\ExpenseCheck\Db\ClaimLine
+	{
+		$l = new \OCA\ExpenseCheck\Db\ClaimLine();
+		$l->setId($id);
+		$l->setLineType($type);
+		$l->setCategoryId($catId);
+		$l->setAmountMinor($amount);
+		$l->setReimbursable(1);
+		return $l;
+	}
+
+	/* ---------- createDraft validation ---------- */
+
+	public function testCreateDraftRejectsEmptyTitle(): void
+	{
+		$this->expectException(\OCA\ExpenseCheck\Exception\ValidationException::class);
+		$this->makeSvc()->createDraft('u1', '', 'EUR');
+	}
+
+	public function testCreateDraftRejectsBadCurrency(): void
+	{
+		try {
+			$this->makeSvc()->createDraft('u1', 'T', 'eur'); // lowercase
+			$this->fail('expected ValidationException');
+		} catch (\OCA\ExpenseCheck\Exception\ValidationException $e) {
+			$this->assertSame('invalid', $e->getFields()['currency']);
+		}
+	}
+
+	public function testCreateDraftRejectsUnknownKind(): void
+	{
+		try {
+			$this->makeSvc()->createDraft('u1', 'T', 'EUR', null, ['kind' => 'nonsense']);
+			$this->fail('expected ValidationException');
+		} catch (\OCA\ExpenseCheck\Exception\ValidationException $e) {
+			$this->assertSame('invalid', $e->getFields()['kind']);
+		}
+	}
+
+	public function testCorrectionKindRequiresCorrectsClaimNo(): void
+	{
+		try {
+			$this->makeSvc()->createDraft('u1', 'T', 'EUR', null, ['kind' => 'correction']);
+			$this->fail('expected ValidationException');
+		} catch (\OCA\ExpenseCheck\Exception\ValidationException $e) {
+			$this->assertSame('required', $e->getFields()['corrects_claim_no']);
+		}
+	}
+
+	public function testCorrectsClaimNoMustExist(): void
+	{
+		$claims = $this->createMock(ClaimMapper::class);
+		$claims->method('findByClaimNo')->willReturn(null);
+		$this->claims = $claims;
+		try {
+			$this->makeSvc()->createDraft('u1', 'T', 'EUR', null,
+				['corrects_claim_no' => 'EXP-2026-99999']);
+			$this->fail('expected ValidationException');
+		} catch (\OCA\ExpenseCheck\Exception\ValidationException $e) {
+			$this->assertSame('unknown', $e->getFields()['corrects_claim_no']);
+		}
+	}
+
+	public function testCreateDraftPersistsAllFields(): void
+	{
+		$numbers = $this->createStub(ClaimNumberService::class);
+		$numbers->method('next')->willReturn('EXP-2026-00042');
+		$claims = $this->createMock(ClaimMapper::class);
+		$claims->method('insert')->willReturnCallback(function (Claim $c) {
+			$c->setId(99); return $c;
+		});
+		$this->claims = $claims;
+		$chain = $this->createMock(ExpChainService::class);
+		$chain->expects($this->once())->method('append')
+			->with(99, 'created', 'u1', null, 'draft', $this->anything());
+
+		$c = $this->makeSvc(['numbers' => $numbers, 'chain' => $chain])
+			->createDraft('u1', 'Trip to Berlin', 'EUR', 'req-1', ['azc_trip_id' => 55]);
+		$this->assertSame('EXP-2026-00042', $c->getClaimNo());
+		$this->assertSame('u1', $c->getUserId());
+		$this->assertSame('draft', $c->getStatus());
+		$this->assertSame('Trip to Berlin', $c->getTitle());
+		$this->assertSame('EUR', $c->getCurrency());
+		$this->assertSame('standard', $c->getKind());
+		$this->assertSame(55, $c->getAzcTripId());
+		$this->assertSame(1, $c->getVersion());
+		$this->assertSame('req-1', $c->getRequestKey());
+	}
+
+	/* ---------- submit gates ---------- */
+
+	public function testSubmitVersionConflict(): void
+	{
+		$c = $this->claim('alice', 'draft');
+		$c->setVersion(3);
+		try {
+			$this->makeSvc()->submit($c, 'alice', 2); // client thinks 2, server 3
+			$this->fail('expected VERSION_CONFLICT');
+		} catch (\OCA\ExpenseCheck\Exception\DomainException $e) {
+			$this->assertSame('VERSION_CONFLICT', $e->getErrorCode());
+		}
+	}
+
+	public function testSubmitWrongStatusRejected(): void
+	{
+		$c = $this->claim('alice', 'submitted');
+		try {
+			$this->makeSvc()->submit($c, 'alice');
+			$this->fail('expected CLAIM_NOT_SUBMITTABLE');
+		} catch (\OCA\ExpenseCheck\Exception\DomainException $e) {
+			$this->assertSame('CLAIM_NOT_SUBMITTABLE', $e->getErrorCode());
+		}
+	}
+
+	public function testSubmitByNonOwnerIsUniform404(): void
+	{
+		$c = $this->claim('alice', 'draft');
+		$this->expectException(ClaimNotFoundException::class);
+		$this->makeSvc()->submit($c, 'mallory'); // not the owner
+	}
+
+	public function testSubmitEmptyClaimRejected(): void
+	{
+		$lines = $this->createStub(ClaimLineMapper::class);
+		$lines->method('findByClaim')->willReturn([]);
+		$c = $this->claim('alice', 'draft');
+		try {
+			$this->makeSvc(['lines' => $lines])->submit($c, 'alice');
+			$this->fail('expected CLAIM_EMPTY');
+		} catch (\OCA\ExpenseCheck\Exception\DomainException $e) {
+			$this->assertSame('CLAIM_EMPTY', $e->getErrorCode());
+		}
+	}
+
+	public function testSubmitRatedLineWithoutRateRejected(): void
+	{
+		$lines = $this->createStub(ClaimLineMapper::class);
+		$l = $this->line(1, 'mileage'); // no rate resolved
+		$lines->method('findByClaim')->willReturn([$l]);
+		$c = $this->claim('alice', 'draft');
+		try {
+			$this->makeSvc(['lines' => $lines])->submit($c, 'alice');
+			$this->fail('expected RATE_MISSING');
+		} catch (\OCA\ExpenseCheck\Exception\DomainException $e) {
+			$this->assertSame('RATE_MISSING', $e->getErrorCode());
+		}
+	}
+
+	public function testSubmitLineWithoutCategoryRejected(): void
+	{
+		$lines = $this->createStub(ClaimLineMapper::class);
+		$l = $this->line(1, 'receipt', 0); // category_id = 0
+		$lines->method('findByClaim')->willReturn([$l]);
+		$c = $this->claim('alice', 'draft');
+		try {
+			$this->makeSvc(['lines' => $lines])->submit($c, 'alice');
+			$this->fail('expected CLAIM_EMPTY');
+		} catch (\OCA\ExpenseCheck\Exception\DomainException $e) {
+			$this->assertSame('CLAIM_EMPTY', $e->getErrorCode());
+		}
+	}
+
+	public function testSubmitHappyPathFreezesChainAndTotals(): void
+	{
+		$lines = $this->createStub(ClaimLineMapper::class);
+		$l = $this->line(1, 'receipt', 3, 1234);
+		$lines->method('findByClaim')->willReturn([$l]);
+		$routing = $this->createMock(ChainRoutingService::class);
+		$chainEnt = new \OCA\ExpenseCheck\Db\Chain();
+		$chainEnt->setId(5);
+		$routing->method('resolveChain')->willReturn($chainEnt);
+		$snap = ['chain_id' => 5, 'name' => 'std', 'steps' => [[
+			'step_no' => 1, 'resolved_uids' => ['boss'], 'unroutable' => false,
+		]]];
+		$routing->method('snapshot')->willReturn($snap);
+		$routing->method('applySelfApprovalRule')->willReturn($snap);
+		$settings = $this->createStub(SettingsService::class);
+		$settings->method('getBool')->willReturn(false);
+		$claims = $this->createMock(ClaimMapper::class);
+		$claims->method('updateWithVersion')->willReturnCallback(function (Claim $c, int $v) {
+			return true;
+		});
+		$this->claims = $claims;
+		$chain = $this->createMock(ExpChainService::class);
+		$chain->expects($this->once())->method('append')
+			->with(7, 'submitted', 'alice', 'draft', 'submitted', $this->anything());
+		$lineSvc = $this->createMock(ClaimLineService::class);
+		$lineSvc->expects($this->once())->method('assertLineDatesAllowed');
+		$lineSvc->expects($this->once())->method('assertReceiptEvidence');
+		$lineSvc->expects($this->once())->method('computePolicyFlags');
+
+		$c = $this->claim('alice', 'draft');
+		$c->setVersion(1);
+		$out = $this->makeSvc([
+			'lines' => $lines, 'routing' => $routing, 'settings' => $settings,
+			'chain' => $chain, 'lineService' => $lineSvc,
+		])->submit($c, 'alice');
+
+		$this->assertSame('submitted', $out->getStatus());
+		$this->assertSame(1234, $out->getTotalMinor());
+		$this->assertSame(1234, $out->getReimbursableTotalMinor());
+		$this->assertSame(5, $out->getChainId());
+		$this->assertSame(1, $out->getCurrentStep());
+		$this->assertSame(2, $out->getVersion()); // CAS bump
+		$this->assertNotNull($out->getChainSnapshot());
+		$this->assertNotNull($out->getSubmittedAt());
+	}
+
+	public function testSubmitUnroutableFallsBackToAdminReview(): void
+	{
+		$lines = $this->createStub(ClaimLineMapper::class);
+		$lines->method('findByClaim')->willReturn([$this->line(1)]);
+		$routing = $this->createMock(ChainRoutingService::class);
+		$routing->method('resolveChain')->willReturn(null); // no chain matches
+		$access = $this->createStub(AccessControlService::class);
+		$access->method('getAppAdminIds')->willReturn(['root']);
+		$this->access = $access;
+		$settings = $this->createStub(SettingsService::class);
+		$settings->method('getBool')->willReturn(false);
+		$claims = $this->createMock(ClaimMapper::class);
+		$claims->method('updateWithVersion')->willReturn(true);
+		$this->claims = $claims;
+
+		$c = $this->claim('alice', 'draft');
+		$out = $this->makeSvc([
+			'lines' => $lines, 'routing' => $routing, 'settings' => $settings,
+		])->submit($c, 'alice');
+		$snap = json_decode($out->getChainSnapshot(), true);
+		$this->assertTrue($snap['steps'][0]['unroutable']);
+		$this->assertSame(['root'], $snap['steps'][0]['resolved_uids']);
+		$this->assertSame('admin-review', $snap['name']);
+	}
+
+	/* ---------- withdraw ---------- */
+
+	public function testWithdrawSubmittedBackToDraft(): void
+	{
+		$claims = $this->createMock(ClaimMapper::class);
+		$claims->method('updateWithVersion')->willReturn(true);
+		$this->claims = $claims;
+		$chain = $this->createMock(ExpChainService::class);
+		$chain->expects($this->once())->method('append')
+			->with(7, 'withdrawn', 'alice', 'submitted', 'draft');
+		$c = $this->claim('alice', 'submitted');
+		$c->setVersion(1);
+		$out = $this->makeSvc(['chain' => $chain])->withdraw($c, 'alice');
+		$this->assertSame('draft', $out->getStatus());
+		$this->assertSame(0, $out->getCurrentStep());
+		$this->assertNull($out->getSubmittedAt());
+	}
+
+	public function testWithdrawWrongStatusRejected(): void
+	{
+		$c = $this->claim('alice', 'draft');
+		try {
+			$this->makeSvc()->withdraw($c, 'alice');
+			$this->fail('expected CLAIM_NOT_WITHDRAWABLE');
+		} catch (\OCA\ExpenseCheck\Exception\DomainException $e) {
+			$this->assertSame('CLAIM_NOT_WITHDRAWABLE', $e->getErrorCode());
+		}
+	}
+
+	public function testWithdrawByNonOwnerIsUniform404(): void
+	{
+		$c = $this->claim('alice', 'submitted');
+		$this->expectException(ClaimNotFoundException::class);
+		$this->makeSvc()->withdraw($c, 'mallory');
+	}
+
+	/* ---------- revert ---------- */
+
+	public function testRevertRequiresAppAdmin(): void
+	{
+		$access = $this->createStub(AccessControlService::class);
+		$access->method('isAppAdmin')->willReturn(false);
+		$this->access = $access;
+		$c = $this->claim('alice', 'approved');
+		$this->expectException(ClaimNotFoundException::class);
+		$this->makeSvc()->revert($c, 'mallory', 'oops');
+	}
+
+	public function testRevertRequiresReason(): void
+	{
+		$access = $this->createStub(AccessControlService::class);
+		$access->method('isAppAdmin')->willReturn(true);
+		$this->access = $access;
+		$c = $this->claim('alice', 'approved');
+		try {
+			$this->makeSvc()->revert($c, 'root', '  ');
+			$this->fail('expected ValidationException');
+		} catch (\OCA\ExpenseCheck\Exception\ValidationException $e) {
+			$this->assertSame('required', $e->getFields()['reason']);
+		}
+	}
+
+	public function testRevertApprovedBackToSubmittedAndWipesDecision(): void
+	{
+		$access = $this->createStub(AccessControlService::class);
+		$access->method('isAppAdmin')->willReturn(true);
+		$this->access = $access;
+		$claims = $this->createMock(ClaimMapper::class);
+		$claims->method('updateWithVersion')->willReturn(true);
+		$this->claims = $claims;
+		$decisions = $this->createMock(StepDecisionMapper::class);
+		$decisions->expects($this->once())->method('deleteByClaim')->with(7);
+		$this->decisions = $decisions;
+		$chain = $this->createMock(ExpChainService::class);
+		$chain->expects($this->once())->method('append')
+			->with(7, 'reverted', 'root', 'approved', 'submitted', $this->anything());
+		$c = $this->claim('alice', 'approved');
+		$c->setDecidedAt(new \DateTime());
+		$c->setDecidedBy('boss');
+		$c->setDecisionNote('ok');
+		$c->setChainSnapshot(json_encode(['steps' => [['step_no' => 3],['step_no' => 2]]]));
+		$out = $this->makeSvc(['chain' => $chain])->revert($c, 'root', 'wrong chain');
+		$this->assertSame('submitted', $out->getStatus());
+		$this->assertNull($out->getDecidedAt());
+		$this->assertNull($out->getDecidedBy());
+		$this->assertNull($out->getDecisionNote());
+		$this->assertSame(2, $out->getCurrentStep()); // min of snapshot steps
+	}
 }

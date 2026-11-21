@@ -17,6 +17,9 @@ use OCP\IConfig;
 use OCP\IDBConnection;
 use OCP\Lock\ILockingProvider;
 use PHPUnit\Framework\MockObject\MockObject;
+use OCA\ExpenseCheck\Config\VendorPublicKey;
+use OCA\ExpenseCheck\Exception\CompanionException;
+use Psr\Log\NullLogger;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 

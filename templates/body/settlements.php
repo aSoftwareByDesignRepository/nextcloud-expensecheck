@@ -1,6 +1,6 @@
 <?php /** @var \OCP\IL10N $l */ ?>
 <section class="exp-surface" data-exp-view="settlements" aria-labelledby="exp-settle-h">
-	<h2 id="exp-settle-h"><?php p($l->t('Settlement queue')); ?></h2>
+	<h2 id="exp-settle-h"><?php p($l->t('Settlement queue')); ?> <span class="exp-list-head__count" id="exp-settle-count" hidden></span></h2>
 	<div id="exp-settle-list" class="exp-card-list" role="list" aria-live="polite"></div>
 	<form id="exp-settle-form" class="exp-actions" hidden>
 		<label class="exp-label" for="exp-paid-ref"><?php p($l->t('Payment reference')); ?></label>

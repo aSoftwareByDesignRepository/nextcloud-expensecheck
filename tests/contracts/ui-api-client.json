@@ -1,240 +1,509 @@
 {
-	"schemaVersion": 1,
-	"appId": "expensecheck",
-	"companionDir": "mobile/expensecheck",
-	"contracts": [
-		{
-			"id": "line-required-fields",
-			"param": "occurred_on",
-			"description": "Claim lines require line_type, occurred_on, category_id and money inputs (receipt: amount; rated: qty + rate_code). Server rejects with field-level VALIDATION_FAILED.",
-			"errorCodes": [
-				"VALIDATION_FAILED"
-			],
-			"server": [
-				{
-					"file": "lib/Service/ClaimLineService.php",
-					"needles": [
-						"line_type",
-						"occurred_on",
-						"category_id",
-						"rate_code"
-					]
-				}
-			],
-			"web": [
-				{
-					"file": "js/pages/app-views.js",
-					"needles": [
-						"line_type",
-						"occurred_on",
-						"category_id",
-						"rate_code",
-						"qty"
-					]
-				},
-				{
-					"file": "templates/body/claim-form.php",
-					"needles": [
-						"exp-lines",
-						"exp-add-line"
-					]
-				}
-			],
-			"mobile": [
-				{
-					"file": "src/api.ts",
-					"needles": [
-						"line_type",
-						"occurred_on",
-						"category_id"
-					]
-				}
-			]
-		},
-		{
-			"id": "line-allocations",
-			"param": "allocations",
-			"description": "Every line requires allocations resolving exactly to the line amount (percent sums to 100 or amounts sum to line total).",
-			"errorCodes": [
-				"ALLOCATION_SUM_MISMATCH",
-				"VALIDATION_FAILED"
-			],
-			"server": [
-				{
-					"file": "lib/Service/MoneyMathService.php",
-					"needles": [
-						"resolveAllocations",
-						"ALLOCATION_SUM_MISMATCH"
-					]
-				}
-			],
-			"web": [
-				{
-					"file": "js/pages/app-views.js",
-					"needles": [
-						"allocations",
-						"cost_center_id"
-					]
-				}
-			],
-			"mobile": [
-				{
-					"file": "src/api.ts",
-					"needles": [
-						"allocations",
-						"cost_center_id"
-					]
-				}
-			]
-		},
-		{
-			"id": "decision-note-required",
-			"param": "note",
-			"description": "Reject and request-changes decisions require a note (>=3 chars). Approve does not.",
-			"errorCodes": [
-				"VALIDATION_FAILED"
-			],
-			"server": [
-				{
-					"file": "lib/Service/ApprovalService.php",
-					"needles": [
-						"note",
-						"DECISION_REQUEST_CHANGES",
-						"DECISION_REJECT"
-					]
-				}
-			],
-			"web": [
-				{
-					"file": "js/pages/app-views.js",
-					"needles": [
-						"decision: 'changes_requested'",
-						"decision: 'rejected'",
-						"note.value"
-					]
-				}
-			],
-			"mobile": null
-		},
-		{
-			"id": "settlement-paid-ref",
-			"param": "paid_ref",
-			"description": "Settling a batch requires claim_ids and paid_ref.",
-			"errorCodes": [
-				"VALIDATION_FAILED"
-			],
-			"server": [
-				{
-					"file": "lib/Controller/SettlementApiController.php",
-					"needles": [
-						"claim_ids",
-						"paid_ref"
-					]
-				}
-			],
-			"web": [
-				{
-					"file": "js/pages/app-views.js",
-					"needles": [
-						"claim_ids",
-						"paid_ref",
-						"exp-paid-ref"
-					]
-				},
-				{
-					"file": "templates/body/settlements.php",
-					"needles": [
-						"exp-paid-ref"
-					]
-				}
-			],
-			"mobile": null
-		},
-		{
-			"id": "version-cas-fields",
-			"param": "version",
-			"description": "Submit/decide/settle mutations send the claim version for CAS; server fails closed on stale versions (VERSION_CONFLICT).",
-			"errorCodes": [
-				"VERSION_CONFLICT"
-			],
-			"server": [
-				{
-					"file": "lib/Db/ClaimMapper.php",
-					"needles": [
-						"updateWithVersion",
-						"expectedVersion"
-					]
-				}
-			],
-			"web": [
-				{
-					"file": "js/pages/app-views.js",
-					"needles": [
-						"version: ver"
-					]
-				}
-			],
-			"mobile": [
-				{
-					"file": "src/api.ts",
-					"needles": [
-						"version"
-					]
-				}
-			]
-		},
-		{
-			"id": "export-channel-format",
-			"param": "channel+format",
-			"description": "Batch export takes channel (reimbursable|nonreimbursable) + format (csv|ods); above export_async_rows the server returns 202 {request_id,token} — the client must poll /api/settlements/exports/{id} (EXPORT_NOT_READY→409) then GET the single-use download URL with the token.",
-			"errorCodes": [
-				"EXPORT_NOT_READY",
-				"VALIDATION_FAILED",
-				"NOT_FOUND"
-			],
-			"server": [
-				{
-					"file": "lib/Controller/SettlementApiController.php",
-					"needles": [
-						"channel",
-						"format",
-						"request_id",
-						"token",
-						"download"
-					]
-				},
-				{
-					"file": "lib/Service/ExportService.php",
-					"needles": [
-						"export_async_rows",
-						"EXPORT_NOT_READY",
-						"token_hash",
-						"expires_at"
-					]
-				}
-			],
-			"web": [
-				{
-					"file": "templates/body/settlement-detail.php",
-					"needles": [
-						"exp-export-format",
-						"exp-export-reimb",
-						"exp-export-nonreimb",
-						"data-channel"
-					]
-				},
-				{
-					"file": "js/pages/app-views.js",
-					"needles": [
-						"channel=",
-						"format=",
-						"request_id",
-						"download?token=",
-						"exp-export-format"
-					]
-				}
-			],
-			"mobile": null
-		}
-	]
+ "schemaVersion": 1,
+ "appId": "expensecheck",
+ "companionDir": "mobile/expensecheck",
+ "contracts": [
+  {
+   "id": "line-required-fields",
+   "param": "occurred_on",
+   "description": "Claim lines require line_type, occurred_on, category_id and money inputs (receipt: amount; rated: qty + rate_code). Server rejects with field-level VALIDATION_FAILED.",
+   "errorCodes": [
+    "VALIDATION_FAILED"
+   ],
+   "server": [
+    {
+     "file": "lib/Service/ClaimLineService.php",
+     "needles": [
+      "line_type",
+      "occurred_on",
+      "category_id",
+      "rate_code"
+     ]
+    }
+   ],
+   "web": [
+    {
+     "file": "js/pages/app-views.js",
+     "needles": [
+      "line_type",
+      "occurred_on",
+      "category_id",
+      "rate_code",
+      "qty"
+     ]
+    },
+    {
+     "file": "templates/body/new-claim.php",
+     "needles": [
+      "exp-lines",
+      "exp-add-line"
+     ]
+    }
+   ],
+   "mobile": [
+    {
+     "file": "src/api.ts",
+     "needles": [
+      "line_type",
+      "occurred_on",
+      "category_id"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "line-allocations",
+   "param": "allocations",
+   "description": "Every line requires allocations resolving exactly to the line amount (percent sums to 100 or amounts sum to line total).",
+   "errorCodes": [
+    "ALLOCATION_SUM_MISMATCH",
+    "VALIDATION_FAILED"
+   ],
+   "server": [
+    {
+     "file": "lib/Service/MoneyMathService.php",
+     "needles": [
+      "resolveAllocations",
+      "ALLOCATION_SUM_MISMATCH"
+     ]
+    }
+   ],
+   "web": [
+    {
+     "file": "js/pages/app-views.js",
+     "needles": [
+      "allocations",
+      "cost_center_id"
+     ]
+    }
+   ],
+   "mobile": [
+    {
+     "file": "src/api.ts",
+     "needles": [
+      "allocations",
+      "cost_center_id"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "decision-note-required",
+   "param": "note",
+   "description": "Reject and request-changes decisions require a note (>=3 chars). Approve does not.",
+   "errorCodes": [
+    "VALIDATION_FAILED"
+   ],
+   "server": [
+    {
+     "file": "lib/Service/ApprovalService.php",
+     "needles": [
+      "note",
+      "DECISION_REQUEST_CHANGES",
+      "DECISION_REJECT"
+     ]
+    }
+   ],
+   "web": [
+    {
+     "file": "js/pages/app-views.js",
+     "needles": [
+      "decision: 'changes_requested'",
+      "decision: 'rejected'",
+      "note.value"
+     ]
+    }
+   ],
+   "mobile": null
+  },
+  {
+   "id": "settlement-paid-ref",
+   "param": "paid_ref",
+   "description": "Settling a batch requires claim_ids and paid_ref.",
+   "errorCodes": [
+    "VALIDATION_FAILED"
+   ],
+   "server": [
+    {
+     "file": "lib/Controller/SettlementApiController.php",
+     "needles": [
+      "claim_ids",
+      "paid_ref"
+     ]
+    }
+   ],
+   "web": [
+    {
+     "file": "js/pages/app-views.js",
+     "needles": [
+      "claim_ids",
+      "paid_ref",
+      "exp-paid-ref"
+     ]
+    },
+    {
+     "file": "templates/body/settlements.php",
+     "needles": [
+      "exp-paid-ref"
+     ]
+    }
+   ],
+   "mobile": null
+  },
+  {
+   "id": "version-cas-fields",
+   "param": "version",
+   "description": "Submit/decide/settle mutations send the claim version for CAS; server fails closed on stale versions (VERSION_CONFLICT).",
+   "errorCodes": [
+    "VERSION_CONFLICT"
+   ],
+   "server": [
+    {
+     "file": "lib/Db/ClaimMapper.php",
+     "needles": [
+      "updateWithVersion",
+      "expectedVersion"
+     ]
+    }
+   ],
+   "web": [
+    {
+     "file": "js/pages/app-views.js",
+     "needles": [
+      "version: ver"
+     ]
+    }
+   ],
+   "mobile": [
+    {
+     "file": "src/api.ts",
+     "needles": [
+      "version"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "export-channel-format",
+   "param": "channel+format",
+   "description": "Batch export takes channel (reimbursable|nonreimbursable) + format (csv|ods); above export_async_rows the server returns 202 {request_id,token} — the client must poll /api/settlements/exports/{id} (EXPORT_NOT_READY→409) then GET the single-use download URL with the token.",
+   "errorCodes": [
+    "EXPORT_NOT_READY",
+    "VALIDATION_FAILED",
+    "NOT_FOUND"
+   ],
+   "server": [
+    {
+     "file": "lib/Controller/SettlementApiController.php",
+     "needles": [
+      "channel",
+      "format",
+      "request_id",
+      "token",
+      "download"
+     ]
+    },
+    {
+     "file": "lib/Service/ExportService.php",
+     "needles": [
+      "export_async_rows",
+      "EXPORT_NOT_READY",
+      "token_hash",
+      "expires_at"
+     ]
+    }
+   ],
+   "web": [
+    {
+     "file": "templates/body/settlement-detail.php",
+     "needles": [
+      "exp-export-format",
+      "exp-export-reimb",
+      "exp-export-nonreimb",
+      "data-channel"
+     ]
+    },
+    {
+     "file": "js/pages/app-views.js",
+     "needles": [
+      "channel=",
+      "format=",
+      "request_id",
+      "download?token=",
+      "exp-export-format"
+     ]
+    }
+   ],
+   "mobile": null
+  },
+  {
+   "id": "sibling-import-fields",
+   "param": "segment_id|chargeback_id + category_id + cost_center_id (+ rate_code for mileage)",
+   "description": "MC segment/charge-back import requires the sibling ref plus an explicit category and cost-center allocation (mileage additionally a rate_code) — the server re-derives money/dates from MobilityCheck and rejects missing picks with field-level VALIDATION_FAILED; duplicate sources yield ALREADY_CLAIMED.",
+   "errorCodes": [
+    "VALIDATION_FAILED",
+    "ALREADY_CLAIMED",
+    "SEGMENT_NOT_FOUND",
+    "CHARGEBACK_NOT_FOUND",
+    "MILEAGE_DISABLED",
+    "RATE_MISSING"
+   ],
+   "server": [
+    {
+     "file": "lib/Controller/IntegrationsApiController.php",
+     "needles": [
+      "segment_id",
+      "chargeback_id",
+      "category_id",
+      "cost_center_id",
+      "rate_code"
+     ]
+    }
+   ],
+   "web": [
+    {
+     "file": "js/pages/app-views.js",
+     "needles": [
+      "segment_id",
+      "chargeback_id",
+      "category_id",
+      "cost_center_id",
+      "rate_code"
+     ]
+    }
+   ],
+   "mobile": null,
+   "mobileReason": "Companion has no sibling-import surface — MC/AZC imports are web-only drafts (mobile cannot reach sibling apps' private APIs)."
+  },
+  {
+   "id": "claim-kind-azc-trip",
+   "param": "azc_trip_id (+ kind on ingress)",
+   "description": "Claim create/update accepts azc_trip_id (F21 AZC business-trip link, optional, own-draft only) and the F24 ingress accepts kind (standard|correction|deduction).",
+   "errorCodes": [
+    "VALIDATION_FAILED",
+    "CLAIM_NOT_FOUND"
+   ],
+   "server": [
+    {
+     "file": "lib/Service/ClaimLifecycleService.php",
+     "needles": [
+      "azc_trip_id",
+      "kind"
+     ]
+    }
+   ],
+   "web": [
+    {
+     "file": "templates/body/new-claim.php",
+     "needles": [
+      "azc_trip_id"
+     ]
+    },
+    {
+     "file": "js/pages/app-views.js",
+     "needles": [
+      "azc_trip_id"
+     ]
+    }
+   ],
+   "mobile": [
+    {
+     "file": "src/api.ts",
+     "needles": [
+      "azc_trip_id"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "line-distance-provenance",
+   "param": "distance_source|distance_estimated|source_app|source_ref",
+   "description": "Mileage lines carry provenance: distance_source enum (manual|gps|mc_segment), distance_estimated flag for sparse GPS fixes, and source_app/source_ref for sibling-sourced lines (server-validated enum, dedupe key).",
+   "errorCodes": [
+    "VALIDATION_FAILED",
+    "ALREADY_CLAIMED"
+   ],
+   "server": [
+    {
+     "file": "lib/Service/ClaimLineService.php",
+     "needles": [
+      "distance_source",
+      "distance_estimated",
+      "source_app",
+      "source_ref",
+      "DISTANCE_SOURCES"
+     ]
+    }
+   ],
+   "web": [
+    {
+     "file": "js/pages/app-views.js",
+     "needles": [
+      "rate_code",
+      "qty"
+     ]
+    }
+   ],
+   "mobile": [
+    {
+     "file": "src/api.ts",
+     "needles": [
+      "distance_source",
+      "distance_estimated",
+      "source_app",
+      "source_ref"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "line-attendees-gate",
+   "param": "attendees",
+   "description": "Categories flagged requires_attendees demand an attendees string on every line of that category (Bewirtung-class, MH-06c). Server rejects missing values with field-level VALIDATION_FAILED (attendees: required).",
+   "errorCodes": [
+    "VALIDATION_FAILED"
+   ],
+   "server": [
+    {
+     "file": "lib/Service/ClaimLineService.php",
+     "needles": [
+      "requires_attendees",
+      "attendees",
+      "required"
+     ]
+    }
+   ],
+   "web": [
+    {
+     "file": "js/pages/app-views.js",
+     "needles": [
+      "attendees",
+      "requires_attendees",
+      "attIn.required"
+     ]
+    }
+   ],
+   "mobile": [
+    {
+     "file": "src/screens/NewClaimScreen.tsx",
+     "needles": [
+      "attendees",
+      "requires_attendees",
+      "needsAtt"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "line-occasion-gate",
+   "param": "occasion",
+   "description": "Categories flagged requires_attendees demand an occasion string alongside attendees (MH-06c Bewirtung-class compliance pair). Server rejects missing values with field-level VALIDATION_FAILED (occasion: required).",
+   "errorCodes": [
+    "VALIDATION_FAILED"
+   ],
+   "server": [
+    {
+     "file": "lib/Service/ClaimLineService.php",
+     "needles": [
+      "requires_attendees",
+      "occasion",
+      "required"
+     ]
+    }
+   ],
+   "web": [
+    {
+     "file": "js/pages/app-views.js",
+     "needles": [
+      "occasion",
+      "requires_attendees",
+      "occIn.required"
+     ]
+    }
+   ],
+   "mobile": [
+    {
+     "file": "src/screens/NewClaimScreen.tsx",
+     "needles": [
+      "occasion",
+      "needsAtt",
+      "setOccasion"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "line-justification-gate",
+   "param": "justification",
+   "description": "Categories with justification_threshold_minor require a justification of >= justification_min_length chars once the line amount crosses the threshold (JUSTIFICATION_REQUIRED, 422). Both clients gate on the same threshold from the lookups payload.",
+   "errorCodes": [
+    "JUSTIFICATION_REQUIRED"
+   ],
+   "server": [
+    {
+     "file": "lib/Service/ClaimLineService.php",
+     "needles": [
+      "justification",
+      "JUSTIFICATION_REQUIRED",
+      "getJustificationMinLength"
+     ]
+    }
+   ],
+   "web": [
+    {
+     "file": "js/pages/app-views.js",
+     "needles": [
+      "justification",
+      "justification_threshold_minor",
+      "justIn.required"
+     ]
+    }
+   ],
+   "mobile": [
+    {
+     "file": "src/screens/NewClaimScreen.tsx",
+     "needles": [
+      "justification",
+      "justification_threshold_minor",
+      "needsJust"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "line-allow-lines-fence",
+   "param": "line_type|category_id",
+   "description": "Each category's allow_lines fences which line types it accepts; the server rejects others with line_type:not_allowed. Both clients filter the category pickers by the chosen line type.",
+   "errorCodes": [
+    "VALIDATION_FAILED"
+   ],
+   "server": [
+    {
+     "file": "lib/Service/ClaimLineService.php",
+     "needles": [
+      "allow_lines",
+      "not_allowed"
+     ]
+    }
+   ],
+   "web": [
+    {
+     "file": "js/pages/app-views.js",
+     "needles": [
+      "allow_lines",
+      "refillCats"
+     ]
+    }
+   ],
+   "mobile": [
+    {
+     "file": "src/screens/NewClaimScreen.tsx",
+     "needles": [
+      "allow_lines",
+      "catsForType"
+     ]
+    }
+   ]
+  }
+ ]
 }

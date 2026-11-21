@@ -115,7 +115,16 @@ class ClaimLifecycleService
 		return false;
 	}
 
-	public function createDraft(string $uid, string $title, string $currency, ?string $requestKey = null): Claim
+	/** Claim kinds — 'standard' claims may never carry negative lines;
+	 *  'correction' (edge 20 storno, references corrects_claim_no) and
+	 *  'deduction' (F26 org-owed flow, line source_app/ref carries the
+	 *  sibling provenance) may. */
+	public const KINDS = ['standard', 'correction', 'deduction'];
+
+	/**
+	 * @param array{kind?:string,corrects_claim_no?:?string,azc_trip_id?:?int} $opts
+	 */
+	public function createDraft(string $uid, string $title, string $currency, ?string $requestKey = null, array $opts = []): Claim
 	{
 		$fields = [];
 		if ($title === '' || mb_strlen($title) > 191) {
@@ -124,9 +133,24 @@ class ClaimLifecycleService
 		if (!preg_match('/^[A-Z]{3}$/', $currency)) {
 			$fields['currency'] = 'invalid';
 		}
+		$kind = (string)($opts['kind'] ?? 'standard');
+		if (!in_array($kind, self::KINDS, true)) {
+			$fields['kind'] = 'invalid';
+		}
+		$corrects = $opts['corrects_claim_no'] ?? null;
+		$corrects = $corrects !== null ? mb_substr(trim((string)$corrects), 0, 16) : null;
+		$corrects = $corrects === '' ? null : $corrects;
+		if ($kind === 'correction' && $corrects === null) {
+			// Edge 20: a correction claim is only explicit when it names the
+			// claim it corrects — without the reference it is a plain claim.
+			$fields['corrects_claim_no'] = 'required';
+		} elseif ($corrects !== null && $this->claims->findByClaimNo($corrects) === null) {
+			$fields['corrects_claim_no'] = 'unknown';
+		}
 		if ($fields !== []) {
 			throw new ValidationException($fields);
 		}
+		$azcTripId = isset($opts['azc_trip_id']) && (int)$opts['azc_trip_id'] > 0 ? (int)$opts['azc_trip_id'] : null;
 		$now = $this->timeFactory->getDateTime();
 		$claim = new Claim();
 		$claim->setClaimNo($this->numbers->next());
@@ -135,6 +159,9 @@ class ClaimLifecycleService
 		$claim->setTitle($title);
 		$claim->setCurrency($currency);
 		$claim->setFxRate('1.000000');
+		$claim->setKind($kind);
+		$claim->setCorrectsClaimNo($corrects);
+		$claim->setAzcTripId($azcTripId);
 		$claim->setVersion(1);
 		$claim->setRequestKey($requestKey);
 		$claim->setCreatedAt($now);

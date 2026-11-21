@@ -1,0 +1,17 @@
+{
+    "name": "expensecheck",
+    "version": "1.0.2",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "e2e:prep": "bash scripts/e2e-prep.sh",
+        "e2e": "playwright test --workers=1",
+        "test:a11y": "playwright test tests/e2e/a11y-smoke.spec.js --workers=1",
+        "test:e2e:smoke": "playwright test tests/e2e/expense-smoke.spec.js --workers=1",
+        "test:matrix": "playwright test -c e2e/playwright.screenshot-matrix.config.mjs --workers=1"
+    },
+    "devDependencies": {
+        "@axe-core/playwright": "4.10.2",
+        "@playwright/test": "1.62.0"
+    }
+}

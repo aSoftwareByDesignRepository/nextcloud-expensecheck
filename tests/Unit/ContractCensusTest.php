@@ -57,6 +57,10 @@ final class ContractCensusTest extends TestCase
 		'CLAIM_EMPTY', 'CLAIM_NOT_CLONEABLE', 'CLAIM_NOT_SETTLEABLE',
 		'CLAIM_READ_ONLY', 'PERIOD_BLOCKED', 'PERIOD_NOT_CLOSED',
 		'DUPLICATE_CODE', 'SEAT_LIMIT_EXCEEDED', 'STORAGE_DENIED',
+		// F25/F26 integration domain codes:
+		'SEGMENT_NOT_FOUND', 'CHARGEBACK_NOT_FOUND',
+		// F25 Mode-A guard — EXP mileage disabled while MC settles km:
+		'MILEAGE_DISABLED',
 		'TOO_MANY_FILES', 'LICENSE_INVALID',
 		// settings normaliser + transfer hooks
 		'INVALID_INT', 'INVALID_ENUM', 'INVALID_CURRENCY',
@@ -88,7 +92,10 @@ final class ContractCensusTest extends TestCase
 			'version', 'created_at', 'updated_at', 'request_key',
 			// F22 billed marker (Version1001) — §D amendment pending:
 			// ExpBillableReadFacade needs a durable invoiced stamp.
-			'billed_at', 'billed_ref'],
+			'billed_at', 'billed_ref',
+			// §D amendment (Version1003): edge-20 correction claims + F26
+			// deduction drafts need a durable kind + corrected-claim link.
+			'kind', 'corrects_claim_no'],
 		'exp_claim_lines' => ['id', 'claim_id', 'line_type', 'occurred_on',
 			'category_id', 'merchant', 'description', 'amount_minor',
 			'tax_minor', 'tax_rate', 'foreign_amount_minor',

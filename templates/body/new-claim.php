@@ -16,6 +16,23 @@
 			<input class="exp-input" id="exp-f-currency" name="currency" value="EUR" required maxlength="3" pattern="[A-Z]{3}">
 			<p class="exp-field-error" data-field-error="currency" hidden></p>
 		</div>
+		<div class="exp-field" id="exp-f-trip-wrap" hidden>
+			<label class="exp-label" for="exp-f-azc-trip"><?php p($l->t('Business trip (ArbeitszeitCheck)')); ?></label>
+			<input class="exp-input" id="exp-f-azc-trip" name="azc_trip_id" type="number" min="1" step="1" inputmode="numeric" aria-describedby="exp-f-trip-h">
+			<p class="exp-hint" id="exp-f-trip-h"><?php p($l->t('Optional — link this claim to an approved business trip.')); ?>
+				<a id="exp-f-trip-link" href="#" target="_blank" rel="noopener noreferrer"><?php p($l->t('Open your trips')); ?></a></p>
+		</div>
+		<div id="exp-integrations" class="exp-integrations" hidden>
+			<h3 class="exp-integrations__h"><?php p($l->t('From other apps')); ?></h3>
+			<div id="exp-integrations-seg" hidden>
+				<p class="exp-hint"><?php p($l->t('Trips recorded in MobilityCheck — pick one to create a mileage claim draft.')); ?></p>
+				<div id="exp-integrations-seg-list" role="list"></div>
+			</div>
+			<div id="exp-integrations-cb" hidden>
+				<p class="exp-hint"><?php p($l->t('Confirmed MobilityCheck charge-backs — create a deduction claim you still review and submit.')); ?></p>
+				<div id="exp-integrations-cb-list" role="list"></div>
+			</div>
+		</div>
 		<fieldset class="exp-fieldset">
 			<legend><?php p($l->t('Lines')); ?></legend>
 			<div id="exp-lines" class="exp-lines"></div>

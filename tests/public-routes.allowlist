@@ -42,6 +42,12 @@ claimApi#uploadAttachment|POST|/api/claims/{id}/attachments|
 claimApi#withdraw|POST|/api/claims/{id}/withdraw|
 inboxApi#list|GET|/api/inbox|
 ingressApi#createDraft|POST|/api/ingress/drafts|
+integrationsApi#azcDoorConfig|GET|/api/integrations/azc/door-config|
+integrationsApi#claimMcChargeback|POST|/api/integrations/mc/chargebacks/claim|
+integrationsApi#claimMcSegment|POST|/api/integrations/mc/segments/claim|
+integrationsApi#mcChargebacks|GET|/api/integrations/mc/chargebacks|
+integrationsApi#mcSegments|GET|/api/integrations/mc/segments|
+integrationsApi#summary|GET|/api/integrations/summary|
 license#apply|POST|/api/license|
 license#assignSeat|POST|/api/license/seats|
 license#remove|DELETE|/api/license|
@@ -102,3 +108,6 @@ transferApi#export|POST|/api/admin/transfer/export|
 transferApi#preview|POST|/api/admin/transfer/preview|
 transferApi#reconcile|POST|/api/admin/transfer/reconcile|
 transferApi#status|GET|/api/admin/transfer/status|
+reportsApi#summary|GET|/api/reports/summary|
+onboardingApi#show|GET|/api/onboarding|
+onboardingApi#dismiss|POST|/api/onboarding/dismiss|

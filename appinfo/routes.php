@@ -169,5 +169,16 @@ return [
 
 		// ── F24 sibling draft-ingress (capability-advertised) ───────
 		['name' => 'ingressApi#createDraft', 'url' => '/api/ingress/drafts', 'verb' => 'POST'],
+
+		// ── Suite integrations (F21/F25/F26, spec §12.2/§12.4c) ─────
+		['name' => 'integrationsApi#summary', 'url' => '/api/integrations/summary', 'verb' => 'GET'],
+		['name' => 'reportsApi#summary', 'url' => '/api/reports/summary', 'verb' => 'GET'],
+		['name' => 'onboardingApi#show', 'url' => '/api/onboarding', 'verb' => 'GET'],
+		['name' => 'onboardingApi#dismiss', 'url' => '/api/onboarding/dismiss', 'verb' => 'POST'],
+		['name' => 'integrationsApi#mcSegments', 'url' => '/api/integrations/mc/segments', 'verb' => 'GET'],
+		['name' => 'integrationsApi#claimMcSegment', 'url' => '/api/integrations/mc/segments/claim', 'verb' => 'POST'],
+		['name' => 'integrationsApi#mcChargebacks', 'url' => '/api/integrations/mc/chargebacks', 'verb' => 'GET'],
+		['name' => 'integrationsApi#claimMcChargeback', 'url' => '/api/integrations/mc/chargebacks/claim', 'verb' => 'POST'],
+		['name' => 'integrationsApi#azcDoorConfig', 'url' => '/api/integrations/azc/door-config', 'verb' => 'GET'],
 	],
 ];

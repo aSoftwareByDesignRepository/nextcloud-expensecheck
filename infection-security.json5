@@ -3,9 +3,37 @@
     // hash-chained journal, and the approval/state-machine guards.
     // Run: make mutation  (docker php:8.3-cli + pcov + infection.phar)
     "$schema": "https://raw.githubusercontent.com/infection/infection/0.29.14/resources/schema.json",
+    // Scoped to the security-critical subset the comment names: money
+    // math, the hash-chained journal, the claim state machine + dedupe,
+    // approval/settlement guards, and the sibling-integration bridges.
     "source": {
         "directories": [
             "lib/Service"
+        ],
+        "excludes": [
+            "AttachmentService.php",
+            "AuditLogService.php",
+            "CategoryService.php",
+            "ChainRoutingService.php",
+            "ClaimNumberService.php",
+            "CsrfTokenValidator.php",
+            "CsvExporter.php",
+            "DigestMailService.php",
+            "ErasureService.php",
+            "ExportService.php",
+            "IconCatalog.php",
+            "LookupService.php",
+            "NotificationService.php",
+            "OdsBuilder.php",
+            "OrgResolutionService.php",
+            "PostCommitEffectQueue.php",
+            "RateCatalogService.php",
+            "SettingsSectionCatalog.php",
+            "SettingsService.php",
+            "TransferSnapshotService.php",
+            "UpgradeBackupCatalog.php",
+            "UpgradeBackupIntegrity.php",
+            "UpgradeBackupService.php"
         ]
     },
     "timeout": 30,

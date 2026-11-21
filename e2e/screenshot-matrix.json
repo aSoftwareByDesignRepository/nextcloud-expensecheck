@@ -1,0 +1,174 @@
+{
+  "prefix": "exp",
+  "outDir": "craft/web",
+  "viewports": [
+    {
+      "name": "mobile",
+      "width": 320,
+      "height": 800
+    },
+    {
+      "name": "tablet",
+      "width": 768,
+      "height": 800
+    },
+    {
+      "name": "desktop",
+      "width": 1280,
+      "height": 800
+    }
+  ],
+  "surfaces": [
+    {
+      "id": "index",
+      "path": "/",
+      "ready": "section[data-exp-view='index']",
+      "states": [
+        "populated"
+      ],
+      "dark": true
+    },
+    {
+      "id": "claims",
+      "path": "/claims",
+      "ready": "section[data-exp-view='claims']",
+      "listSel": "#exp-claims-list",
+      "states": [
+        "populated",
+        "empty"
+      ],
+      "emptyDriver": "statusFilter",
+      "filterSel": "[data-exp-filter=\"status\"]",
+      "dark": true
+    },
+    {
+      "id": "claim-new",
+      "path": "/claims/new",
+      "ready": "section[data-exp-view='claim-form']",
+      "states": [
+        "current"
+      ]
+    },
+    {
+      "id": "claim-detail",
+      "path": "/claims/{claimId}",
+      "ready": "section[data-exp-view='claim-detail']",
+      "states": [
+        "populated"
+      ]
+    },
+    {
+      "id": "inbox",
+      "path": "/inbox",
+      "ready": "section[data-exp-view='inbox']",
+      "listSel": "#exp-inbox-list",
+      "states": [
+        "populated"
+      ]
+    },
+    {
+      "id": "receipts",
+      "path": "/receipts",
+      "ready": "section[data-exp-view='receipts']",
+      "listSel": "#exp-receipts-list",
+      "states": [
+        "populated"
+      ]
+    },
+    {
+      "id": "all-claims",
+      "path": "/all",
+      "ready": "section[data-exp-view='all']",
+      "listSel": "#exp-all-list",
+      "states": [
+        "populated"
+      ]
+    },
+    {
+      "id": "settlements",
+      "path": "/settlements",
+      "ready": "section[data-exp-view='settlements']",
+      "listSel": "#exp-batches-list",
+      "states": [
+        "populated"
+      ]
+    },
+    {
+      "id": "settlement-detail",
+      "path": "/settlements/{batchId}",
+      "ready": "section[data-exp-view='settlement-detail']",
+      "states": [
+        "populated"
+      ]
+    },
+    {
+      "id": "reports",
+      "path": "/reports",
+      "ready": "section[data-exp-view='reports']",
+      "states": [
+        "current"
+      ]
+    },
+    {
+      "id": "categories",
+      "path": "/categories",
+      "ready": "section[data-exp-view='admin-categories']",
+      "listSel": "#exp-cat-list",
+      "states": [
+        "populated"
+      ]
+    },
+    {
+      "id": "rates",
+      "path": "/rates",
+      "ready": "section[data-exp-view='admin-rates']",
+      "listSel": "#exp-rates-list",
+      "states": [
+        "populated"
+      ]
+    },
+    {
+      "id": "cost-centers",
+      "path": "/cost-centers",
+      "ready": "section[data-exp-view='admin-cost-centers']",
+      "listSel": "#exp-cc-list",
+      "states": [
+        "populated"
+      ]
+    },
+    {
+      "id": "chains",
+      "path": "/chains",
+      "ready": "section[data-exp-view='admin-chains']",
+      "listSel": "#exp-chains-list",
+      "states": [
+        "populated"
+      ]
+    },
+    {
+      "id": "settings",
+      "path": "/settings",
+      "ready": "section[data-exp-view='settings']",
+      "states": [
+        "current"
+      ]
+    },
+    {
+      "id": "settings-transfer",
+      "path": "/settings/transfer",
+      "ready": "section[data-exp-view='settings']",
+      "states": [
+        "current"
+      ]
+    },
+    {
+      "id": "license",
+      "path": "/license",
+      "ready": "section[data-exp-view='license']",
+      "states": [
+        "current"
+      ],
+      "dark": true
+    }
+  ]
+}

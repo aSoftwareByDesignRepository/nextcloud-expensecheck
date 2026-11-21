@@ -66,6 +66,11 @@ class IngressApiController extends AApiController
 			$this->str($b, 'title', 191) !== '' ? $this->str($b, 'title', 191) : 'Imported claim',
 			strtoupper($this->str($b, 'currency', 3)) ?: 'EUR',
 			$requestKey !== '' ? $this->uid() . ':ingress:' . $requestKey : null,
+			[
+				'kind' => (string)($b['kind'] ?? 'standard'),
+				'corrects_claim_no' => $b['corrects_claim_no'] ?? null,
+				'azc_trip_id' => isset($b['azc_trip_id']) ? (int)$b['azc_trip_id'] : null,
+			],
 		);
 		foreach ($lines as $lp) {
 			$lp = (array)$lp;

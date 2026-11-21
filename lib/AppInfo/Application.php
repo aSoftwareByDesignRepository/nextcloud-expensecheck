@@ -9,6 +9,8 @@ use OCP\Files\IRootFolder;
 use OCP\App\IAppManager;
 use OCA\ExpenseCheck\Service\UpgradeBackupService;
 use OCA\ExpenseCheck\Repair\BackupBeforeUpdate;
+use OCA\ExpenseCheck\Repair\EnsureExpenseCheckSchema;
+use OCA\ExpenseCheck\Repair\UninstallDropTables;
 use OCA\ExpenseCheck\Middleware\ApiExceptionMiddleware;
 use OCA\ExpenseCheck\Middleware\AppAccessMiddleware;
 use OCA\ExpenseCheck\Middleware\ClientLicenseMiddleware;
@@ -131,6 +133,22 @@ class Application extends App implements IBootstrap
 		$context->registerService(BackupBeforeUpdate::class, function ($c): BackupBeforeUpdate {
 			return new BackupBeforeUpdate(
 				$c->get(UpgradeBackupService::class),
+			);
+		});
+
+		$context->registerService(EnsureExpenseCheckSchema::class, function ($c): EnsureExpenseCheckSchema {
+			return new EnsureExpenseCheckSchema(
+				$c->get(\OCP\IDBConnection::class),
+				$c->get(\OCP\IConfig::class),
+				$c->get(\OCP\AppFramework\Utility\ITimeFactory::class),
+			);
+		});
+
+		$context->registerService(UninstallDropTables::class, function ($c): UninstallDropTables {
+			return new UninstallDropTables(
+				$c->get(\OCP\IDBConnection::class),
+				$c->get(\OCP\IConfig::class),
+				$c->get(IRootFolder::class),
 			);
 		});
 

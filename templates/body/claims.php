@@ -12,6 +12,7 @@
 			<option value="rejected"><?php p($l->t('Rejected')); ?></option>
 			<option value="settled"><?php p($l->t('Settled')); ?></option>
 		</select>
+		<span class="exp-list-head__count" id="exp-claims-count" hidden></span>
 	</div>
 	<div id="exp-claims-list" class="exp-card-list" role="list" aria-live="polite"></div>
 	<p class="exp-empty" id="exp-claims-empty" hidden><?php p($l->t('No claims yet — create your first one.')); ?></p>

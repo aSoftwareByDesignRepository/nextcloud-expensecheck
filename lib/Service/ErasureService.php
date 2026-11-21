@@ -129,6 +129,14 @@ class ErasureService {
 				'exp_periods' => ['closed_by'],
 				'exp_settlement_batches' => ['created_by'],
 				'exp_manager_map' => ['user_id', 'created_by'],
+				// The target acted on OTHER people's claims too — approver
+				// events, delegate-uploaded attachments, seats they assigned,
+				// delegations they created. Those rows are someone else's
+				// financial record and must survive, but the uid must not.
+				'exp_claim_events' => ['actor'],
+				'exp_attachments' => ['uploaded_by'],
+				'exp_mobile_seats' => ['assigned_by'],
+				'exp_delegates' => ['created_by'],
 			] as $table => $cols) {
 				foreach ($cols as $col) {
 					$u = $this->db->getQueryBuilder();

@@ -18,26 +18,6 @@ class MoneyMathService
 	private const QTY_SCALE = 100;         // distance_km/days/quantity DECIMAL(…,2)
 
 	/**
-	 * Parse a decimal string ("12.34") into minor units without float drift.
-	 * Negative allowed only for correction claims — caller decides legality.
-	 */
-	public static function decimalToMinor(string $decimal): int
-	{
-		$decimal = trim($decimal);
-		if ($decimal === '' || !preg_match('/^-?\d{1,12}(\.\d{1,6})?$/', $decimal)) {
-			throw new ValidationException(['amount' => 'invalid_amount']);
-		}
-		$neg = str_starts_with($decimal, '-');
-		$decimal = ltrim($decimal, '-');
-		[$int, $frac] = array_pad(explode('.', $decimal, 2), 2, '0');
-		$frac = substr($frac . '000000', 0, 6);
-		$minor = (int)$int * 1000000 + (int)$frac;
-		// Caller supplies its own scale — this helper returns micro-minor (1e-6 unit)
-		// only when asked; default contract is minor units with ≤2 fraction digits.
-		return $neg ? -$minor : $minor;
-	}
-
-	/**
 	 * Minor units from a decimal string with at most `decimals` fraction
 	 * digits (default 2 = cents). Rejects anything else — no silent rounding
 	 * on input.

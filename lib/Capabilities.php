@@ -63,6 +63,17 @@ class Capabilities implements ICapability
 					'version' => 1,
 					'ingressEndpoint' => '/api/ingress/drafts',
 				],
+				// F25/F26 consumers discover the surfaces here — never by
+				// probing routes. F21 trip-linking is client-side via AZC's
+				// own per-user API.
+				'check:mc-segments' => [
+					'version' => 1,
+					'endpoint' => '/api/integrations/mc/segments',
+				],
+				'check:mc-chargebacks' => [
+					'version' => 1,
+					'endpoint' => '/api/integrations/mc/chargebacks',
+				],
 				'mobile' => [
 					'minAppVersion' => '1.0.0',
 					'bootstrapEndpoint' => '/api/mobile/bootstrap',

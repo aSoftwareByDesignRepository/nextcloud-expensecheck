@@ -9,6 +9,7 @@ use OCA\ExpenseCheck\Db\AttachmentMapper;
 use OCA\ExpenseCheck\Db\Claim;
 use OCA\ExpenseCheck\Db\ClaimAllocationMapper;
 use OCA\ExpenseCheck\Db\ClaimEvent;
+use OCA\ExpenseCheck\Db\ClaimEventMapper;
 use OCA\ExpenseCheck\Db\ClaimLine;
 use OCA\ExpenseCheck\Db\ClaimLineMapper;
 use OCA\ExpenseCheck\Db\StepDecisionMapper;
@@ -24,6 +25,7 @@ class ClaimSerializer
 		private readonly ClaimAllocationMapper $allocations,
 		private readonly AttachmentMapper $attachments,
 		private readonly StepDecisionMapper $decisions,
+		private readonly ClaimEventMapper $events,
 	) {
 	}
 
@@ -40,6 +42,9 @@ class ClaimSerializer
 			'reimbursable_minor' => $c->getReimbursableTotalMinor(),
 			'nonreimbursable_minor' => $c->getNonreimbursableTotalMinor(),
 			'owner' => $c->getUserId(),
+			'kind' => $c->getKind(),
+			'corrects_claim_no' => $c->getCorrectsClaimNo(),
+			'azc_trip_id' => $c->getAzcTripId(),
 			'submitted_at' => $c->getSubmittedAt()?->format('Y-m-d H:i:s'),
 			'decided_at' => $c->getDecidedAt()?->format('Y-m-d H:i:s'),
 			'decided_by' => $c->getDecidedBy(),
@@ -70,6 +75,7 @@ class ClaimSerializer
 			'note' => $d->getNote(),
 			'created_at' => $d->getCreatedAt()?->format('Y-m-d H:i:s'),
 		], $this->decisions->findByClaim($c->getId()));
+		$out['events'] = array_map([self::class, 'eventDto'], $this->events->findAllForClaim($c->getId()));
 		return $out;
 	}
 

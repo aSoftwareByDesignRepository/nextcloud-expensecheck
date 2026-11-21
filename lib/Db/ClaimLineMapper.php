@@ -21,6 +21,19 @@ class ClaimLineMapper extends QBMapper
 	}
 
 	/** @return list<ClaimLine> */
+	public function findByClaims(array $claimIds): array
+	{
+		if ($claimIds === []) {
+			return [];
+		}
+		$qb = $this->db->getQueryBuilder();
+		$qb->select('*')->from($this->getTableName())
+			->where($qb->expr()->in('claim_id', $qb->createNamedParameter($claimIds, \OCP\DB\QueryBuilder\IQueryBuilder::PARAM_INT_ARRAY)))
+			->orderBy('claim_id', 'ASC')->addOrderBy('sort', 'ASC');
+		return $this->findEntities($qb);
+	}
+
+	/** @return list<ClaimLine> */
 	public function findByClaim(int $claimId): array
 	{
 		$qb = $this->db->getQueryBuilder();
@@ -52,6 +65,27 @@ class ClaimLineMapper extends QBMapper
 		return $this->findEntities($qb);
 	}
 
+
+	/**
+	 * Which claim already consumed a sibling source link? (edge 37)
+	 * @return array{claim_id:int,line_id:int,claim_no:string}|null
+	 */
+	public function findClaimBySource(string $sourceApp, string $sourceRef): ?array
+	{
+		$qb = $this->db->getQueryBuilder();
+		$qb->select('l.id', 'l.claim_id', 'c.claim_no')
+			->from($this->getTableName(), 'l')
+			->innerJoin('l', 'exp_claims', 'c', $qb->expr()->eq('l.claim_id', 'c.id'))
+			->where($qb->expr()->eq('l.source_app', $qb->createNamedParameter($sourceApp)))
+			->andWhere($qb->expr()->eq('l.source_ref', $qb->createNamedParameter($sourceRef)))
+			->setMaxResults(1);
+		$row = $qb->executeQuery()->fetch();
+		return $row === false ? null : [
+			'claim_id' => (int)$row['claim_id'],
+			'line_id' => (int)$row['id'],
+			'claim_no' => (string)$row['claim_no'],
+		];
+	}
 
 	public function findById(int $id)
 	{

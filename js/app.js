@@ -64,7 +64,8 @@
 	/* ---------- API ---------- */
 
 	function ApiError(payload, status) {
-		this.error = (payload && payload.error) || 'SERVER_ERROR';
+		this.code = (payload && (payload.error_code || payload.error)) || 'SERVER_ERROR';
+		this.error = this.code;
 		this.message = (payload && payload.message) || t('Unexpected error');
 		this.fields = (payload && payload.fields) || {};
 		this.status = status || 0;
@@ -183,7 +184,12 @@
 		if (e && e.fields && Object.keys(e.fields).length && window.CheckFieldErrors) {
 			CheckFieldErrors.markValidationFields(e.fields);
 		}
-		toast('error', (e && e.message) ? e.message : t('Something went wrong.'));
+		// §9.2: known codes get the contracted sentence + recovery, localized.
+		var copy = (e && window.EXPErrorCopy) ? EXPErrorCopy.describe(e.code) : null;
+		var msg = copy
+			? copy.sentence + ' ' + copy.recovery
+			: ((e && e.message) ? e.message : t('Something went wrong.'));
+		toast('error', msg);
 	}
 
 	/**

@@ -65,6 +65,10 @@ use OCP\AppFramework\Db\Entity;
  * @method void setBilledAt(?\DateTime $v)
  * @method ?string getBilledRef()
  * @method void setBilledRef(?string $v)
+ * @method string getKind()
+ * @method void setKind(string $v)
+ * @method ?string getCorrectsClaimNo()
+ * @method void setCorrectsClaimNo(?string $v)
  * @method int getVersion()
  * @method void setVersion(int $v)
  * @method \DateTime getCreatedAt()
@@ -105,6 +109,8 @@ class Claim extends Entity
 	protected ?int $batchId = null;
 	protected ?\DateTime $billedAt = null;
 	protected ?string $billedRef = null;
+	protected string $kind = 'standard';
+	protected ?string $correctsClaimNo = null;
 	protected int $version = 0;
 	protected ?\DateTime $createdAt = null;
 	protected ?\DateTime $updatedAt = null;
@@ -141,6 +147,8 @@ class Claim extends Entity
 		$this->addType('batchId', 'integer');
 		$this->addType('billedAt', 'datetime');
 		$this->addType('billedRef', 'string');
+		$this->addType('kind', 'string');
+		$this->addType('correctsClaimNo', 'string');
 		$this->addType('version', 'integer');
 		$this->addType('createdAt', 'datetime');
 		$this->addType('updatedAt', 'datetime');

@@ -38,6 +38,18 @@ class ClaimMapper extends QBMapper
 		}
 	}
 
+	public function findByClaimNo(string $claimNo): ?Claim
+	{
+		$qb = $this->db->getQueryBuilder();
+		$qb->select('*')->from($this->getTableName())
+			->where($qb->expr()->eq('claim_no', $qb->createNamedParameter($claimNo)));
+		try {
+			return $this->findEntity($qb);
+		} catch (DoesNotExistException) {
+			return null;
+		}
+	}
+
 	public function findByRequestKey(string $key): ?Claim
 	{
 		$qb = $this->db->getQueryBuilder();
@@ -128,10 +140,24 @@ class ClaimMapper extends QBMapper
 			->set('settled_by', $qb->createNamedParameter($claim->getSettledBy()))
 			->set('settlement_ref', $qb->createNamedParameter($claim->getSettlementRef()))
 			->set('batch_id', $qb->createNamedParameter($claim->getBatchId(), IQueryBuilder::PARAM_INT))
+			->set('kind', $qb->createNamedParameter($claim->getKind()))
+			->set('corrects_claim_no', $qb->createNamedParameter($claim->getCorrectsClaimNo()))
 			->set('version', $qb->createNamedParameter($claim->getVersion(), IQueryBuilder::PARAM_INT))
 			->set('updated_at', $qb->createNamedParameter($claim->getUpdatedAt()->format('Y-m-d H:i:s')))
 			->where($qb->expr()->eq('id', $qb->createNamedParameter($claim->getId(), IQueryBuilder::PARAM_INT)))
 			->andWhere($qb->expr()->eq('version', $qb->createNamedParameter($expectedVersion, IQueryBuilder::PARAM_INT)));
 		return $qb->executeStatement() === 1;
+	}
+
+	/** Submitted claims in a time window — reports aggregation (NH-28). */
+	public function findSubmittedBetween(\DateTimeInterface $from, \DateTimeInterface $to): array
+	{
+		$qb = $this->db->getQueryBuilder();
+		$qb->select('*')->from($this->getTableName())
+			->where($qb->expr()->isNotNull('submitted_at'))
+			->andWhere($qb->expr()->gte('submitted_at', $qb->createNamedParameter($from->format('Y-m-d H:i:s'))))
+			->andWhere($qb->expr()->lt('submitted_at', $qb->createNamedParameter($to->format('Y-m-d H:i:s'))))
+			->orderBy('id', 'DESC');
+		return $this->findEntities($qb);
 	}
 }

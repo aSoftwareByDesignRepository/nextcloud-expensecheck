@@ -90,6 +90,11 @@ class ClaimApiController extends AApiController
 				$this->str($b, 'title', 191),
 				strtoupper($this->str($b, 'currency', 3)) ?: 'EUR',
 				$requestKey !== '' ? $this->uid() . ':' . $requestKey : null,
+				[
+					'kind' => (string)($b['kind'] ?? 'standard'),
+					'corrects_claim_no' => $b['corrects_claim_no'] ?? null,
+					'azc_trip_id' => isset($b['azc_trip_id']) ? (int)$b['azc_trip_id'] : null,
+				],
 			);
 			// Lines may be supplied at create-time (web form + mobile companion
 			// both send them atomically). Same validation path as line writes.
@@ -105,6 +110,21 @@ class ClaimApiController extends AApiController
 			$this->db->commit();
 		} catch (\Throwable $e) {
 			$this->db->rollBack();
+			// request_key dedupe is check-then-act: a concurrent create with
+			// the same key passes the findByRequestKey lookup and loses on
+			// the unique index. The loser must replay the dedupe path, not
+			// 500 — idempotent retries have to be race-safe end to end.
+			if ($requestKey !== '' && $this->isConcurrencyViolation($e)) {
+				// The winning transaction may not have committed yet when
+				// InnoDB rolls the loser back — poll briefly before giving up.
+				for ($attempt = 0; $attempt < 5; $attempt++) {
+					$winner = $this->claims->findByRequestKey($this->uid() . ':' . $requestKey);
+					if ($winner !== null) {
+						return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($winner), 'deduplicated' => true]);
+					}
+					usleep(40000);
+				}
+			}
 			throw $e;
 		}
 		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim)], Http::STATUS_CREATED);
@@ -155,6 +175,12 @@ class ClaimApiController extends AApiController
 					throw new ValidationException(['currency' => 'invalid']);
 				}
 				$claim->setCurrency($cur);
+			}
+			if (isset($b['azc_trip_id'])) {
+				// F21 soft link — advisory per edge 19 (links can break when
+				// the sibling is reinstalled; UI shows resolved + raw id).
+				$tid = (int)$b['azc_trip_id'];
+				$claim->setAzcTripId($tid > 0 ? $tid : null);
 			}
 			if (isset($b['lines']) || isset($b['line'])) {
 				$lineParams = $b['lines'] ?? [$b['line']];
@@ -358,5 +384,14 @@ class ClaimApiController extends AApiController
 	public function lookups(): JSONResponse
 	{
 		return new JSONResponse(['ok' => true] + $this->lookupService->data());
+	}
+
+	private function isConcurrencyViolation(\Throwable $e): bool
+	{
+		$msg = strtolower($e->getMessage());
+		// Unique-key collision AND InnoDB insert-vs-insert deadlocks on the
+		// same unique index — both mean a sibling request won the key.
+		return str_contains($msg, 'unique') || str_contains($msg, 'duplicate')
+			|| str_contains($msg, 'deadlock') || str_contains($msg, 'serialization');
 	}
 }

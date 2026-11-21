@@ -62,3 +62,280 @@
 	outline: var(--exp-focus);
 	outline-offset: var(--exp-focus-offset);
 }
+
+/* === app-feedback:exp start === */
+#app-navigation .exp-nav-footer,
+.exp-nav .exp-nav-footer,
+.exp-app-nav .exp-nav-footer {
+	margin-top: auto;
+	flex-shrink: 0;
+	min-width: 0;
+	width: 100%;
+	box-sizing: border-box;
+	padding: var(--exp-space-2, 0.5rem) var(--exp-space-3, 0.75rem)
+		max(var(--exp-space-3, 0.75rem), env(safe-area-inset-bottom, 0px));
+	border-top: 1px solid var(--exp-border, color-mix(in srgb, var(--color-main-text) 12%, var(--color-main-background)));
+	background: transparent;
+	z-index: 1;
+}
+
+.exp-nav-footer__popover {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--exp-space-2, 0.5rem);
+}
+
+/* Scoped under #content: bare .{p}-nav-footer__trigger loses to NC core
+ * `#app-content button` / `#app-navigation button` min-height rules
+ * (var(--default-clickable-area) → 34px) — Atlas touch-target defect. */
+#content .exp-nav-footer__trigger {
+	display: inline-flex;
+	gap: var(--exp-space-3, 0.75rem);
+	min-height: 44px;
+	min-width: 44px;
+	padding: var(--exp-space-2, 0.5rem) var(--exp-space-3, 0.75rem);
+	border-radius: var(--exp-radius-sm, 6px);
+	box-sizing: border-box;
+	border: none;
+	background: none;
+	color: var(--color-main-text);
+	font: inherit;
+	cursor: pointer;
+	align-items: center;
+	justify-content: center;
+	white-space: nowrap;
+}
+
+.exp-nav-footer__trigger:hover {
+	background: color-mix(in srgb, var(--color-primary-element) 8%, var(--color-main-background));
+}
+
+.exp-nav-footer__trigger:focus-visible {
+	outline: 3px solid var(--color-primary-element);
+	outline-offset: 2px;
+}
+
+.exp-nav-footer__trigger:focus:not(:focus-visible) {
+	outline: none;
+}
+
+.exp-nav-footer__trigger-icon .exp-icon {
+	width: 20px;
+	height: 20px;
+}
+
+.exp-nav-footer__menu {
+	position: absolute;
+	bottom: calc(100% + var(--exp-space-2, 0.5rem));
+	left: 50%;
+	transform: translateX(-50%);
+	min-width: max-content;
+	max-width: calc(100vw - 2rem);
+	list-style: none;
+	margin: 0;
+	padding: var(--exp-space-2, 0.5rem);
+	background: var(--color-main-background);
+	border: 1px solid var(--exp-border, var(--color-border));
+	border-radius: var(--exp-radius-md, 12px);
+	box-shadow:
+		0 2px 6px color-mix(in srgb, var(--color-main-text) 6%, transparent),
+		0 8px 24px color-mix(in srgb, var(--color-main-text) 10%, transparent);
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	z-index: 100;
+}
+
+.exp-nav-footer__menu[hidden] {
+	display: none;
+}
+
+#content .exp-nav-footer__menu-item {
+	display: flex;
+	align-items: center;
+	gap: var(--exp-space-3, 0.75rem);
+	min-height: 44px;
+	min-width: 44px;
+	padding: var(--exp-space-2, 0.5rem) var(--exp-space-3, 0.75rem);
+	border-radius: var(--exp-radius-sm, 6px);
+	color: var(--color-main-text);
+	text-decoration: none;
+	font-size: var(--exp-fs-sm, 0.875rem);
+	line-height: var(--exp-line-base, 1.45);
+	white-space: normal;
+	/* Menu labels keep normal word breaks — anywhere tears mid-word. */
+	overflow-wrap: break-word;
+}
+
+.exp-nav-footer__menu-item:hover {
+	background: color-mix(in srgb, var(--color-primary-element) 8%, var(--color-main-background));
+}
+
+.exp-nav-footer__menu-item:focus-visible {
+	outline: 3px solid var(--color-primary-element);
+	outline-offset: -2px;
+}
+
+.exp-nav-footer__menu-item:focus:not(:focus-visible) {
+	outline: none;
+}
+
+.exp-nav-footer__menu-icon .exp-icon {
+	width: 18px;
+	height: 18px;
+}
+
+.exp-nav-footer__note {
+	margin: 0;
+	font-size: var(--exp-fs-xs, 0.75rem);
+	line-height: 1.45;
+	color: var(--color-text-maxcontrast);
+	text-align: center;
+	overflow-wrap: anywhere;
+}
+
+@media (width < 480px) {
+	.exp-nav-footer__menu {
+		left: var(--exp-space-2, 0.5rem);
+		right: var(--exp-space-2, 0.5rem);
+		transform: none;
+		min-width: 0;
+	}
+}
+
+.exp-nav-footer__new-tab {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+}
+
+#content .exp-nav-footer__toast-link {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	min-width: 44px;
+	margin-top: var(--exp-space-2, 0.5rem);
+	padding: 0;
+	font-size: var(--exp-fs-sm, 0.875rem);
+	line-height: 1.45;
+	color: var(--color-error-text, var(--color-main-text));
+	text-decoration: underline;
+	text-underline-offset: 0.15em;
+	overflow-wrap: anywhere;
+}
+
+.exp-nav-footer__toast-link:focus-visible {
+	outline: 2px solid var(--color-primary-element);
+	outline-offset: 2px;
+}
+
+.exp-nav-footer__toast-link:focus:not(:focus-visible) {
+	outline: none;
+}
+
+@media (prefers-contrast: more) {
+	#app-navigation .exp-nav-footer,
+	.exp-nav .exp-nav-footer,
+	.exp-app-nav .exp-nav-footer {
+		border-top-width: 2px;
+		border-top-color: var(--color-main-text);
+	}
+
+	.exp-nav-footer__menu {
+		border-width: 2px;
+	}
+
+	.exp-nav-footer__trigger:focus-visible,
+	.exp-nav-footer__menu-item:focus-visible,
+	.exp-nav-footer__toast-link:focus-visible {
+		outline-width: 3px;
+	}
+}
+
+@media (forced-colors: active) {
+	.exp-nav-footer__menu-item,
+	.exp-nav-footer__toast-link {
+		forced-color-adjust: none;
+		color: LinkText;
+	}
+
+	.exp-nav-footer__trigger:focus-visible,
+	.exp-nav-footer__menu-item:focus-visible,
+	.exp-nav-footer__toast-link:focus-visible {
+		outline: 3px solid Highlight;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.exp-nav-footer__trigger,
+	.exp-nav-footer__menu-item,
+	.exp-nav-footer__toast-link {
+		transition: none;
+	}
+}
+/* === app-feedback:exp end === */
+
+/* ---------- Overview dashboard (§9.5 overview-first landing) ---------- */
+.exp-section-h {
+	font-size: var(--exp-fs-md, 1rem);
+	font-weight: 700;
+	margin: var(--exp-space-5, 24px) 0 var(--exp-space-2, 8px);
+}
+.exp-toolbar--between {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--exp-space-3, 12px);
+	flex-wrap: wrap;
+}
+.exp-queue {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-2, 8px);
+}
+.exp-queue__item {
+	display: flex;
+	align-items: center;
+	gap: var(--exp-space-3, 12px);
+	padding: var(--exp-space-3, 12px) var(--exp-space-4, 16px);
+	border: 1px solid var(--exp-border, var(--color-border));
+	border-radius: var(--exp-radius-md, 12px);
+	color: var(--exp-text, var(--color-main-text));
+	text-decoration: none;
+	min-height: 44px;
+}
+.exp-queue__item:hover, .exp-queue__item:focus-visible {
+	background: var(--color-background-hover);
+}
+.exp-queue__main { display: flex; gap: var(--exp-space-2, 8px); align-items: baseline; min-width: 0; flex: 1; }
+.exp-queue__meta { color: var(--exp-muted, var(--color-text-maxcontrast)); font-size: var(--exp-fs-sm, 0.875rem); }
+
+/* ---------- Section chip nav (§9.5 claim-detail) ---------- */
+.exp-chipbar {
+	display: flex; gap: var(--exp-space-2, 8px); flex-wrap: wrap;
+	margin: 0 0 var(--exp-space-4, 16px);
+	position: sticky; top: 0; z-index: 5;
+	padding: var(--exp-space-2, 8px) 0;
+	background: var(--exp-bg-card, var(--color-main-background));
+}
+.exp-chipbar__chip {
+	display: inline-flex; align-items: center; min-height: 44px;
+	padding: var(--exp-space-1, 4px) var(--exp-space-3, 12px);
+	border: 1px solid var(--exp-form-border, var(--color-border-maxcontrast));
+	border-radius: var(--exp-radius-pill, 999px);
+	background: var(--exp-bg-card, var(--color-main-background));
+	color: var(--exp-text, var(--color-main-text));
+	font-size: var(--exp-fs-sm, 0.875rem); font-weight: 600; text-decoration: none;
+}
+.exp-chipbar__chip:hover, .exp-chipbar__chip:focus-visible { background: var(--color-background-hover); }
