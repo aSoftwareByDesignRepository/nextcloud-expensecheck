@@ -101,7 +101,7 @@ class PageController extends Controller
 		$params += [
 			'pageId' => $pageId,
 			'pageTitle' => $this->l10n->t(ucwords(str_replace('-', ' ', $pageId))),
-			'pageHelp' => self::PAGES[$pageId]['help'] ?? '',
+			'pageHelp' => $this->l10n->t(self::PAGES[$pageId]['help'] ?? ''),
 			'pageIcon' => self::PAGES[$pageId]['icon'] ?? 'file-text',
 			'roleLabel' => $this->l10n->t(ucfirst($role)),
 			'urls' => $this->pageUrls(),
