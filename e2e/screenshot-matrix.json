@@ -183,6 +183,15 @@
         "current"
       ],
       "dark": true
+    },
+    {
+      "id": "get-the-app",
+      "path": "/get-the-app",
+      "ready": "div[data-exp-view='get-the-app']",
+      "states": [
+        "current"
+      ],
+      "dark": true
     }
   ]
 }
