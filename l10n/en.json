@@ -393,6 +393,8 @@
 "You selected %1$d people but only %2$d seats remain. Only free seats will be assigned.": "You selected %1$d people but only %2$d seats remain. Only free seats will be assigned.",
 "Your license expires within 30 days. Contact your vendor to renew.": "Your license expires within 30 days. Contact your vendor to renew.",
 "Your numbers": "Your numbers",
+"_1 result_::_%n results_": ["1 result", "%n results"],
+"_1 row_::_%n rows_": ["1 row", "%n rows"],
 "awaiting your decision": "awaiting your decision",
 "line #{n}": "line #{n}",
 "none": "none",
@@ -404,8 +406,6 @@
 "{n} draft(s) to finish": "{n} draft(s) to finish",
 "{n} pending": "{n} pending",
 "{n} receipt(s) to file": "{n} receipt(s) to file",
-"{n} results": "{n} results",
-"{n} rows": "{n} rows",
 "… and %n more": "… and %n more"
 }
 }

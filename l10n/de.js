@@ -409,6 +409,8 @@ OC.L10N.register(
 	"Your expense claims — drafts, submitted, and history." : "Ihre Spesenabrechnungen — Entwürfe, eingereichte und Verlauf.",
 	"Your license expires within 30 days. Contact your vendor to renew." : "Ihre Lizenz läuft innerhalb von 30 Tagen ab. Wenden Sie sich zur Verlängerung an Ihren Anbieter.",
 	"Your numbers" : "Ihre Zahlen",
+	"_1 result_::_%n results_" : ["1 Ergebnis","%n Ergebnisse"],
+	"_1 row_::_%n rows_" : ["1 Zeile","%n Zeilen"],
 	"awaiting your decision" : "warten auf Ihre Entscheidung",
 	"line #{n}" : "Position #{n}",
 	"none" : "keine",
@@ -420,8 +422,6 @@ OC.L10N.register(
 	"{n} draft(s) to finish" : "{n} Entwurf\/Entwürfe fertigstellen",
 	"{n} pending" : "{n} ausstehend",
 	"{n} receipt(s) to file" : "{n} Beleg(e) abzulegen",
-	"{n} results" : "{n} Ergebnisse",
-	"{n} rows" : "{n} Zeilen",
 	"… and %n more" : "… und %n weitere"
 	}
 );

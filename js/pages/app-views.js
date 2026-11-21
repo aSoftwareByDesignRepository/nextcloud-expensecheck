@@ -6,6 +6,17 @@
 	if (!E) return;
 	var t = E.t, el = E.el, api = E.api, esc = E.esc, fmtDate = E.fmtDate, fmtDateTime = E.fmtDateTime;
 
+	// Plural-aware translate — window.n resolves the _sg_::_pl_ combined
+	// catalog key and substitutes %n. Singular msgids carry the literal '1',
+	// plurals carry %n (same convention as transfer.js).
+	function n(singular, plural, count) {
+		var c = Number.isFinite(Number(count)) ? Number(count) : 0;
+		if (typeof window.n === 'function') {
+			return window.n('expensecheck', singular, plural, c);
+		}
+		return String(c === 1 ? singular : plural).replace('%n', String(c));
+	}
+
 	function money(minor, cur) {
 		if (minor === null || minor === undefined) return '—';
 		var n = Number(minor) / 100;
@@ -58,9 +69,9 @@
 		return CheckViewComponents.listFetch(host, {
 			fetch: fetcher,
 			render: function (data) {
-				var n = render(data);
-				if (countEl && typeof n === 'number') {
-					countEl.textContent = t('{n} results', { n: n });
+				var cnt = render(data);
+				if (countEl && typeof cnt === 'number') {
+					countEl.textContent = n('1 result', '%n results', cnt);
 					countEl.hidden = false;
 				}
 			},
@@ -793,7 +804,7 @@
 			((data && data.batches) || []).forEach(function (b) {
 				var a = el('a', { class: 'exp-card', href: '#' });
 				a.textContent = '#' + b.id + ' · ' + fmtDateTime(b.created_at)
-					+ ' · ' + t('{n} rows', { n: b.row_count }) + ' · ' + String(b.format || 'csv').toUpperCase();
+					+ ' · ' + n('1 row', '%n rows', b.row_count) + ' · ' + String(b.format || 'csv').toUpperCase();
 				a.addEventListener('click', function (ev) {
 					ev.preventDefault();
 					location.href = E.appBase() + '/settlements/' + b.id;
