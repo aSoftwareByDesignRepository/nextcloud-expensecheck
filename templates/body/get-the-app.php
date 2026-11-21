@@ -54,7 +54,7 @@ $features = [
 	],
 ];
 ?>
-<div class="exp-get-app-page exp-page-stack">
+<div class="exp-get-app-page exp-page-stack" data-exp-view="get-the-app">
 	<section class="exp-get-app__hero" aria-labelledby="exp-get-app-intro-title">
 		<p class="exp-get-app__eyebrow"><?php p($l->t('Official Android companion')); ?></p>
 		<h2 id="exp-get-app-intro-title" class="exp-get-app__title"><?php p($l->t('ExpenseCheck Mobile')); ?></h2>
