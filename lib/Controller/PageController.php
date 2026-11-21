@@ -29,22 +29,22 @@ use OCP\Util;
 class PageController extends Controller
 {
 	private const PAGES = [
-		'index' => ['template' => 'index', 'icon' => 'home', 'help' => 'What needs your attention — approvals, open claims, receipts.'],
-		'claims' => ['template' => 'claims', 'icon' => 'clipboard-list', 'help' => 'Your expense claims — drafts, submitted, and history.'],
-		'new-claim' => ['template' => 'claim-form', 'icon' => 'plus', 'help' => 'Create a new expense claim.'],
-		'claim-detail' => ['template' => 'claim-detail', 'icon' => 'file-text', 'help' => 'Claim detail, lines, receipts, and decisions.'],
-		'inbox' => ['template' => 'inbox', 'icon' => 'inbox', 'help' => 'Claims waiting for your approval.'],
-		'receipts' => ['template' => 'receipts', 'icon' => 'upload', 'help' => 'Captured receipts not yet filed to a claim line.'],
-		'all' => ['template' => 'all-claims', 'icon' => 'list', 'help' => 'All claims visible to your role.'],
-		'settlements' => ['template' => 'settlements', 'icon' => 'check-circle', 'help' => 'Finance settlement queue and payout batches.'],
-		'settlement-detail' => ['template' => 'settlement-detail', 'icon' => 'file-check', 'help' => 'Settlement batch detail and export.'],
-		'reports' => ['template' => 'reports', 'icon' => 'activity', 'help' => 'Claim totals by period, category, and cost center.'],
-		'categories' => ['template' => 'admin-categories', 'icon' => 'grid', 'help' => 'Expense categories and their rules.'],
-		'rates' => ['template' => 'admin-rates', 'icon' => 'activity', 'help' => 'Versioned rate catalog for mileage, per-diem, and flat rates.'],
-		'cost-centers' => ['template' => 'admin-cost-centers', 'icon' => 'layout-grid', 'help' => 'Cost-center tree for allocations.'],
-		'chains' => ['template' => 'admin-chains', 'icon' => 'repeat', 'help' => 'Approval chains and routing.'],
-		'settings' => ['template' => 'settings', 'icon' => 'settings', 'help' => 'ExpenseCheck configuration.'],
-		'license' => ['template' => 'license', 'icon' => 'shield', 'help' => 'Mobile companion license (EXP2) and seats.'],
+		'index' => ['template' => 'index', 'icon' => 'home', 'title' => 'Overview', 'help' => 'What needs your attention — approvals, open claims, receipts.'],
+		'claims' => ['template' => 'claims', 'icon' => 'clipboard-list', 'title' => 'My claims', 'help' => 'Your expense claims — drafts, submitted, and history.'],
+		'new-claim' => ['template' => 'claim-form', 'icon' => 'plus', 'title' => 'New claim', 'help' => 'Create a new expense claim.'],
+		'claim-detail' => ['template' => 'claim-detail', 'icon' => 'file-text', 'title' => 'Claim detail', 'help' => 'Claim detail, lines, receipts, and decisions.'],
+		'inbox' => ['template' => 'inbox', 'icon' => 'inbox', 'title' => 'Approvals', 'help' => 'Claims waiting for your approval.'],
+		'receipts' => ['template' => 'receipts', 'icon' => 'upload', 'title' => 'Receipts', 'help' => 'Captured receipts not yet filed to a claim line.'],
+		'all' => ['template' => 'all-claims', 'icon' => 'list', 'title' => 'All claims', 'help' => 'All claims visible to your role.'],
+		'settlements' => ['template' => 'settlements', 'icon' => 'check-circle', 'title' => 'Settlements', 'help' => 'Finance settlement queue and payout batches.'],
+		'settlement-detail' => ['template' => 'settlement-detail', 'icon' => 'file-check', 'title' => 'Batch detail', 'help' => 'Settlement batch detail and export.'],
+		'reports' => ['template' => 'reports', 'icon' => 'activity', 'title' => 'Reports', 'help' => 'Claim totals by period, category, and cost center.'],
+		'categories' => ['template' => 'admin-categories', 'icon' => 'grid', 'title' => 'Categories', 'help' => 'Expense categories and their rules.'],
+		'rates' => ['template' => 'admin-rates', 'icon' => 'activity', 'title' => 'Rates', 'help' => 'Versioned rate catalog for mileage, per-diem, and flat rates.'],
+		'cost-centers' => ['template' => 'admin-cost-centers', 'icon' => 'layout-grid', 'title' => 'Cost centers', 'help' => 'Cost-center tree for allocations.'],
+		'chains' => ['template' => 'admin-chains', 'icon' => 'repeat', 'title' => 'Chains', 'help' => 'Approval chains and routing.'],
+		'settings' => ['template' => 'settings', 'icon' => 'settings', 'title' => 'Settings', 'help' => 'ExpenseCheck configuration.'],
+		'license' => ['template' => 'license', 'icon' => 'shield', 'title' => 'License', 'help' => 'Mobile companion license (EXP2) and seats.'],
 	];
 
 	public function __construct(
@@ -102,7 +102,7 @@ class PageController extends Controller
 		}
 		$params += [
 			'pageId' => $pageId,
-			'pageTitle' => $this->l10n->t(ucwords(str_replace('-', ' ', $pageId))),
+			'pageTitle' => $this->l10n->t(self::PAGES[$pageId]['title'] ?? ucwords(str_replace('-', ' ', $pageId))),
 			'pageHelp' => $this->l10n->t(self::PAGES[$pageId]['help'] ?? ''),
 			'pageIcon' => self::PAGES[$pageId]['icon'] ?? 'file-text',
 			'roleLabel' => $this->l10n->t(ucfirst($role)),
