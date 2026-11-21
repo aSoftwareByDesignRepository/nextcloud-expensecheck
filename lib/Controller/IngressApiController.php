@@ -58,7 +58,7 @@ class IngressApiController extends AApiController
 		if ($requestKey !== '') {
 			$existing = \OCP\Server::get(\OCA\ExpenseCheck\Db\ClaimMapper::class)->findByRequestKey($this->uid() . ':ingress:' . $requestKey);
 			if ($existing !== null) {
-				return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($existing), 'deduplicated' => true]);
+				return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($existing, $this->uid()), 'deduplicated' => true]);
 			}
 		}
 		$claim = $this->lifecycle->createDraft(
@@ -82,6 +82,6 @@ class IngressApiController extends AApiController
 			}
 			$this->lineService->addLine($claim, $lp, (array)($lp['allocations'] ?? []), $this->uid());
 		}
-		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim)], Http::STATUS_CREATED);
+		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim, $this->uid())], Http::STATUS_CREATED);
 	}
 }

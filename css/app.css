@@ -339,3 +339,12 @@
 	font-size: var(--exp-fs-sm, 0.875rem); font-weight: 600; text-decoration: none;
 }
 .exp-chipbar__chip:hover, .exp-chipbar__chip:focus-visible { background: var(--color-background-hover); }
+
+/* ---------- Inline glossary term (§9.3) ---------- */
+.exp-glossary-term {
+	background: none; border: 0; padding: 0;
+	color: var(--exp-accent-ink, var(--color-primary-element));
+	text-decoration: underline dotted;
+	min-height: 0; cursor: help; font: inherit;
+}
+.exp-glossary-term:focus-visible { outline: 2px solid var(--color-primary-element); outline-offset: 2px; }

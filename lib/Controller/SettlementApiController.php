@@ -32,6 +32,7 @@ class SettlementApiController extends AApiController
 		private readonly SettlementBatchMapper $batches,
 		private readonly SettlementRowMapper $rows,
 		private readonly PeriodService $periods,
+		private readonly ClaimSerializer $serializer,
 	) {
 		parent::__construct(Application::APP_ID, $request, $access);
 	}
@@ -50,7 +51,7 @@ class SettlementApiController extends AApiController
 		$this->assertFinance();
 		return new JSONResponse([
 			'ok' => true,
-			'claims' => array_map([ClaimSerializer::class, 'summary'], $this->settlement->settleable()),
+			'claims' => array_map(fn ($c) => $this->serializer->summaryFor($c, $this->uid()), $this->settlement->settleable()),
 		]);
 	}
 

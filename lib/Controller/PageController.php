@@ -60,6 +60,7 @@ class PageController extends Controller
 		private readonly \OCA\ExpenseCheck\Db\ClaimMapper $claims,
 		private readonly \OCA\ExpenseCheck\Db\AttachmentMapper $attachments,
 		private readonly \OCP\IConfig $config,
+		private readonly \OCA\ExpenseCheck\Service\GlossaryService $glossary,
 	) {
 		parent::__construct($appName, $request);
 	}
@@ -74,6 +75,7 @@ class PageController extends Controller
 		Util::addScript(Application::APP_ID, 'common/error-copy');
 		Util::addScript(Application::APP_ID, 'common/focus-preservation');
 		Util::addScript(Application::APP_ID, 'common/view-components');
+		Util::addScript(Application::APP_ID, 'common/glossary');
 		Util::addScript(Application::APP_ID, 'pages/app-views');
 		if (($params['settingsSection'] ?? '') === 'transfer') {
 			Util::addStyle(Application::APP_ID, 'common/transfer');
@@ -112,6 +114,7 @@ class PageController extends Controller
 			'brandIcon' => 'file-text',
 			'isAdmin' => $this->access->isAppAdmin($uid),
 			'isFinance' => $this->access->isFinance($uid),
+			'glossary' => $this->glossary->all(),
 		];
 		return new TemplateResponse(Application::APP_ID, 'main', $params);
 	}

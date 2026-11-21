@@ -13,9 +13,16 @@ use OCA\ExpenseCheck\Db\ClaimEvent;
 use OCA\ExpenseCheck\Db\ClaimEventMapper;
 use OCA\ExpenseCheck\Db\ClaimLine;
 use OCA\ExpenseCheck\Db\ClaimLineMapper;
+use OCA\ExpenseCheck\Db\CostCenter;
+use OCA\ExpenseCheck\Db\CostCenterMapper;
+use OCA\ExpenseCheck\Db\DelegateMapper;
 use OCA\ExpenseCheck\Db\StepDecision;
 use OCA\ExpenseCheck\Db\StepDecisionMapper;
+use OCA\ExpenseCheck\Service\AccessControlService;
+use OCA\ExpenseCheck\Service\AzcBridge;
+use OCA\ExpenseCheck\Service\ChainRoutingService;
 use OCA\ExpenseCheck\Service\ClaimSerializer;
+use OCP\AppFramework\Utility\ITimeFactory;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -24,8 +31,12 @@ use PHPUnit\Framework\TestCase;
  */
 final class ClaimSerializerTest extends TestCase
 {
-	private function svc(array $lines = [], array $allocations = [], array $attachments = [], array $lineAttachments = [], array $decisions = [], array $events = []): ClaimSerializer
-	{
+	private function svc(
+		array $lines = [], array $allocations = [], array $attachments = [],
+		array $lineAttachments = [], array $decisions = [], array $events = [],
+		?CostCenter $costCenter = null, bool $azcAvailable = false,
+		bool $finance = false, bool $auditor = false, bool $canDecide = false,
+	): ClaimSerializer {
 		$lineMapper = $this->createStub(ClaimLineMapper::class);
 		$lineMapper->method('findByClaim')->willReturn($lines);
 		$alloc = $this->createStub(ClaimAllocationMapper::class);
@@ -37,7 +48,21 @@ final class ClaimSerializerTest extends TestCase
 		$dec->method('findByClaim')->willReturn($decisions);
 		$ev = $this->createStub(ClaimEventMapper::class);
 		$ev->method('findAllForClaim')->willReturn($events);
-		return new ClaimSerializer($lineMapper, $alloc, $att, $dec, $ev);
+		$cc = $this->createStub(CostCenterMapper::class);
+		$cc->method('findById')->willReturn($costCenter);
+		$delegates = $this->createStub(DelegateMapper::class);
+		$delegates->method('findActiveForDelegate')->willReturn([]);
+		$routing = $this->createStub(ChainRoutingService::class);
+		$routing->method('decisionRights')->willReturn(['allowed' => $canDecide, 'on_behalf_of' => null]);
+		$access = $this->createStub(AccessControlService::class);
+		$access->method('isFinance')->willReturn($finance);
+		$access->method('isAuditor')->willReturn($auditor);
+		$azc = $this->createStub(AzcBridge::class);
+		$azc->method('facadeAvailable')->willReturn($azcAvailable);
+		$time = $this->createStub(ITimeFactory::class);
+		$time->method('getDateTime')->willReturn(new \DateTime('2026-11-21 12:00:00'));
+		return new ClaimSerializer($lineMapper, $alloc, $att, $dec, $ev,
+			$cc, $delegates, $routing, $access, $azc, $time);
 	}
 
 	private function claim(): Claim
@@ -315,6 +340,96 @@ final class ClaimSerializerTest extends TestCase
 			'step_no' => 2, 'decided_by' => 'boss', 'decision' => 'approved',
 			'note' => 'ok go', 'created_at' => '2026-11-05 08:30:00',
 		]], $out['decisions']);
+	}
+
+	/** §10.6 — caller-scoped can.* block is the only affordance authority. */
+	public function testCanForOwnerDraftEditable(): void
+	{
+		$c = $this->claim();
+		$c->setStatus('draft');
+		$c->setCurrentStep(0);
+		$can = $this->svc(lines: [new ClaimLine()])->canFor($c, 'alice', 1);
+		$this->assertTrue($can['canEdit']);
+		$this->assertTrue($can['canSubmit']);
+		$this->assertTrue($can['canAttach']);
+		$this->assertFalse($can['canWithdraw']);
+		$this->assertFalse($can['canDecide']);
+		$this->assertFalse($can['canSettle']);
+	}
+
+	public function testCanForEmptyDraftCannotSubmit(): void
+	{
+		$c = $this->claim();
+		$c->setStatus('draft');
+		$can = $this->svc()->canFor($c, 'alice', 0);
+		$this->assertFalse($can['canSubmit'], 'submit affordance must hide on a line-less draft');
+		$this->assertTrue($can['canEdit']);
+	}
+
+	public function testCanForSubmittedOwnerWithdrawsNotDecides(): void
+	{
+		$c = $this->claim();
+		$c->setStatus('submitted');
+		$can = $this->svc(canDecide: false)->canFor($c, 'alice', 2);
+		$this->assertTrue($can['canWithdraw']);
+		$this->assertFalse($can['canEdit']);
+		$this->assertFalse($can['canDecide']);
+	}
+
+	public function testCanDecideFollowsRoutingRights(): void
+	{
+		$c = $this->claim();
+		$c->setStatus('submitted');
+		$can = $this->svc(canDecide: true)->canFor($c, 'boss', 2);
+		$this->assertTrue($can['canDecide']);
+		$this->assertFalse($can['canWithdraw'], 'non-owner never withdraws');
+	}
+
+	public function testCanSettleFinanceOnly(): void
+	{
+		$c = $this->claim();
+		$c->setStatus('approved');
+		$this->assertTrue($this->svc(finance: true)->canFor($c, 'fin', 1)['canSettle']);
+		$this->assertFalse($this->svc(finance: false, auditor: true)->canFor($c, 'aud', 1)['canSettle']);
+		$this->assertTrue($this->svc(auditor: true)->canFor($c, 'aud', 1)['canExport']);
+	}
+
+	public function testSummaryForAddsCanBlock(): void
+	{
+		$out = $this->svc()->summaryFor($this->claim(), 'alice');
+		$this->assertArrayHasKey('can', $out);
+		foreach (['canEdit','canSubmit','canWithdraw','canDecide','canSettle','canAttach','canExport'] as $k) {
+			$this->assertArrayHasKey($k, $out['can'], "can.$k missing");
+			$this->assertIsBool($out['can'][$k]);
+		}
+	}
+
+	public function testDetailWithUidAddsCanAndResolvedLabel(): void
+	{
+		$cc = new CostCenter();
+		$cc->setCode('OPS-100');
+		$c = $this->claim();
+		$c->setCostCenterId(5);
+		$d = $this->svc(costCenter: $cc, azcAvailable: true)->detail($c, 'alice');
+		$this->assertArrayHasKey('can', $d);
+		$this->assertSame('OPS-100', $d['resolved_label']['cost_center']);
+		$this->assertSame('AZC #42', $d['resolved_label']['azc_trip']);
+	}
+
+	public function testResolvedLabelBrokenLinksNull(): void
+	{
+		$c = $this->claim();
+		$c->setCostCenterId(99);
+		$d = $this->svc(costCenter: null, azcAvailable: false)->detail($c, 'alice');
+		$this->assertNull($d['resolved_label']['cost_center'], 'deleted cost center renders muted, not raw id');
+		$this->assertNull($d['resolved_label']['azc_trip'], 'AZC absent → muted soft link');
+	}
+
+	public function testDetailWithoutUidOmitsCan(): void
+	{
+		$d = $this->svc()->detail($this->claim());
+		$this->assertArrayNotHasKey('can', $d);
+		$this->assertArrayNotHasKey('resolved_label', $d);
 	}
 
 	public function testDetailComposesSubsections(): void

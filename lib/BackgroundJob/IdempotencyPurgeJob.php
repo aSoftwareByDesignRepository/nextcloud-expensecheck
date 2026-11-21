@@ -21,6 +21,6 @@ class IdempotencyPurgeJob extends TimedJob
 
 	protected function run($argument): void
 	{
-		$this->store->purgeOlderThan($this->time->getDateTime()->modify('-7 days'));
+		$this->store->purgeOlderThan($this->time->getDateTime()->modify('-30 days'));
 	}
 }

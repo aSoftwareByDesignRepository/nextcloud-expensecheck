@@ -74,4 +74,16 @@ class DelegateMapper extends QBMapper
 		}
 	}
 
+	/**
+	 * Retention (spec §11.6): drop delegation rows whose window ended before
+	 * $cutoff — expired grants are audit material only while valid_to + 1y.
+	 */
+	public function purgeExpiredBefore(\DateTimeInterface $cutoff): int
+	{
+		$qb = $this->db->getQueryBuilder();
+		$qb->delete($this->getTableName())
+			->where($qb->expr()->lt('valid_to', $qb->createNamedParameter($cutoff->format('Y-m-d'))));
+		return $qb->executeStatement();
+	}
+
 }

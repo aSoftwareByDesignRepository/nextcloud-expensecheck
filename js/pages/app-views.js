@@ -639,19 +639,22 @@
 				actions.appendChild(b);
 			}
 			var ver = c.version;
-			if (c.status === 'draft' || c.status === 'changes_requested') {
+			var can = c.can || {};
+			if (can.canSubmit) {
 				act(t('Submit'), 'exp-btn--primary', function () {
 					api('/claims/' + id + '/submit', { method: 'POST', json: { version: ver } })
 						.then(reload, E.handleError);
 				});
-				act(t('Cancel'), 'exp-btn--danger', function () {
-					E.confirmDialog(t('Cancel this claim?')).then(function (ok) {
+			}
+			if (can.canWithdraw) {
+				act(t('Withdraw'), 'exp-btn--danger', function () {
+					E.confirmDialog(t('Withdraw this claim back to draft?')).then(function (ok) {
 						if (!ok) return;
-						api('/claims/' + id + '/cancel', { method: 'POST', json: { version: ver } }).then(reload, E.handleError);
+						api('/claims/' + id + '/withdraw', { method: 'POST', json: { version: ver } }).then(reload, E.handleError);
 					});
 				});
 			}
-			if (c.my_decision) {
+			if (can.canDecide) {
 				act(t('Approve'), 'exp-btn--primary', function () {
 					E.confirmDialog(t('Approve this claim?')).then(function (ok) {
 						if (!ok) return;
@@ -683,8 +686,8 @@
 					});
 				});
 			}
-			// Receipt attach on own open claims.
-			if (c.mine && (c.status === 'draft' || c.status === 'changes_requested')) {
+			// Receipt attach on own editable claims.
+			if (can.canAttach) {
 				var up = el('label', { class: 'exp-btn exp-btn--secondary' });
 				up.textContent = t('Attach receipt');
 				var fi = el('input', { type: 'file', class: 'exp-sr-only', accept: 'image/*,application/pdf' });

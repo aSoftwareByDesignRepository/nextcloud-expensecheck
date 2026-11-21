@@ -20,6 +20,7 @@ class InboxApiController extends AApiController
 		IRequest $request,
 		AccessControlService $access,
 		private readonly ApprovalService $approvals,
+		private readonly ClaimSerializer $serializer,
 	) {
 		parent::__construct(Application::APP_ID, $request, $access);
 	}
@@ -30,7 +31,7 @@ class InboxApiController extends AApiController
 	{
 		return new JSONResponse([
 			'ok' => true,
-			'claims' => array_map([ClaimSerializer::class, 'summary'], $this->approvals->inboxFor($this->uid())),
+			'claims' => array_map(fn ($c) => $this->serializer->summaryFor($c, $this->uid()), $this->approvals->inboxFor($this->uid())),
 		]);
 	}
 }

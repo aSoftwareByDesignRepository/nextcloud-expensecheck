@@ -227,7 +227,7 @@ class IntegrationsApiController extends AApiController
 			$this->lineService->addLine($claim, $line, $allocations, $this->uid());
 			$this->db->commit();
 			$claim = $this->lifecycle->loadVisible($claim->getId(), $this->uid());
-			return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim)], Http::STATUS_CREATED);
+			return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim, $this->uid())], Http::STATUS_CREATED);
 		} catch (\Throwable $e) {
 			$this->db->rollBack();
 			throw $e;

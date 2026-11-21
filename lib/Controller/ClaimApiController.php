@@ -83,7 +83,7 @@ class ClaimApiController extends AApiController
 	{
 		$status = $this->request->getParam('status');
 		$rows = $this->claims->findByUser($this->uid(), is_string($status) && $status !== '' ? $status : null);
-		return new JSONResponse(['ok' => true, 'claims' => array_map([ClaimSerializer::class, 'summary'], $rows)]);
+		return new JSONResponse(['ok' => true, 'claims' => array_map(fn ($c) => $this->serializer->summaryFor($c, $this->uid()), $rows)]);
 	}
 
 	#[NoCSRFRequired]
@@ -95,7 +95,7 @@ class ClaimApiController extends AApiController
 		if ($requestKey !== '') {
 			$existing = $this->claims->findByRequestKey($this->uid() . ':' . $requestKey);
 			if ($existing !== null) {
-				return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($existing), 'deduplicated' => true]);
+				return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($existing, $this->uid()), 'deduplicated' => true]);
 			}
 		}
 		// One transaction for draft + lines: a line-validation failure must
@@ -138,14 +138,14 @@ class ClaimApiController extends AApiController
 				for ($attempt = 0; $attempt < 5; $attempt++) {
 					$winner = $this->claims->findByRequestKey($this->uid() . ':' . $requestKey);
 					if ($winner !== null) {
-						return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($winner), 'deduplicated' => true]);
+						return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($winner, $this->uid()), 'deduplicated' => true]);
 					}
 					usleep(40000);
 				}
 			}
 			throw $e;
 		}
-		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim)], Http::STATUS_CREATED);
+		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim, $this->uid())], Http::STATUS_CREATED);
 	}
 
 	#[NoCSRFRequired]
@@ -153,7 +153,7 @@ class ClaimApiController extends AApiController
 	public function show(): JSONResponse
 	{
 		$claim = $this->lifecycle->loadVisible($this->routeId(), $this->uid());
-		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim)]);
+		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim, $this->uid())]);
 	}
 
 	#[NoCSRFRequired]
@@ -221,7 +221,7 @@ class ClaimApiController extends AApiController
 			$this->db->rollBack();
 			throw $e;
 		}
-		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim)]);
+		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim, $this->uid())]);
 	}
 
 	private function applyLineAction(\OCA\ExpenseCheck\Db\Claim $claim, array $b): void
@@ -256,7 +256,7 @@ class ClaimApiController extends AApiController
 		$b = $this->body();
 		$ver = isset($b['version']) ? (int)$b['version'] : null;
 		$claim = $this->lifecycle->submit($claim, $this->uid(), $ver);
-		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim)]);
+		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim, $this->uid())]);
 	}
 
 	#[NoCSRFRequired]
@@ -266,7 +266,7 @@ class ClaimApiController extends AApiController
 		$claim = $this->lifecycle->loadVisible($this->routeId(), $this->uid());
 		$b = $this->body();
 		$claim = $this->lifecycle->withdraw($claim, $this->uid(), isset($b['version']) ? (int)$b['version'] : null);
-		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim)]);
+		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim, $this->uid())]);
 	}
 
 	#[NoCSRFRequired]
@@ -275,7 +275,7 @@ class ClaimApiController extends AApiController
 	{
 		$claim = $this->lifecycle->loadVisible($this->routeId(), $this->uid());
 		$new = $this->lifecycle->cloneToNewDraft($claim, $this->uid());
-		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($new)], Http::STATUS_CREATED);
+		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($new, $this->uid())], Http::STATUS_CREATED);
 	}
 
 	#[NoCSRFRequired]
@@ -286,7 +286,7 @@ class ClaimApiController extends AApiController
 		$b = $this->body();
 		$claim = $this->lifecycle->revert($claim, $this->uid(), $this->str($b, 'reason', 2000),
 			isset($b['version']) ? (int)$b['version'] : null);
-		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim)]);
+		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim, $this->uid())]);
 	}
 
 	#[NoCSRFRequired]
@@ -298,7 +298,7 @@ class ClaimApiController extends AApiController
 		$b = $this->body();
 		$ver = isset($b['version']) ? (int)$b['version'] : null;
 		$claim = $this->approvals->decide($claim, (string)($b['decision'] ?? ''), $this->uid(), $b['note'] ?? null, $ver);
-		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim)]);
+		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim, $this->uid())]);
 	}
 
 	#[NoCSRFRequired]

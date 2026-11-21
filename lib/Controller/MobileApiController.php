@@ -112,7 +112,7 @@ class MobileApiController extends AApiController
 		$this->contractCheck();
 		$status = $this->request->getParam('status');
 		$rows = $this->claims->findByUser($this->uid(), is_string($status) && $status !== '' ? $status : null);
-		return new JSONResponse(['ok' => true, 'claims' => array_map([ClaimSerializer::class, 'summary'], $rows)]);
+		return $this->listResponse(['ok' => true, 'claims' => array_map(fn ($c) => $this->serializer->summaryFor($c, $this->uid()), $rows)]);
 	}
 
 	#[NoAdminRequired]
@@ -125,7 +125,7 @@ class MobileApiController extends AApiController
 		if ($requestKey !== '') {
 			$existing = $this->claims->findByRequestKey($this->uid() . ':' . $requestKey);
 			if ($existing !== null) {
-				return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($existing), 'deduplicated' => true]);
+				return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($existing, $this->uid()), 'deduplicated' => true]);
 			}
 		}
 		// Identical body contract to web create() (AC-M1): lines supplied
@@ -154,7 +154,7 @@ class MobileApiController extends AApiController
 			$this->db->rollBack();
 			throw $e;
 		}
-		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim)], Http::STATUS_CREATED);
+		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim, $this->uid())], Http::STATUS_CREATED);
 	}
 
 	#[NoAdminRequired]
@@ -163,7 +163,7 @@ class MobileApiController extends AApiController
 	{
 		$this->contractCheck();
 		$claim = $this->lifecycle->loadVisible($this->routeId(), $this->uid());
-		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim)]);
+		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim, $this->uid())]);
 	}
 
 	#[NoAdminRequired]
@@ -175,7 +175,7 @@ class MobileApiController extends AApiController
 		$claim = $this->lifecycle->loadVisible($this->routeId(), $this->uid());
 		$b = $this->body();
 		$ver = isset($b['version']) ? (int)$b['version'] : null;
-		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($this->lifecycle->submit($claim, $this->uid(), $ver))]);
+		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($this->lifecycle->submit($claim, $this->uid(), $ver), $this->uid())]);
 	}
 
 	#[NoAdminRequired]
@@ -186,7 +186,7 @@ class MobileApiController extends AApiController
 		$claim = $this->lifecycle->loadVisible($this->routeId(), $this->uid());
 		$b = $this->body();
 		$ver = isset($b['version']) ? (int)$b['version'] : null;
-		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($this->lifecycle->withdraw($claim, $this->uid(), $ver))]);
+		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($this->lifecycle->withdraw($claim, $this->uid(), $ver), $this->uid())]);
 	}
 
 	#[NoAdminRequired]
@@ -199,7 +199,7 @@ class MobileApiController extends AApiController
 		$b = $this->body();
 		$ver = isset($b['version']) ? (int)$b['version'] : null;
 		$claim = $this->approvals->decide($claim, (string)($b['decision'] ?? ''), $this->uid(), $b['note'] ?? null, $ver);
-		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim)]);
+		return new JSONResponse(['ok' => true, 'claim' => $this->serializer->detail($claim, $this->uid())]);
 	}
 
 	#[NoAdminRequired]
@@ -207,9 +207,9 @@ class MobileApiController extends AApiController
 	public function inbox(): JSONResponse
 	{
 		$this->contractCheck();
-		return new JSONResponse([
+		return $this->listResponse([
 			'ok' => true,
-			'claims' => array_map([ClaimSerializer::class, 'summary'], $this->approvals->inboxFor($this->uid())),
+			'claims' => array_map(fn ($c) => $this->serializer->summaryFor($c, $this->uid()), $this->approvals->inboxFor($this->uid())),
 		]);
 	}
 
@@ -226,10 +226,27 @@ class MobileApiController extends AApiController
 	public function receiptsInbox(): JSONResponse
 	{
 		$this->contractCheck();
-		return new JSONResponse([
+		return $this->listResponse([
 			'ok' => true,
 			'receipts' => array_map([ClaimSerializer::class, 'attachmentDto'], $this->attachmentService->inbox($this->uid())),
 		]);
+	}
+
+	/**
+	 * §10.3 — ETag on list GETs: a matching If-None-Match answers 304 with an
+	 * empty body; the companion skips the re-parse + re-render entirely.
+	 */
+	private function listResponse(array $payload): JSONResponse
+	{
+		$etag = '"' . md5(json_encode($payload)) . '"';
+		if ($this->request->getHeader('If-None-Match') === $etag) {
+			$res = new JSONResponse(null, Http::STATUS_NOT_MODIFIED);
+		} else {
+			$res = new JSONResponse($payload);
+		}
+		$res->addHeader('ETag', $etag);
+		$res->addHeader('Cache-Control', 'private, no-cache');
+		return $res;
 	}
 
 	#[NoAdminRequired]
