@@ -692,3 +692,30 @@
 	}
 }
 /* === support-us:exp end === */
+
+/* ── Access denied template ─────────────────────────────────── */
+.exp-access-denied {
+	max-width: 40rem;
+	margin: 3rem auto;
+	padding: var(--exp-space-5);
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--exp-space-4);
+}
+.exp-access-denied .exp-card {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--exp-space-4);
+	width: 100%;
+}
+.exp-access-denied .exp-page-header__icon {
+	margin-bottom: 0;
+}
+.exp-access-denied h1 {
+	margin: 0;
+}
+.exp-app--access-denied .exp-access-denied {
+	margin-top: var(--exp-space-7);
+}
