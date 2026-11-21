@@ -171,6 +171,135 @@ class ClaimLineServiceTest extends TestCase {
 		$this->assertNull($line->getJustification());
 	}
 
+	public function testJustificationRequiredAtExactThreshold(): void {
+		// >= boundary: amount == threshold needs justification too.
+		$this->categories->method('findById')->willReturn($this->category([
+			'just_threshold' => 1000, 'just_min_len' => 10,
+		]));
+		try {
+			$this->lines->method('findByClaim')->willReturn([]);
+			$this->svc->addLine($this->draftClaim(), $this->receiptParams([
+				'amount' => '10.00', 'justification' => 'short']), [], 'u1');
+			$this->fail('expected JUSTIFICATION_REQUIRED at exact threshold');
+		} catch (DomainException $e) {
+			$this->assertSame('JUSTIFICATION_REQUIRED', $e->getErrorCode());
+		}
+	}
+
+	public function testJustificationExactlyMinLengthPasses(): void {
+		$this->categories->method('findById')->willReturn($this->category([
+			'just_threshold' => 1, 'just_min_len' => 10,
+		]));
+		$this->lines->method('findByClaim')->willReturn([]);
+		$line = $this->svc->addLine($this->draftClaim(), $this->receiptParams([
+			'amount' => '1.00', 'justification' => '1234567890']), [], 'u1');
+		$this->assertSame('1234567890', $line->getJustification());
+	}
+
+	public function testHardCapExactMaxPasses(): void {
+		// > boundary: amount == max is allowed.
+		$this->categories->method('findById')->willReturn($this->category(['max' => 1000, 'max_hard' => 1]));
+		$this->lines->method('findByClaim')->willReturn([]);
+		$line = $this->svc->addLine($this->draftClaim(), $this->receiptParams(['amount' => '10.00']), [], 'u1');
+		$this->assertSame(1000, $line->getAmountMinor());
+	}
+
+	public function testFreeTextFieldsAreTrimmedAndTruncated(): void {
+		$this->categories->method('findById')->willReturn($this->category([]));
+		$this->lines->method('findByClaim')->willReturn([]);
+		$line = $this->svc->addLine($this->draftClaim(), $this->receiptParams([
+			'merchant' => '  Hotel Foo  ',
+			'description' => str_repeat('d', 2500),
+			'justification' => '   ',
+		]), [], 'u1');
+		$this->assertSame('Hotel Foo', $line->getMerchant());
+		$this->assertSame(2000, mb_strlen((string)$line->getDescription()));
+		$this->assertNull($line->getJustification()); // whitespace-only → null
+	}
+
+	public function testMerchantTruncatedTo191(): void {
+		$this->categories->method('findById')->willReturn($this->category([]));
+		$this->lines->method('findByClaim')->willReturn([]);
+		$line = $this->svc->addLine($this->draftClaim(), $this->receiptParams([
+			'merchant' => str_repeat('m', 300),
+		]), [], 'u1');
+		$this->assertSame(191, mb_strlen((string)$line->getMerchant()));
+	}
+
+	public function testOccurredOnRejectsInvalidFormats(): void {
+		$this->categories->method('findById')->willReturn($this->category([]));
+		foreach (['2026-13-01', '01.12.2026', 'not-a-date', '2026-12-1', ''] as $bad) {
+			try {
+				$this->lines->method('findByClaim')->willReturn([]);
+				$this->svc->addLine($this->draftClaim(), $this->receiptParams(['occurred_on' => $bad]), [], 'u1');
+				$this->fail("date {$bad} accepted");
+			} catch (ValidationException $e) {
+				$this->assertSame('invalid_date', $e->getFields()['occurred_on']);
+			}
+		}
+	}
+
+	public function testForeignAmountMustBePositive(): void {
+		$this->categories->method('findById')->willReturn($this->category([]));
+		foreach (['0', '-5.00'] as $bad) {
+			try {
+				$this->lines->method('findByClaim')->willReturn([]);
+				$this->svc->addLine($this->draftClaim(), $this->receiptParams([
+					'foreign_amount' => $bad, 'foreign_currency' => 'USD', 'foreign_fx' => '1.10']), [], 'u1');
+				$this->fail("foreign_amount {$bad} accepted");
+			} catch (ValidationException $e) {
+				$this->assertSame('invalid_amount', $e->getFields()['foreign_amount']);
+			}
+		}
+	}
+
+	public function testForeignFxZeroRejected(): void {
+		$this->categories->method('findById')->willReturn($this->category([]));
+		try {
+			$this->lines->method('findByClaim')->willReturn([]);
+			$this->svc->addLine($this->draftClaim(), $this->receiptParams([
+				'foreign_amount' => '5.00', 'foreign_currency' => 'USD', 'foreign_fx' => '0']), [], 'u1');
+			$this->fail('zero fx accepted');
+		} catch (ValidationException $e) {
+			$this->assertSame('invalid_fx', $e->getFields()['foreign_fx']);
+		}
+	}
+
+	public function testMileageQtyMustBePositive(): void {
+		$this->categories->method('findById')->willReturn($this->category([]));
+		foreach (['0', '-1.5'] as $bad) {
+			try {
+				$this->lines->method('findByClaim')->willReturn([]);
+				$this->svc->addLine($this->draftClaim(), $this->receiptParams([
+					'line_type' => 'mileage', 'qty' => $bad, 'rate_code' => 'KM']), [], 'u1');
+				$this->fail("qty {$bad} accepted");
+			} catch (ValidationException $e) {
+				$this->assertSame('invalid_amount', $e->getFields()['qty']);
+			}
+		}
+	}
+
+	public function testMileageRateCodeRequired(): void {
+		$this->categories->method('findById')->willReturn($this->category([]));
+		try {
+			$this->lines->method('findByClaim')->willReturn([]);
+			$this->svc->addLine($this->draftClaim(), $this->receiptParams([
+				'line_type' => 'mileage', 'qty' => '10']), [], 'u1');
+			$this->fail('missing rate_code accepted');
+		} catch (ValidationException $e) {
+			$this->assertSame('required', $e->getFields()['rate_code']);
+		}
+	}
+
+	public function testTipParsedToMinor(): void {
+		$this->categories->method('findById')->willReturn($this->category([]));
+		$this->lines->method('findByClaim')->willReturn([]);
+		$line = $this->svc->addLine($this->draftClaim(), $this->receiptParams(['tip' => '1.50']), [], 'u1');
+		$this->assertSame(150, $line->getTipMinor());
+		$line2 = $this->svc->addLine($this->draftClaim(), $this->receiptParams(['tip' => '']), [], 'u1');
+		$this->assertNull($line2->getTipMinor());
+	}
+
 	public function testPolicyFlagsComputed(): void {
 		$cat = $this->category(['max' => 500, 'default' => 800]);
 		$this->categories->method('findById')->willReturn($cat);

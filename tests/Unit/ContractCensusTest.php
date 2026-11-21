@@ -73,6 +73,8 @@ final class ContractCensusTest extends TestCase
 		// middleware / session layer
 		'CSRF_FAILED', 'NOT_FOUND', 'SESSION_INVALID', 'SEAT_REVOKED',
 		'LICENSE_SEAT_REVOKED',
+		// §11.4 IThrottler 429 on submit/decision griefing surfaces
+		'RATE_LIMITED',
 	];
 
 	/**

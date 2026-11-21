@@ -55,8 +55,26 @@ class ClaimApiController extends AApiController
 		private readonly ExpChainService $chain,
 		private readonly \OCA\ExpenseCheck\Service\LookupService $lookupService,
 		private readonly \OCP\IDBConnection $db,
+		private readonly \OCP\Security\Bruteforce\IThrottler $throttler,
 	) {
 		parent::__construct(Application::APP_ID, $request, $access);
+	}
+
+	/**
+	 * Spec §11.4 — submit/decision are griefing surfaces (claim spam floods
+	 * approver inboxes). Every call registers an attempt; bursts hit
+	 * progressive delay then a hard 429.
+	 */
+	private function throttle(string $action): void
+	{
+		$ip = (string)$this->request->getRemoteAddress();
+		$this->throttler->registerAttempt($action, $ip, ['uid' => $this->uid()]);
+		try {
+			$this->throttler->sleepDelayOrThrowOnMax($ip, $action);
+		} catch (\OCP\Security\Bruteforce\MaxDelayReached) {
+			throw new \OCA\ExpenseCheck\Exception\DomainException(
+				'RATE_LIMITED', 'Too many requests — slow down and retry.', 429);
+		}
 	}
 
 	#[NoCSRFRequired]
@@ -233,6 +251,7 @@ class ClaimApiController extends AApiController
 	#[NoAdminRequired]
 	public function submit(): JSONResponse
 	{
+		$this->throttle('expensecheck_submit');
 		$claim = $this->lifecycle->loadVisible($this->routeId(), $this->uid());
 		$b = $this->body();
 		$ver = isset($b['version']) ? (int)$b['version'] : null;
@@ -274,6 +293,7 @@ class ClaimApiController extends AApiController
 	#[NoAdminRequired]
 	public function decide(): JSONResponse
 	{
+		$this->throttle('expensecheck_decide');
 		$claim = $this->lifecycle->loadVisible($this->routeId(), $this->uid());
 		$b = $this->body();
 		$ver = isset($b['version']) ? (int)$b['version'] : null;
@@ -388,10 +408,8 @@ class ClaimApiController extends AApiController
 
 	private function isConcurrencyViolation(\Throwable $e): bool
 	{
-		$msg = strtolower($e->getMessage());
-		// Unique-key collision AND InnoDB insert-vs-insert deadlocks on the
-		// same unique index — both mean a sibling request won the key.
-		return str_contains($msg, 'unique') || str_contains($msg, 'duplicate')
-			|| str_contains($msg, 'deadlock') || str_contains($msg, 'serialization');
+		// Unique-key collision AND insert-vs-insert deadlocks/serialization
+		// failures on the same unique index — cross-DB via SqlErrors.
+		return \OCA\ExpenseCheck\Db\SqlErrors::isConcurrencyViolation($e);
 	}
 }

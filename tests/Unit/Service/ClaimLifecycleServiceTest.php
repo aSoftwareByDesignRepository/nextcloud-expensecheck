@@ -307,6 +307,71 @@ final class ClaimLifecycleServiceTest extends TestCase
 		$this->assertSame('req-1', $c->getRequestKey());
 	}
 
+	public function testCreateDraftRemainingFieldsAndTimestamps(): void
+	{
+		$claims = $this->createMock(ClaimMapper::class);
+		$claims->method('findByClaimNo')->willReturn(new Claim());
+		$claims->method('insert')->willReturnCallback(function (Claim $c) {
+			$c->setId(99); return $c;
+		});
+		$this->claims = $claims;
+		$c = $this->makeSvc()->createDraft('u1', 'T', 'EUR', null,
+			['kind' => 'correction', 'corrects_claim_no' => '  EXP-2026-00001  ']);
+		$this->assertSame('1.000000', $c->getFxRate());
+		$this->assertSame('correction', $c->getKind());
+		// whitespace-trimmed before existence check + storage
+		$this->assertSame('EXP-2026-00001', $c->getCorrectsClaimNo());
+		$this->assertNotNull($c->getCreatedAt());
+		$this->assertNotNull($c->getUpdatedAt());
+		$this->assertNull($c->getAzcTripId());
+	}
+
+	public function testCreateDraftTitleBoundaryAndMultibyte(): void
+	{
+		$claims = $this->createMock(ClaimMapper::class);
+		$claims->method('insert')->willReturnCallback(function (Claim $c) {
+			$c->setId(99); return $c;
+		});
+		$this->claims = $claims;
+		// exactly 191 chars is legal (mutant: >191 → >=191 must stay green)
+		$c = $this->makeSvc()->createDraft('u1', str_repeat('a', 191), 'EUR');
+		$this->assertSame(191, mb_strlen($c->getTitle()));
+		// 191 multibyte chars: mb_strlen is the contract, byte length irrelevant
+		$c = $this->makeSvc()->createDraft('u1', str_repeat('ä', 191), 'EUR');
+		$this->assertSame(191, mb_strlen($c->getTitle()));
+		try {
+			$this->makeSvc()->createDraft('u1', str_repeat('a', 192), 'EUR');
+			$this->fail('192-char title accepted');
+		} catch (\OCA\ExpenseCheck\Exception\ValidationException $e) {
+			$this->assertSame('required', $e->getFields()['title']);
+		}
+	}
+
+	public function testCreateDraftCurrencyAnchors(): void
+	{
+		foreach (['XEUR', 'EURX', 'EU', 'EURO', 'E1R', 'eUR'] as $bad) {
+			try {
+				$this->makeSvc()->createDraft('u1', 'T', $bad);
+				$this->fail("currency {$bad} accepted");
+			} catch (\OCA\ExpenseCheck\Exception\ValidationException $e) {
+				$this->assertSame('invalid', $e->getFields()['currency']);
+			}
+		}
+	}
+
+	public function testCreateDraftAzcTripIdNonPositiveIsNull(): void
+	{
+		$claims = $this->createMock(ClaimMapper::class);
+		$claims->method('insert')->willReturnCallback(function (Claim $c) {
+			$c->setId(99); return $c;
+		});
+		$this->claims = $claims;
+		foreach ([0, -5] as $v) {
+			$c = $this->makeSvc()->createDraft('u1', 'T', 'EUR', null, ['azc_trip_id' => $v]);
+			$this->assertNull($c->getAzcTripId(), "azc_trip_id {$v} must normalise to null");
+		}
+	}
+
 	/* ---------- submit gates ---------- */
 
 	public function testSubmitVersionConflict(): void

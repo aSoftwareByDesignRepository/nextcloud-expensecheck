@@ -25,6 +25,11 @@ final class ExifStripTest extends TestCase
 	protected function setUp(): void
 	{
 		parent::setUp();
+		if (!function_exists('imagecreatetruecolor')) {
+			// GD-less runtimes (e.g. the infection mutation image): the
+			// production reencode path cannot run without GD anyway.
+			$this->markTestSkipped('gd extension required');
+		}
 		$this->svc = new AttachmentService(
 			$this->createMock(AttachmentMapper::class),
 			$this->createMock(IRootFolder::class),

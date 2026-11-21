@@ -186,6 +186,137 @@ final class ClaimSerializerTest extends TestCase
 		$this->assertSame('draft', $d['from_status']);
 	}
 
+	/**
+	 * Mutation fence: every DTO slot carries a distinct sentinel and is
+	 * asserted by exact value — kills ArrayItem/ArrayItemRemoval swaps that
+	 * assertArrayHasKey alone cannot see.
+	 */
+	public function testSummaryEveryValueIsExact(): void
+	{
+		$c = $this->claim();
+		$c->setDecidedAt(new \DateTime('2026-11-02 11:00:00'));
+		$c->setDecidedBy('boss');
+		$c->setSettledAt(new \DateTime('2026-11-03 12:00:00'));
+		$c->setUpdatedAt(new \DateTime('2026-11-04 13:00:00'));
+		$s = ClaimSerializer::summary($c);
+		$this->assertSame(7, $s['id']);
+		$this->assertSame('EXP-2026-00007', $s['claim_no']);
+		$this->assertSame('Trip', $s['title']);
+		$this->assertSame('approved', $s['status']);
+		$this->assertSame('EUR', $s['currency']);
+		$this->assertSame(1500, $s['total_minor']);
+		$this->assertSame(1200, $s['reimbursable_minor']);
+		$this->assertSame(300, $s['nonreimbursable_minor']);
+		$this->assertSame('alice', $s['owner']);
+		$this->assertSame('regular', $s['kind']);
+		$this->assertSame('EXP-2026-00001', $s['corrects_claim_no']);
+		$this->assertSame(42, $s['azc_trip_id']);
+		$this->assertSame('2026-11-01 09:00:00', $s['submitted_at']);
+		$this->assertSame('2026-11-02 11:00:00', $s['decided_at']);
+		$this->assertSame('boss', $s['decided_by']);
+		$this->assertSame('2026-11-03 12:00:00', $s['settled_at']);
+		$this->assertSame(4, $s['version']);
+		$this->assertSame('2026-11-04 13:00:00', $s['updated_at']);
+	}
+
+	public function testLineDtoEveryValueIsExact(): void
+	{
+		$l = new ClaimLine();
+		$l->setId(11);
+		$l->setLineType('mileage');
+		$l->setOccurredOn(new \DateTime('2026-10-06'));
+		$l->setCategoryId(12);
+		$l->setMerchant('Shell');
+		$l->setDescription('fuel');
+		$l->setAmountMinor(4321);
+		$l->setTaxMinor(700);
+		$l->setTaxRate('19.00');
+		$l->setForeignAmountMinor(5000);
+		$l->setForeignCurrency('USD');
+		$l->setForeignFx('1.080000');
+		$l->setDistanceKm('12.50');
+		$l->setDays('1.00');
+		$l->setQuantity('2.00');
+		$l->setRateCode('KM-PRIV');
+		$l->setRateMinor(30);
+		$l->setRateName('Private car');
+		$l->setJustification('client visit');
+		$l->setReimbursable(1);
+		$l->setDistanceSource('mc_segment');
+		$l->setAttendees('bob,carol');
+		$l->setOccasion('kickoff');
+		$l->setTipMinor(150);
+		$l->setPolicyFlags('{"over_threshold":true}');
+		$l->setSourceApp('mobilitycheck');
+		$l->setSourceRef('seg-77');
+		$a = new ClaimAllocation();
+		$a->setCostCenterId(31);
+		$a->setSharePercent(10000);
+		$a->setAmountMinor(4321);
+		$a->setPcProjectId(88);
+		$att = new Attachment();
+		$d = $this->svc(allocations: [$a], lineAttachments: [$att])->lineDto($l);
+		$this->assertSame([
+			'id' => 11, 'line_type' => 'mileage', 'occurred_on' => '2026-10-06',
+			'category_id' => 12, 'merchant' => 'Shell', 'description' => 'fuel',
+			'amount_minor' => 4321, 'tax_minor' => 700, 'tax_rate' => '19.00',
+			'foreign_amount_minor' => 5000, 'foreign_currency' => 'USD',
+			'foreign_fx' => '1.080000', 'distance_km' => '12.50',
+			'days' => '1.00', 'quantity' => '2.00', 'rate_code' => 'KM-PRIV',
+			'rate_minor' => 30, 'rate_name' => 'Private car',
+			'justification' => 'client visit', 'reimbursable' => true,
+			'distance_source' => 'mc_segment', 'attendees' => 'bob,carol',
+			'occasion' => 'kickoff', 'tip_minor' => 150,
+			'policy_flags' => ['over_threshold' => true],
+			'source_app' => 'mobilitycheck', 'source_ref' => 'seg-77',
+			'allocations' => [[
+				'cost_center_id' => 31, 'share_percent' => '10000',
+				'amount_minor' => 4321, 'pc_project_id' => 88,
+			]],
+			'attachment_count' => 1,
+		], $d);
+	}
+
+	public function testAttachmentAndEventDtoEveryValueIsExact(): void
+	{
+		$a = new Attachment();
+		$a->setId(21); $a->setClaimId(7); $a->setLineId(3);
+		$a->setInbox(1); $a->setName('receipt.jpg'); $a->setMime('image/jpeg');
+		$a->setSize(2048); $a->setSha256('deadbeef');
+		$this->assertSame([
+			'id' => 21, 'claim_id' => 7, 'line_id' => 3, 'inbox' => true,
+			'name' => 'receipt.jpg', 'mime' => 'image/jpeg',
+			'size' => 2048, 'sha256' => 'deadbeef',
+		], ClaimSerializer::attachmentDto($a));
+
+		$e = new ClaimEvent();
+		$e->setSeq(9); $e->setEvent('submitted'); $e->setActor('alice');
+		$e->setFromStatus('draft'); $e->setToStatus('submitted');
+		$e->setTombstoned(0); $e->setPayload('{"step":1}');
+		$e->setCreatedAt(new \DateTime('2026-11-01 09:00:00'));
+		$this->assertSame([
+			'seq' => 9, 'event' => 'submitted', 'actor' => 'alice',
+			'from_status' => 'draft', 'to_status' => 'submitted',
+			'tombstoned' => false, 'payload' => ['step' => 1],
+			'created_at' => '2026-11-01 09:00:00',
+		], ClaimSerializer::eventDto($e));
+	}
+
+	public function testDetailDecisionRowEveryValueIsExact(): void
+	{
+		$d = new StepDecision();
+		$d->setStepNo(2);
+		$d->setDecidedBy('boss');
+		$d->setDecision('approved');
+		$d->setNote('ok go');
+		$d->setCreatedAt(new \DateTime('2026-11-05 08:30:00'));
+		$out = $this->svc(decisions: [$d])->detail($this->claim());
+		$this->assertSame([[
+			'step_no' => 2, 'decided_by' => 'boss', 'decision' => 'approved',
+			'note' => 'ok go', 'created_at' => '2026-11-05 08:30:00',
+		]], $out['decisions']);
+	}
+
 	public function testDetailComposesSubsections(): void
 	{
 		$l = new ClaimLine();

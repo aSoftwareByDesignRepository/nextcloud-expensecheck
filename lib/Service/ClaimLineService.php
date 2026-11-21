@@ -161,8 +161,7 @@ class ClaimLineService
 
 	private function isUniqueViolation(\Throwable $e): bool
 	{
-		$msg = strtolower($e->getMessage());
-		return str_contains($msg, 'unique') || str_contains($msg, 'duplicate');
+		return \OCA\ExpenseCheck\Db\SqlErrors::isUniqueViolation($e);
 	}
 
 	private function buildLine(Claim $claim, ClaimLine $line, array $p, bool $lateSyncAccept = false): ClaimLine

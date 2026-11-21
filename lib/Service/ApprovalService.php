@@ -39,6 +39,7 @@ class ApprovalService
 		private readonly ITimeFactory $timeFactory,
 		private readonly PostCommitEffectQueue $postCommit,
 		private readonly NotificationService $notify,
+		private readonly SettingsService $settings,
 	) {
 	}
 
@@ -63,8 +64,14 @@ class ApprovalService
 		}
 		$stepNo = $claim->getCurrentStep();
 		$rights = $this->routing->decisionRights($snapshot, $stepNo, $actorUid, $this->timeFactory->getDateTime(), $this->delegates);
-		if (!$rights['allowed'] || $actorUid === $claim->getUserId()) {
-			throw new ClaimNotFoundException(); // uniform 404 — no existence oracle, no self-approve
+		if (!$rights['allowed']) {
+			throw new ClaimNotFoundException(); // uniform 404 — no existence oracle
+		}
+		if ($actorUid === $claim->getUserId()
+			&& !$this->settings->getBool(SettingsService::KEY_ALLOW_SELF_APPROVE)) {
+			// Claimant knows their own claim exists — a real 403 with the
+			// stable error code is honest and leaks nothing (spec §10.4).
+			throw new DomainException('SELF_APPROVAL_DENIED', 'You cannot decide on your own claim.', 403);
 		}
 
 		$this->db->beginTransaction();

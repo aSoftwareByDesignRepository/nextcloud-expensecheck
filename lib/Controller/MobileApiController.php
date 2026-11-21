@@ -54,8 +54,22 @@ class MobileApiController extends AApiController
 		private readonly LicenseService $license,
 		private readonly SettingsService $settings,
 		private readonly \OCA\ExpenseCheck\Service\LookupService $lookupService,
+		private readonly \OCP\Security\Bruteforce\IThrottler $throttler,
 	) {
 		parent::__construct(Application::APP_ID, $request, $access);
+	}
+
+	/** Spec §11.4 — same griefing surface as the web routes, via app_password. */
+	private function throttle(string $action): void
+	{
+		$ip = (string)$this->request->getRemoteAddress();
+		$this->throttler->registerAttempt($action, $ip, ['uid' => $this->uid()]);
+		try {
+			$this->throttler->sleepDelayOrThrowOnMax($ip, $action);
+		} catch (\OCP\Security\Bruteforce\MaxDelayReached) {
+			throw new \OCA\ExpenseCheck\Exception\DomainException(
+				'RATE_LIMITED', 'Too many requests — slow down and retry.', 429);
+		}
 	}
 
 	private function contractCheck(): void
@@ -157,6 +171,7 @@ class MobileApiController extends AApiController
 	public function submitClaim(): JSONResponse
 	{
 		$this->contractCheck();
+		$this->throttle('expensecheck_submit');
 		$claim = $this->lifecycle->loadVisible($this->routeId(), $this->uid());
 		$b = $this->body();
 		$ver = isset($b['version']) ? (int)$b['version'] : null;
@@ -179,6 +194,7 @@ class MobileApiController extends AApiController
 	public function decide(): JSONResponse
 	{
 		$this->contractCheck();
+		$this->throttle('expensecheck_decide');
 		$claim = $this->lifecycle->loadVisible($this->routeId(), $this->uid());
 		$b = $this->body();
 		$ver = isset($b['version']) ? (int)$b['version'] : null;

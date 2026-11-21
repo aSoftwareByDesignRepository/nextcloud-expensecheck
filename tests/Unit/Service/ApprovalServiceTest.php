@@ -18,6 +18,7 @@ use OCA\ExpenseCheck\Service\ChainRoutingService;
 use OCA\ExpenseCheck\Service\ExpChainService;
 use OCA\ExpenseCheck\Service\NotificationService;
 use OCA\ExpenseCheck\Service\PostCommitEffectQueue;
+use OCA\ExpenseCheck\Service\SettingsService;
 use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\IDBConnection;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -31,6 +32,7 @@ final class ApprovalServiceTest extends TestCase
 	private ChainRoutingService&MockObject $routing;
 	private IDBConnection&MockObject $db;
 	private ExpChainService&MockObject $chain;
+	private SettingsService&MockObject $settings;
 	private ApprovalService $svc;
 
 	protected function setUp(): void
@@ -39,6 +41,7 @@ final class ApprovalServiceTest extends TestCase
 		$this->claims = $this->createStub(ClaimMapper::class);
 		$this->routing = $this->createStub(ChainRoutingService::class);
 		$this->db = $this->createStub(IDBConnection::class);
+		$this->settings = $this->createStub(SettingsService::class);
 		$time = $this->createStub(ITimeFactory::class);
 		$time->method('getDateTime')->willReturn(new \DateTime('2026-01-01 00:00:00'));
 		$this->svc = new ApprovalService(
@@ -52,6 +55,7 @@ final class ApprovalServiceTest extends TestCase
 			$time,
 			new PostCommitEffectQueue($this->createStub(IDBConnection::class), $this->createStub(LoggerInterface::class)),
 			$this->createStub(NotificationService::class),
+			$this->settings,
 		);
 	}
 
@@ -214,12 +218,36 @@ final class ApprovalServiceTest extends TestCase
 		$this->svc->decide($this->submittedClaim(), 'approved', 'stranger', null);
 	}
 
-	public function testSelfApproveBlockedBy404(): void
+	public function testSelfApproveDeniedWhenFlagOff(): void
 	{
-		// even if rights say allowed, owner deciding own claim → 404 (no oracle).
+		// Routed as approver of own claim but org forbids self-approval →
+		// SELF_APPROVAL_DENIED 403 (claimant knows the claim exists; spec §10.4).
 		$this->routing->method('decisionRights')->willReturn(['allowed' => true, 'on_behalf_of' => null]);
-		$this->expectException(ClaimNotFoundException::class);
-		$this->svc->decide($this->submittedClaim('alice'), 'approved', 'alice', null);
+		$this->settings->method('getBool')->with(SettingsService::KEY_ALLOW_SELF_APPROVE)->willReturn(false);
+		try {
+			$this->svc->decide($this->submittedClaim('alice'), 'approved', 'alice', null);
+			$this->fail('self-approval accepted with flag off');
+		} catch (DomainException $e) {
+			$this->assertSame('SELF_APPROVAL_DENIED', $e->getErrorCode());
+			$this->assertSame(403, $e->getHttpStatus());
+		}
+	}
+
+	public function testSelfApprovePermittedWhenFlagOn(): void
+	{
+		// flag on + routed approver = claimant → decision proceeds (single-person
+		// org path; spec §10.7 allow_self_approve). Previously this deadlocked:
+		// routing let the claim in but decide() hard-404'd forever.
+		$this->routing->method('decisionRights')->willReturn(['allowed' => true, 'on_behalf_of' => null]);
+		$this->settings->method('getBool')->with(SettingsService::KEY_ALLOW_SELF_APPROVE)->willReturn(true);
+		$this->decisions->method('findForStep')->willReturn(null);
+		$this->decisions->method('insert')->willReturnArgument(0);
+		$this->claims->method('updateWithVersion')->willReturn(true);
+		$this->chain->method('append')->willReturn($this->createStub(\OCA\ExpenseCheck\Db\ClaimEvent::class));
+		$this->db->expects($this->once())->method('commit');
+		$out = $this->svc->decide($this->submittedClaim('alice'), 'approved', 'alice', null);
+		$this->assertSame('approved', $out->getStatus());
+		$this->assertSame('alice', $out->getDecidedBy());
 	}
 
 	public function testStepAlreadyDecidedStatusCode(): void
