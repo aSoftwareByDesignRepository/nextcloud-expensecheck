@@ -9,6 +9,7 @@ use OCA\ExpenseCheck\ConfigTransfer\TransferReceiptStore;
 use OCA\ExpenseCheck\Exception\ClaimNotFoundException;
 use OCA\ExpenseCheck\Service\AccessControlService;
 use OCA\ExpenseCheck\Service\ClaimLifecycleService;
+use OCA\ExpenseCheck\Service\LicenseService;
 use OCA\ExpenseCheck\Support\AssetRegistrar;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
@@ -18,6 +19,7 @@ use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IL10N;
 use OCP\IRequest;
 use OCP\IURLGenerator;
+use OCP\IUserManager;
 use OCP\IUserSession;
 use OCP\Util;
 
@@ -61,6 +63,8 @@ class PageController extends Controller
 		private readonly \OCA\ExpenseCheck\Db\AttachmentMapper $attachments,
 		private readonly \OCP\IConfig $config,
 		private readonly \OCA\ExpenseCheck\Service\GlossaryService $glossary,
+		private readonly LicenseService $licenseService,
+		private readonly IUserManager $userManager,
 	) {
 		parent::__construct($appName, $request);
 	}
@@ -77,6 +81,10 @@ class PageController extends Controller
 		Util::addScript(Application::APP_ID, 'common/view-components');
 		Util::addScript(Application::APP_ID, 'common/glossary');
 		Util::addScript(Application::APP_ID, 'pages/app-views');
+		if ($pageId === 'license') {
+			Util::addStyle(Application::APP_ID, 'common/license-page');
+			Util::addScript(Application::APP_ID, 'common/license-page');
+		}
 		if (($params['settingsSection'] ?? '') === 'transfer') {
 			Util::addStyle(Application::APP_ID, 'common/transfer');
 			Util::addScript(Application::APP_ID, 'transfer-bridge');
@@ -414,6 +422,13 @@ class PageController extends Controller
 			return new NotFoundResponse();
 		}
 		$params = ['settingsSection' => $section];
+		if ($section === 'support') {
+			$params['supportUsLinks'] = new \OCA\ExpenseCheck\Support\SupportUsLinks(
+				'ExpenseCheck',
+				true,
+				$this->urlGenerator->linkToRouteAbsolute('expensecheck.page.license') . '#exp-license-page',
+			);
+		}
 		if ($section === 'transfer') {
 			$params['isSystemAdmin'] = $this->access->isSystemAdmin($this->access->currentUserId());
 			$params['transferLastReceipt'] = $this->transferReceipts->lastReceipt();
@@ -432,6 +447,52 @@ class PageController extends Controller
 		if (!$this->access->isAppAdmin($this->access->currentUserId())) {
 			return new NotFoundResponse();
 		}
-		return $this->render('license');
+		$state = $this->licenseService->state();
+		$license = null;
+		if ($state !== null) {
+			$license = [
+				'active' => $state['valid'],
+				'cryptographicallyValid' => true,
+				'dateValid' => $state['valid'],
+				'validUntil' => $state['validUntil'],
+				'customerId' => $state['customerId'],
+			];
+		} elseif ($this->licenseService->hasStoredKey()) {
+			// Stored but unverifiable — the template's signature warning.
+			$license = ['active' => false, 'cryptographicallyValid' => false, 'dateValid' => true, 'validUntil' => '', 'customerId' => ''];
+		}
+		$inventory = $this->licenseService->seatInventory();
+		$seats = array_map(function (array $s): array {
+			$uid = (string)$s['uid'];
+			$user = $this->userManager->get($uid);
+			return [
+				'userId' => $uid,
+				'displayName' => $user !== null ? $user->getDisplayName() : $uid,
+				'assignedAt' => (string)($s['assigned_at'] ?? ''),
+			];
+		}, $inventory['seats']);
+		return $this->render('license', [
+			'license' => $license,
+			'productCode' => 'EXP2',
+			'companionText' => $this->l10n->t('the ExpenseCheck mobile companion app'),
+			'seatAppName' => $this->l10n->t('the ExpenseCheck mobile companion app'),
+			'mobileSeatsUsed' => (int)$inventory['used'],
+			'mobileSeatsLimit' => (int)$inventory['total'],
+			'mobileSeats' => $seats,
+			'showMobileSeats' => true,
+			'showTerminal' => false,
+			'terminals' => [],
+			'instanceId' => '',
+			'instanceBound' => false,
+			'licenseRenewMailto' => 'mailto:info@software-by-design.de?subject=' . rawurlencode('ExpenseCheck License (EXP2)'),
+			'productsUrl' => 'https://nextcloud.software-by-design.de/',
+			'apiLicenseUrl' => $this->urlGenerator->linkToRoute('expensecheck.license.apply'),
+			'apiClearLicenseUrl' => $this->urlGenerator->linkToRoute('expensecheck.license.remove'),
+			'apiSeatsUrl' => $this->urlGenerator->linkToRoute('expensecheck.license.seats'),
+			'apiSeatsBatchUrl' => '',
+			'apiRemoveSeatUrl' => $this->urlGenerator->linkToRoute('expensecheck.license.removeSeatPost'),
+			'apiSearchUsersUrl' => $this->urlGenerator->linkToRoute('expensecheck.adminApi.directoryUsers'),
+			'requesttoken' => Util::callRegister(),
+		]);
 	}
 }

@@ -1400,20 +1400,6 @@
 		})();
 	};
 
-	views.license = function () {
-		var body = document.getElementById('exp-license-body');
-		listFetch(body, null, function () { return api('/license'); }, function (d) {
-			var lic = d && d.license;
-			if (!lic) {
-				body.appendChild(el('p', { class: 'exp-muted', text: t('No license installed') }));
-				return;
-			}
-			body.appendChild(el('p', { text: t('Status') + ': ' + (lic.valid ? t('Valid') : t('Expired')) }));
-			if (lic.valid_until) body.appendChild(el('p', { text: t('Valid until') + ': ' + fmtDate(lic.valid_until) }));
-			if (lic.mobile_seats !== undefined && lic.mobile_seats !== null) body.appendChild(el('p', { text: t('Mobile seats') + ': ' + lic.mobile_seats }));
-		})();
-	};
-
 	views.index = function () {
 		var btn = document.getElementById('exp-ob-dismiss');
 		var card = document.getElementById('exp-onboarding');

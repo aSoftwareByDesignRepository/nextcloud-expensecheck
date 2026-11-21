@@ -537,7 +537,12 @@ class AdminApiController extends AApiController
 			$uid = $u->getUID();
 			if (!isset($seen[$uid])) {
 				$seen[$uid] = true;
-				$out[] = ['uid' => $uid, 'name' => $u->getDisplayName()];
+				$out[] = [
+					'uid' => $uid,
+					'name' => $u->getDisplayName(),
+					'displayName' => $u->getDisplayName(),
+					'hasSeat' => $this->license->hasSeat($uid),
+				];
 			}
 		};
 		foreach ($this->userManager->search($q, 25) as $u) {

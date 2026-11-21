@@ -129,6 +129,16 @@ class LicenseService
 	}
 
 	/**
+	 * True when a key string is stored even if it fails verification —
+	 * the license page uses this to surface the "stored but invalid"
+	 * signature warning instead of the plain empty state.
+	 */
+	public function hasStoredKey(): bool
+	{
+		return $this->storedKey() !== '';
+	}
+
+	/**
 	 * Seat inventory: total purchased, assigned count, per-user assignments.
 	 * @return array{total:int,used:int,seats:list<array{uid:string,assigned_at:string}>}
 	 */
