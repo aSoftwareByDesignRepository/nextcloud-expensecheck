@@ -72,12 +72,8 @@ class PageController extends Controller
 	private function render(string $pageId, array $params = []): TemplateResponse|NotFoundResponse
 	{
 		AssetRegistrar::registerStyles();
-		Util::addScript(Application::APP_ID, 'app');
-		Util::addScript(Application::APP_ID, 'common/toasts');
-		Util::addScript(Application::APP_ID, 'common/mobile-nav');
-		Util::addScript(Application::APP_ID, 'common/field-errors');
+		AssetRegistrar::registerScripts();
 		Util::addScript(Application::APP_ID, 'common/error-copy');
-		Util::addScript(Application::APP_ID, 'common/focus-preservation');
 		Util::addScript(Application::APP_ID, 'common/view-components');
 		Util::addScript(Application::APP_ID, 'common/glossary');
 		Util::addScript(Application::APP_ID, 'pages/app-views');
@@ -116,6 +112,7 @@ class PageController extends Controller
 			'roleLabel' => $this->l10n->t(ucfirst($role)),
 			'urls' => $this->pageUrls(),
 			'navGroups' => $this->navGroups($uid, $pageId),
+			'settingsNav' => $this->settingsNav($pageId, (string)($params['settingsSection'] ?? '')),
 			'footerPartial' => __DIR__ . '/../../templates/parts/feedback-nav-footer.php',
 			'clientHints' => ['locale' => 'en-US', 'htmlLang' => 'en-US', 'timezone' => 'UTC'],
 			'brandTitle' => 'ExpenseCheck',
@@ -181,11 +178,34 @@ class PageController extends Controller
 				['id' => 'rates', 'label' => $this->l10n->t('Rates'), 'href' => $this->urlGenerator->linkToRoute('expensecheck.page.rates'), 'icon' => 'activity', 'active' => $active === 'rates'],
 				['id' => 'cost-centers', 'label' => $this->l10n->t('Cost centers'), 'href' => $this->urlGenerator->linkToRoute('expensecheck.page.costCenters'), 'icon' => 'layout-grid', 'active' => $active === 'cost-centers'],
 				['id' => 'chains', 'label' => $this->l10n->t('Chains'), 'href' => $this->urlGenerator->linkToRoute('expensecheck.page.chains'), 'icon' => 'repeat', 'active' => $active === 'chains'],
-				['id' => 'settings', 'label' => $this->l10n->t('Settings'), 'href' => $this->urlGenerator->linkToRoute('expensecheck.page.settings'), 'icon' => 'settings', 'active' => $active === 'settings'],
 				['id' => 'license', 'label' => $this->l10n->t('License'), 'href' => $this->urlGenerator->linkToRoute('expensecheck.page.license'), 'icon' => 'shield', 'active' => $active === 'license'],
 			]];
 		}
 		return $groups;
+	}
+
+	/**
+	 * Settings sections as their own nav group (family parity — the
+	 * "Support us" entry users look for lives here, not inside a chip bar).
+	 * Admin-only: every section route 404s for non-admins.
+	 * @return list<array<string,mixed>>
+	 */
+	private function settingsNav(string $activePage, string $section): array
+	{
+		if (!$this->access->isAppAdmin($this->access->currentUserId())) {
+			return [];
+		}
+		$items = [];
+		foreach (\OCA\ExpenseCheck\Service\SettingsSectionCatalog::labels($this->l10n) as $slug => $label) {
+			$items[] = [
+				'id' => 'settings-' . $slug,
+				'label' => $label,
+				'href' => $this->urlGenerator->linkToRoute('expensecheck.page.settingsSection', ['section' => $slug]),
+				'icon' => 'settings',
+				'active' => $activePage === 'settings' && ($section === $slug || ($slug === 'general' && $section === '')),
+			];
+		}
+		return $items;
 	}
 
 	#[NoAdminRequired] #[NoCSRFRequired]
