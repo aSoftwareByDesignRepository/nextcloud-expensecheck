@@ -74,6 +74,7 @@ page#chains|GET|/chains|
 page#claimDetail|GET|/claims/{id}|
 page#claims|GET|/claims|
 page#costCenters|GET|/cost-centers|
+page#getTheApp|GET|/get-the-app|
 page#inbox|GET|/inbox|
 page#index|GET|/|
 page#license|GET|/license|
