@@ -26,6 +26,9 @@
 		"_%n receipt to file_::_%n receipts to file_": [
 			"%n makbuz dosyalanacak"
 		],
+		"_%n pending_::_%n pending_": [
+			"%n bekliyor"
+		],
 		"_1 result_::_%n results_": [
 			"%n sonuç"
 		],
@@ -727,10 +730,6 @@
 		"{n} pending": "{n} bekliyor",
 		"_… and %n more_::_… and %n more_": [
 			"… ve %n tane daha"
-		],
-		"_%n pending_::_%n pending_": [
-			"%n bekliyor",
-			"%n bekliyor"
 		],
 		"… and %n more": "… ve %n tane daha"
 	}

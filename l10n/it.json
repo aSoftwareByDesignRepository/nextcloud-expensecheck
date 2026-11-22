@@ -30,6 +30,10 @@
 			"1 scontrino da archiviare",
 			"%n scontrini da archiviare"
 		],
+		"_%n pending_::_%n pending_": [
+			"%n in sospeso",
+			"%n in sospeso"
+		],
 		"_1 result_::_%n results_": [
 			"1 risultato",
 			"%n risultati"
@@ -734,10 +738,6 @@
 		"_… and %n more_::_… and %n more_": [
 			"… e altre %n",
 			"… e altre %n"
-		],
-		"_%n pending_::_%n pending_": [
-			"%n in sospeso",
-			"%n in sospeso"
 		],
 		"… and %n more": "… e altre %n"
 	}

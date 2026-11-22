@@ -715,7 +715,7 @@ OC.L10N.register(
 	"Your settlement export finished building. Open ExpenseCheck to download it." : "Ödeme dışa aktarımınız hazır. İndirmek için ExpenseCheck’i açın.",
 	"{n} pending" : "{n} bekliyor",
 	"_… and %n more_::_… and %n more_" : ["… ve %n tane daha"],
-	"_%n pending_::_%n pending_" : ["%n bekliyor","%n bekliyor"],
+	"_%n pending_::_%n pending_" : ["%n bekliyor"],
 	"… and %n more" : "… ve %n tane daha"
 	}
 );

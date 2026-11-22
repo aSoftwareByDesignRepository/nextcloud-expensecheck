@@ -30,6 +30,10 @@
 			"1 justificatif à classer",
 			"%n justificatifs à classer"
 		],
+		"_%n pending_::_%n pending_": [
+			"%n en attente",
+			"%n en attente"
+		],
 		"_1 result_::_%n results_": [
 			"1 résultat",
 			"%n résultats"
@@ -734,10 +738,6 @@
 		"_… and %n more_::_… and %n more_": [
 			"… et %n de plus",
 			"… et %n de plus"
-		],
-		"_%n pending_::_%n pending_": [
-			"%n en attente",
-			"%n en attente"
 		],
 		"… and %n more": "… et %n de plus"
 	}

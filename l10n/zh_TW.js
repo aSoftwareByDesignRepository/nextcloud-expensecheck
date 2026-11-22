@@ -715,7 +715,7 @@ OC.L10N.register(
 	"Your settlement export finished building. Open ExpenseCheck to download it." : "您的結算匯出已產生。請開啟 ExpenseCheck 下載。",
 	"{n} pending" : "{n} 待處理 項",
 	"_… and %n more_::_… and %n more_" : ["……還有 %n 筆"],
-	"_%n pending_::_%n pending_" : ["%n 待處理 項","%n 待處理 項"],
+	"_%n pending_::_%n pending_" : ["%n 待處理 項"],
 	"… and %n more" : "……還有 %n 筆"
 	}
 );

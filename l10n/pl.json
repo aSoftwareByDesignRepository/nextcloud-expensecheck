@@ -34,6 +34,11 @@
 			"%n paragony do zarchiwizowania",
 			"%n paragonów do zarchiwizowania"
 		],
+		"_%n pending_::_%n pending_": [
+			"%n oczekuje",
+			"%n oczekują",
+			"%n oczekujących"
+		],
 		"_1 result_::_%n results_": [
 			"1 wynik",
 			"%n wyniki",
@@ -741,10 +746,6 @@
 			"… i %n więcej",
 			"… i %n więcej",
 			"… i %n więcej"
-		],
-		"_%n pending_::_%n pending_": [
-			"%n oczekujące",
-			"%n oczekujące"
 		],
 		"… and %n more": "… i %n więcej"
 	}

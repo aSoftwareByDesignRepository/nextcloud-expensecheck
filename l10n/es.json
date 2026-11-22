@@ -30,6 +30,10 @@
 			"1 recibo por archivar",
 			"%n recibos por archivar"
 		],
+		"_%n pending_::_%n pending_": [
+			"%n pendiente",
+			"%n pendientes"
+		],
 		"_1 result_::_%n results_": [
 			"1 resultado",
 			"%n resultados"
@@ -734,10 +738,6 @@
 		"_… and %n more_::_… and %n more_": [
 			"… y %n más",
 			"… y %n más"
-		],
-		"_%n pending_::_%n pending_": [
-			"%n pendiente",
-			"%n pendientes"
 		],
 		"… and %n more": "… y %n más"
 	}

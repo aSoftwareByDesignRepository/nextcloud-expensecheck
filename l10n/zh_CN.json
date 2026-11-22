@@ -26,6 +26,9 @@
 		"_%n receipt to file_::_%n receipts to file_": [
 			"%n 张收据待归档"
 		],
+		"_%n pending_::_%n pending_": [
+			"%n 待处理 项"
+		],
 		"_1 result_::_%n results_": [
 			"%n 个结果"
 		],
@@ -727,10 +730,6 @@
 		"{n} pending": "{n} 待处理 项",
 		"_… and %n more_::_… and %n more_": [
 			"……还有 %n 条"
-		],
-		"_%n pending_::_%n pending_": [
-			"%n 待处理 项",
-			"%n 待处理 项"
 		],
 		"… and %n more": "……还有 %n 条"
 	}

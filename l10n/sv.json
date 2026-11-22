@@ -30,6 +30,10 @@
 			"1 kvitto att arkivera",
 			"%n kvitton att arkivera"
 		],
+		"_%n pending_::_%n pending_": [
+			"%n väntande",
+			"%n väntande"
+		],
 		"_1 result_::_%n results_": [
 			"1 resultat",
 			"%n resultat"
@@ -734,10 +738,6 @@
 		"_… and %n more_::_… and %n more_": [
 			"… och %n till",
 			"… och %n till"
-		],
-		"_%n pending_::_%n pending_": [
-			"%n väntande",
-			"%n väntande"
 		],
 		"… and %n more": "… och %n till"
 	}

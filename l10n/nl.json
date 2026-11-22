@@ -30,6 +30,10 @@
 			"1 bon te archiveren",
 			"%n bonnen te archiveren"
 		],
+		"_%n pending_::_%n pending_": [
+			"%n in behandeling",
+			"%n in behandeling"
+		],
 		"_1 result_::_%n results_": [
 			"1 resultaat",
 			"%n resultaten"
@@ -734,10 +738,6 @@
 		"_… and %n more_::_… and %n more_": [
 			"… en nog %n",
 			"… en nog %n"
-		],
-		"_%n pending_::_%n pending_": [
-			"%n in behandeling",
-			"%n in behandeling"
 		],
 		"… and %n more": "… en nog %n"
 	}
