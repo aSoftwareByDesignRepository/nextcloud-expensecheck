@@ -7,6 +7,7 @@ namespace OCA\ExpenseCheck\Controller;
 use OCA\ExpenseCheck\AppInfo\Application;
 use OCA\ExpenseCheck\Db\CategoryMapper;
 use OCA\ExpenseCheck\Db\Chain;
+use OCA\ExpenseCheck\Db\ClaimMapper;
 use OCA\ExpenseCheck\Db\ChainMapper;
 use OCA\ExpenseCheck\Db\ChainStep;
 use OCA\ExpenseCheck\Db\ChainStepMapper;
@@ -53,6 +54,7 @@ class AdminApiController extends AApiController
 		private readonly ChainStepMapper $chainSteps,
 		private readonly DelegateMapper $delegates,
 		private readonly ManagerMapMapper $managerMap,
+		private readonly ClaimMapper $claimMapper,
 		private readonly CategoryService $categoryService,
 		private readonly RateCatalogService $rateCatalog,
 		private readonly ExpChainService $chain,
@@ -402,7 +404,11 @@ class AdminApiController extends AApiController
 		$map = $this->managerMap->findByUser($user) ?? new ManagerMap();
 		$map->setUserId($user);
 		$map->setManagerUids(json_encode($managers));
-		$map->setCreatedBy($map->getCreatedBy() ?? $this->uid());
+		if ($map->getCreatedBy() === '') {
+			// Fresh entity carries '' (not null) — a no-op setter would leave
+			// the column out of the INSERT and violate the notnull schema.
+			$map->setCreatedBy($this->uid());
+		}
 		$map->setCreatedAt($map->getCreatedAt() ?? new \DateTime());
 		$map->setUpdatedAt(new \DateTime());
 		$map = $map->getId() === null ? $this->managerMap->insert($map) : $this->managerMap->update($map);
@@ -574,7 +580,11 @@ class AdminApiController extends AApiController
 	public function verifyJournal(): JSONResponse
 	{
 		$this->assertAdmin();
-		return new JSONResponse(['ok' => true, 'verification' => $this->chain->verify((int)$this->request->getParam('claimId'))]);
+		$claimId = (int)$this->request->getParam('claimId');
+		if ($this->claimMapper->findByIdRaw($claimId) === null) {
+			throw new DomainException('CLAIM_NOT_FOUND', 'Claim not found.', 404);
+		}
+		return new JSONResponse(['ok' => true, 'verification' => $this->chain->verify($claimId)]);
 	}
 
 	#[NoCSRFRequired]

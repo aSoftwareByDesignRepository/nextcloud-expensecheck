@@ -110,6 +110,9 @@ class RateCatalogService
 	public function delete(int $id): void
 	{
 		$entry = $this->rates->findById($id);
+		if ($entry === null) {
+			throw new DomainException('RATE_NOT_FOUND', 'Rate not found.', 404);
+		}
 		$today = $this->timeFactory->getDateTime()->format('Y-m-d');
 		if ($entry->getEffectiveFrom()->format('Y-m-d') <= $today) {
 			throw new DomainException('RATE_IMMUTABLE', 'Effective rates cannot be deleted — add a new effective-dated entry.', 409);

@@ -66,6 +66,7 @@ class PageController extends Controller
 		private readonly \OCA\ExpenseCheck\Service\GlossaryService $glossary,
 		private readonly LicenseService $licenseService,
 		private readonly IUserManager $userManager,
+		private readonly \OCA\ExpenseCheck\Db\SettlementBatchMapper $batches,
 	) {
 		parent::__construct($appName, $request);
 	}
@@ -85,8 +86,13 @@ class PageController extends Controller
 		if ($pageId === 'get-the-app') {
 			Util::addStyle(Application::APP_ID, 'get-the-app');
 		}
-		if (($params['settingsSection'] ?? '') === 'transfer') {
+		$expSection = (string)($params['settingsSection'] ?? '');
+		if (in_array($expSection, ['general', 'access', 'transfer'], true)) {
+			// The exp-choice-card recipe lives in the transfer pack but the
+			// access-policy and coexistence radio cards reuse it too.
 			Util::addStyle(Application::APP_ID, 'common/transfer');
+		}
+		if ($expSection === 'transfer') {
 			Util::addScript(Application::APP_ID, 'transfer-bridge');
 			Util::addScript(Application::APP_ID, 'transfer');
 		}
@@ -165,7 +171,7 @@ class PageController extends Controller
 		if ($pending > 0 || $this->access->isFinance($uid) || $this->access->isAuditor($uid) || $this->access->isAppAdmin($uid)) {
 			$item = ['id' => 'inbox', 'label' => $this->l10n->t('Approvals'), 'href' => $this->urlGenerator->linkToRoute('expensecheck.page.inbox'), 'icon' => 'inbox', 'active' => $active === 'inbox'];
 			if ($pending > 0) {
-				$item['hint'] = $this->l10n->t('{n} pending', ['n' => $pending]);
+				$item['hint'] = $this->l10n->n('%n pending', '%n pending', $pending);
 			}
 			$groups[] = ['label' => $this->l10n->t('Approve'), 'items' => [$item]];
 		}
@@ -376,7 +382,8 @@ class PageController extends Controller
 	#[NoAdminRequired] #[NoCSRFRequired]
 	public function settlementDetail(int $batchId): TemplateResponse|NotFoundResponse
 	{
-		if (!$this->access->isFinance($this->access->currentUserId())) {
+		if (!$this->access->isFinance($this->access->currentUserId())
+			|| $this->batches->findById($batchId) === null) {
 			return new NotFoundResponse();
 		}
 		return $this->render('settlement-detail', ['batchId' => $batchId]);
