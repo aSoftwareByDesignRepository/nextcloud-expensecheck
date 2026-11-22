@@ -735,6 +735,10 @@
 			"… e altre %n",
 			"… e altre %n"
 		],
+		"_%n pending_::_%n pending_": [
+			"%n in sospeso",
+			"%n in sospeso"
+		],
 		"… and %n more": "… e altre %n"
 	}
 }

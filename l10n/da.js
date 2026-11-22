@@ -715,6 +715,7 @@ OC.L10N.register(
 	"Your settlement export finished building. Open ExpenseCheck to download it." : "Din afregningseksport er færdig. Åbn ExpenseCheck for at hente den.",
 	"{n} pending" : "{n} afventer",
 	"_… and %n more_::_… and %n more_" : ["… og %n flere","… og %n flere"],
+	"_%n pending_::_%n pending_" : ["%n afventer","%n afventer"],
 	"… and %n more" : "… og %n flere"
 	}
 );

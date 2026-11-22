@@ -713,8 +713,9 @@ OC.L10N.register(
 	"Your numbers" : "您的数据",
 	"Your organisation restricts ExpenseCheck access. You are not on the allowed-users list and you are not a member of any allowed group." : "贵组织限制了 ExpenseCheck 访问。您不在允许用户列表中，也不属于任何允许的群组。",
 	"Your settlement export finished building. Open ExpenseCheck to download it." : "您的结算导出已生成。请打开 ExpenseCheck 下载。",
-	"{n} pending" : "{n} ",
+	"{n} pending" : "{n} 待处理 项",
 	"_… and %n more_::_… and %n more_" : ["……还有 %n 条"],
+	"_%n pending_::_%n pending_" : ["%n 待处理 项","%n 待处理 项"],
 	"… and %n more" : "……还有 %n 条"
 	}
 );

@@ -735,6 +735,10 @@
 			"… e mais %n",
 			"… e mais %n"
 		],
+		"_%n pending_::_%n pending_": [
+			"%n pendente",
+			"%n pendentes"
+		],
 		"… and %n more": "… e mais %n"
 	}
 }

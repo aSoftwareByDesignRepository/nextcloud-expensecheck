@@ -735,6 +735,10 @@
 			"… et %n de plus",
 			"… et %n de plus"
 		],
+		"_%n pending_::_%n pending_": [
+			"%n en attente",
+			"%n en attente"
+		],
 		"… and %n more": "… et %n de plus"
 	}
 }

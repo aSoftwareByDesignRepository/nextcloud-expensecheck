@@ -735,6 +735,10 @@
 			"… og %n flere",
 			"… og %n flere"
 		],
+		"_%n pending_::_%n pending_": [
+			"%n afventer",
+			"%n afventer"
+		],
 		"… and %n more": "… og %n flere"
 	}
 }

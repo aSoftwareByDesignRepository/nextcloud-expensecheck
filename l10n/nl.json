@@ -735,6 +735,10 @@
 			"… en nog %n",
 			"… en nog %n"
 		],
+		"_%n pending_::_%n pending_": [
+			"%n in behandeling",
+			"%n in behandeling"
+		],
 		"… and %n more": "… en nog %n"
 	}
 }

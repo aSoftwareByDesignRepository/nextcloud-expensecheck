@@ -715,6 +715,7 @@ OC.L10N.register(
 	"Your settlement export finished building. Open ExpenseCheck to download it." : "La sua esportazione di liquidazione è pronta. Apra ExpenseCheck per scaricarla.",
 	"{n} pending" : "{n} in attesa",
 	"_… and %n more_::_… and %n more_" : ["… e altre %n","… e altre %n"],
+	"_%n pending_::_%n pending_" : ["%n in sospeso","%n in sospeso"],
 	"… and %n more" : "… e altre %n"
 	}
 );
