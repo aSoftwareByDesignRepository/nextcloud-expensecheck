@@ -35,7 +35,8 @@
       "listSel": "#exp-claims-list",
       "states": [
         "populated",
-        "empty"
+        "empty",
+        "load-error"
       ],
       "emptyDriver": "statusFilter",
       "filterSel": "[data-exp-filter=\"status\"]",
@@ -60,12 +61,24 @@
       "dark": true
     },
     {
+      "id": "claim-decide",
+      "path": "/claims/{pendingId}",
+      "ready": "section[data-exp-view='claim-detail']",
+      "states": [
+        "dialog-approve",
+        "dialog-changes",
+        "dialog-reject"
+      ],
+      "dark": true
+    },
+    {
       "id": "inbox",
       "path": "/inbox",
       "ready": "section[data-exp-view='inbox']",
       "listSel": "#exp-inbox-list",
       "states": [
-        "populated"
+        "populated",
+        "load-error"
       ],
       "dark": true
     },
@@ -167,11 +180,47 @@
       "dark": true
     },
     {
+      "id": "settings-general",
+      "path": "/settings/general",
+      "ready": "section[data-exp-view='settings']",
+      "states": [
+        "current"
+      ],
+      "dark": true
+    },
+    {
+      "id": "settings-access",
+      "path": "/settings/access",
+      "ready": "section[data-exp-view='settings']",
+      "states": [
+        "current"
+      ],
+      "dark": true
+    },
+    {
       "id": "settings-transfer",
       "path": "/settings/transfer",
       "ready": "section[data-exp-view='settings']",
       "states": [
         "current"
+      ],
+      "dark": true
+    },
+    {
+      "id": "settings-support",
+      "path": "/settings/support",
+      "ready": "section[data-exp-view='settings']",
+      "states": [
+        "current"
+      ],
+      "dark": true
+    },
+    {
+      "id": "access-denied",
+      "path": "/",
+      "ready": ".exp-access-denied",
+      "states": [
+        "restricted"
       ],
       "dark": true
     },

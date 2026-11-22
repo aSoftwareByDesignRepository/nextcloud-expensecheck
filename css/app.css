@@ -320,6 +320,11 @@
 }
 .exp-queue__main { display: flex; gap: var(--exp-space-2, 8px); align-items: baseline; min-width: 0; flex: 1; }
 .exp-queue__meta { color: var(--exp-muted, var(--color-text-maxcontrast)); font-size: var(--exp-fs-sm, 0.875rem); }
+/* Onboarding coach steps are an <ol.exp-queue> — the template sets
+ * list-style-position:inside expecting real numbers, but the flex-column
+ * marker strip above suppresses them (flex items never render markers).
+ * Restore block layout + decimal markers on the ordered variant only. */
+ol.exp-queue { display: block; list-style: decimal inside; }
 
 /* ---------- Section chip nav (§9.5 claim-detail) ---------- */
 .exp-chipbar {
@@ -371,8 +376,8 @@
 	font-size: 1.25rem; line-height: 1; cursor: pointer;
 }
 .exp-chip__remove:hover, .exp-chip__remove:focus-visible {
-	background: var(--exp-tint-danger, var(--color-error));
-	color: var(--exp-danger-ink, var(--color-error-text, var(--color-error)));
+	background: var(--exp-tint-danger);
+	color: var(--exp-danger-ink, var(--color-error-text));
 }
 .exp-picker {
 	position: absolute; z-index: 20; inset-inline: 0; top: 100%;
@@ -392,6 +397,15 @@
 	background: var(--color-background-hover);
 }
 .exp-field:has(.exp-picker) { position: relative; }
+
+/* Inline hint links (e.g. "Open your trips" on claim-new) are ~20px tall —
+ * below the WCAG 2.5.8 / a11y_dom 24px hit-target floor. inline-flex +
+ * min-height grows the target without breaking the text flow. */
+.exp-hint a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 24px;
+}
 
 /* === support-us:exp start === */
 /**
@@ -718,4 +732,41 @@
 }
 .exp-app--access-denied .exp-access-denied {
 	margin-top: var(--exp-space-7);
+}
+
+/* Overlay control armor — <button class="exp-toast__close"> renders inside
+ * the body-mounted toast stack (#exp-toasts, outside .exp-app), so the bare
+ * 0-1-0 class rule in css/common/notification-surfaces.css loses to core's
+ * button repaint (width/pale fill/border/margin). The id/class-scoped
+ * selectors pin every repainted property !important
+ * (overlay_toast_button_armor_gap; donor shape: contractcheck
+ * #cc-toasts button.cc-toast__close, whistlecheck #wc-toasts armor). */
+#exp-toasts button.exp-toast__close,
+.exp-toasts button.exp-toast__close {
+	width: auto !important;
+	margin: 0 !important;
+	margin-inline-start: auto !important;
+	padding: var(--exp-space-2) !important;
+	background: transparent !important;
+	border: 0 !important;
+	min-width: 44px;
+	min-height: 44px;
+}
+
+/* Tinted semantic badges — the shared rules put --color-*-text ink (dark,
+ * tuned for light surfaces) on a tint fill that follows the theme background;
+ * in dark themes that pair collapses to ~1.8:1 (axe on /settlements). Mix the
+ * semantic ink toward main-text so the hue cue survives and AA holds in both
+ * themes — no data-theme branch needed since main-text always flips. */
+#app-content.exp-app .exp-badge--success {
+	color: color-mix(in srgb, var(--color-success-text, var(--color-success)) 38%, var(--color-main-text));
+}
+#app-content.exp-app .exp-badge--warn {
+	color: color-mix(in srgb, var(--color-warning-text, var(--color-warning, #8a6d00)) 45%, var(--color-main-text));
+}
+#app-content.exp-app .exp-badge--danger {
+	color: color-mix(in srgb, var(--color-error-text, var(--color-error)) 55%, var(--color-main-text));
+}
+#app-content.exp-app .exp-btn--warn {
+	color: color-mix(in srgb, var(--color-warning-text, var(--color-warning, #8a6d00)) 45%, var(--color-main-text));
 }
