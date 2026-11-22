@@ -551,6 +551,7 @@ OC.L10N.register(
 	"Secrets not transferred" : "Секреты не переносятся",
 	"Security-relevant changes" : "Изменения, влияющие на безопасность",
 	"Select at least one person." : "Выберите хотя бы одного человека.",
+	"Select claim {claim}" : "Выбрать отчёт {claim}",
 	"Self-approval is disabled." : "Самосогласование отключено.",
 	"Send" : "Отправить",
 	"set it on this instance" : "задать на этом инстансе",

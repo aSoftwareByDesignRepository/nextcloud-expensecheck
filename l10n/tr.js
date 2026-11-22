@@ -551,6 +551,7 @@ OC.L10N.register(
 	"Secrets not transferred" : "Gizli bilgiler aktarılmadı",
 	"Security-relevant changes" : "Güvenlikle ilgili değişiklikler",
 	"Select at least one person." : "En az bir kişi seçin.",
+	"Select claim {claim}" : "Bildirim {claim} seçin",
 	"Self-approval is disabled." : "Kendi kendine onay devre dışı.",
 	"Send" : "Gönder",
 	"set it on this instance" : "bu ortamda ayarla",

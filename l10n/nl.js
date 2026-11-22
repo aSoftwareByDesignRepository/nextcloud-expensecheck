@@ -551,6 +551,7 @@ OC.L10N.register(
 	"Secrets not transferred" : "Geheimen niet overgedragen",
 	"Security-relevant changes" : "Beveiligingsrelevante wijzigingen",
 	"Select at least one person." : "Selecteer minstens één persoon.",
+	"Select claim {claim}" : "Declaratie {claim} selecteren",
 	"Self-approval is disabled." : "Eigen goedkeuring is uitgeschakeld.",
 	"Send" : "Versturen",
 	"set it on this instance" : "het op deze instantie instellen",

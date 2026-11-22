@@ -582,10 +582,13 @@
 					return out;
 				})
 			};
+			var submitBtn = form.querySelector('button[type="submit"]');
+			if (submitBtn) submitBtn.disabled = true;
 			api('/claims', { method: 'POST', json: payload }).then(function (c) {
 				E.toast('success', t('Claim created.'));
 				location.href = E.appBase() + '/claims/' + (c.claim && c.claim.id ? c.claim.id : c.id);
 			}, function (err) {
+				if (submitBtn) submitBtn.disabled = false;
 				// Server returns flat keys (amount, rate_code, occasion…) while
 				// controls are named lines[N][key] — map the suffix so the
 				// inline error lands on the actual input, not only a toast.
@@ -827,28 +830,40 @@
 			var items = (data && data.claims) || [];
 			items.forEach(function (c) {
 				var card = claimRow(c);
+				var cbLabel = el('label', { class: 'exp-checkbox' });
 				var cb = el('input', { type: 'checkbox' });
 				cb.addEventListener('change', function () {
 					if (cb.checked) selected[c.id] = c.version;
 					else delete selected[c.id];
 					form.hidden = Object.keys(selected).length === 0;
 				});
-				card.prepend(cb);
+				cbLabel.appendChild(cb);
+				cbLabel.appendChild(el('span', {
+					class: 'exp-sr-only',
+					text: t('Select claim {claim}', { claim: c.claim_no || c.claimNo || ('#' + c.id) }),
+				}));
+				card.prepend(cbLabel);
 				list.appendChild(card);
 			});
 			return items.length;
 		}, document.getElementById('exp-settle-count'))();
+		var settleBtn = form.querySelector('button[type="submit"]');
+		var settleBusy = false;
 		form.addEventListener('submit', function (ev) {
 			ev.preventDefault();
+			if (settleBusy) return;
 			var ref = document.getElementById('exp-paid-ref').value;
 			var format = document.getElementById('exp-settle-format').value;
 			var ids = Object.keys(selected).map(Number);
 			// §9.3 finality gate: payout is documented-irrevocable.
 			E.confirmDialog(t('Payout is documented and cannot be undone — corrections need a correction claim. Settle {n} claims?', { n: ids.length })).then(function (ok) {
 				if (!ok) return;
+				settleBusy = true;
+				if (settleBtn) settleBtn.disabled = true;
 				api('/settlements', { method: 'POST', json: { claim_ids: ids, paid_ref: ref, format: format } })
 					.then(function () { E.toast('success', t('Batch settled.')); location.reload(); },
-						E.handleError);
+						E.handleError)
+					.finally(function () { settleBusy = false; if (settleBtn) settleBtn.disabled = false; });
 			});
 		});
 		listFetch(batches, null, function () { return api('/settlements/batches'); }, function (data) {
@@ -1067,12 +1082,15 @@
 					});
 				})();
 			}
+			var submitBtn = form.querySelector('button[type="submit"]');
 			form.addEventListener('submit', function (ev) {
 				ev.preventDefault();
+				if (submitBtn) submitBtn.disabled = true;
 				var fd = new FormData(form);
 				api(ep, { method: 'POST', json: {
 					code: fd.get('code'), name: fd.get('name'), active: true
-				} }).then(function () { form.reset(); load(); }, E.handleError);
+				} }).then(function () { form.reset(); load(); }, E.handleError)
+					.finally(function () { if (submitBtn) submitBtn.disabled = false; });
 			});
 			load();
 		};
@@ -1094,14 +1112,17 @@
 				});
 			})();
 		}
+		var submitBtn = form.querySelector('button[type="submit"]');
 		form.addEventListener('submit', function (ev) {
 			ev.preventDefault();
+			if (submitBtn) submitBtn.disabled = true;
 			var fd = new FormData(form);
 			api('/admin/rates', { method: 'POST', json: {
 				rate_type: fd.get('rate_type'), code: fd.get('code'), name: fd.get('name'),
 				rate: fd.get('rate'), currency: (fd.get('currency') || 'EUR').toUpperCase(),
 				effective_from: fd.get('effective_from')
-			} }).then(function () { form.reset(); load(); }, E.handleError);
+			} }).then(function () { form.reset(); load(); }, E.handleError)
+				.finally(function () { if (submitBtn) submitBtn.disabled = false; });
 		});
 		load();
 	};
@@ -1293,12 +1314,13 @@
 			form.appendChild(save);
 			form.addEventListener('submit', function (ev) {
 				ev.preventDefault();
+				save.disabled = true;
 				var fd = new FormData(form);
 				var patch = {};
 				for (var p of fd.entries()) patch[p[0]] = p[1];
 				api('/settings', { method: 'POST', json: patch }).then(function () {
 					E.toast('success', t('Settings saved.'));
-				}, E.handleError);
+				}, E.handleError).finally(function () { save.disabled = false; });
 			});
 			body.appendChild(form);
 

@@ -551,6 +551,7 @@ OC.L10N.register(
 	"Secrets not transferred" : "Hemligheter ej överförda",
 	"Security-relevant changes" : "Säkerhetsrelevanta ändringar",
 	"Select at least one person." : "Välj minst en person.",
+	"Select claim {claim}" : "Välj utlägg {claim}",
 	"Self-approval is disabled." : "Självgodkännande är avstängt.",
 	"Send" : "Skicka",
 	"set it on this instance" : "sätt det på den här instansen",

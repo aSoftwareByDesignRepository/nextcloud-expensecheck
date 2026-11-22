@@ -572,6 +572,7 @@
 		"Secrets not transferred": "Segredos não transferidos",
 		"Security-relevant changes": "Alterações relevantes para a segurança",
 		"Select at least one person.": "Selecione pelo menos uma pessoa.",
+		"Select claim {claim}": "Selecionar nota {claim}",
 		"Self-approval is disabled.": "A autoaprovação está desativada.",
 		"Send": "Enviar",
 		"set it on this instance": "defini-lo nesta instância",

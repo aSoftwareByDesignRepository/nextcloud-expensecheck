@@ -551,6 +551,7 @@ OC.L10N.register(
 	"Secrets not transferred" : "Hemmeligheder ikke overført",
 	"Security-relevant changes" : "Sikkerhedsrelevante ændringer",
 	"Select at least one person." : "Vælg mindst én person.",
+	"Select claim {claim}" : "Vælg udlæg {claim}",
 	"Self-approval is disabled." : "Selv-godkendelse er deaktiveret.",
 	"Send" : "Sende",
 	"set it on this instance" : "sæt det på denne instans",

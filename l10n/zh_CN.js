@@ -551,6 +551,7 @@ OC.L10N.register(
 	"Secrets not transferred" : "机密不传输",
 	"Security-relevant changes" : "安全相关变更",
 	"Select at least one person." : "请至少选择一人。",
+	"Select claim {claim}" : "选择报销单 {claim}",
 	"Self-approval is disabled." : "自我审批已禁用。",
 	"Send" : "发送",
 	"set it on this instance" : "在此实例上设置",

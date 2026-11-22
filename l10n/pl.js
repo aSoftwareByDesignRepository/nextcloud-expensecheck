@@ -551,6 +551,7 @@ OC.L10N.register(
 	"Secrets not transferred" : "Sekrety nieprzeniesione",
 	"Security-relevant changes" : "Zmiany istotne dla bezpieczeństwa",
 	"Select at least one person." : "Wybierz co najmniej jedną osobę.",
+	"Select claim {claim}" : "Wybierz rozliczenie {claim}",
 	"Self-approval is disabled." : "Samozatwierdzanie jest wyłączone.",
 	"Send" : "Wysłać",
 	"set it on this instance" : "ustaw je na tej instancji",
