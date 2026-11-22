@@ -48,7 +48,7 @@ class PeriodService
 		}
 		$open = $this->lines->countOpenClaimsInRange($from, $to);
 		if ($open > 0 && !$carryOver) {
-			throw new DomainException('PERIOD_BLOCKED', $open . ' open claim(s) occupy this period.', 409);
+			throw new DomainException('PERIOD_BLOCKED', 'This period is occupied by ' . $open . ' open claim' . ($open === 1 ? '' : 's') . '.', 409);
 		}
 		$drafts = $this->lines->draftClaimIdsInRange($from, $to);
 

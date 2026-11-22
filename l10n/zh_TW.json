@@ -14,6 +14,18 @@
 		"1 row needs a value on this instance": "1 列需要在此執行個體上填寫值",
 		"1 row skipped.": "1 列已略過。",
 		"1 setting": "1 項設定",
+		"_%n claim awaiting your approval_::_%n claims awaiting your approval_": [
+			"%n 筆報銷單待您核准"
+		],
+		"_%n claim sent back for changes_::_%n claims sent back for changes_": [
+			"%n 筆報銷單遭退回修改"
+		],
+		"_%n draft to finish_::_%n drafts to finish_": [
+			"%n 份草稿待完成"
+		],
+		"_%n receipt to file_::_%n receipts to file_": [
+			"%n 張收據待歸檔"
+		],
 		"_1 result_::_%n results_": [
 			"%n 個結果"
 		],
@@ -28,7 +40,7 @@
 		"A scoped change with acceptance criteria and a delivery date — billed as project work.": "帶驗收標準和交付日期的範圍變更——按專案工作計費。",
 		"A transfer started by %s is already running.": "由 %s 啟動的傳輸已在執行中。",
 		"Access": "訪問授權",
-		"Access denied": "Access denied",
+		"Access denied": "存取被拒",
 		"Access mode": "存取模式",
 		"Access policy saved.": "存取政策已儲存。",
 		"Actions": "操作",
@@ -67,7 +79,7 @@
 		"Allowed groups": "允許的群組",
 		"Allowed users": "允許的使用者",
 		"Already claimed: %s": "已被認領：%s",
-		"Already in claim {no}": "已在報銷單 {no} 中",
+		"Already in claim {number}": "已在報銷單 {number} 中",
 		"Amount": "金額",
 		"An approver asked for changes. Open ExpenseCheck to review the note and resubmit.": "審批人要求修改。請開啟 ExpenseCheck 檢視備註並重新送出。",
 		"an_error_occurred": "發生錯誤",
@@ -607,6 +619,7 @@
 		"The business reason — legally required for entertainment expenses.": "商務事由——招待費報銷的法定必填項。",
 		"the companion apps": "配套應用程式",
 		"the ExpenseCheck mobile companion app": "ExpenseCheck 行動伴侶應用程式",
+		"The export could not be generated.": "無法產生匯出。",
 		"The export is not ready yet.": "匯出尚未就緒。",
 		"The field is marked — enter the reason and retry.": "該欄位已標記，請填寫原因後重試。",
 		"The following expense claims are waiting for your approval:": "以下報銷單正在等待您的核准：",
@@ -647,6 +660,7 @@
 		"This will update %1$s and %2$s — nothing is deleted.": "這將更新 %1$s 與 %2$s——不會刪除任何內容。",
 		"Tick the confirmation and send again.": "請勾選確認後再次送出。",
 		"Timezone": "時區",
+		"Try again — if it keeps failing, report this problem.": "請重試 — 如果問題持續發生，請回報此問題。",
 		"Title": "標題",
 		"Toggle navigation menu": "切換導覽選單",
 		"Too many attempts — wait a minute and try again.": "嘗試過多——請等一分鐘後重試。",
@@ -710,11 +724,10 @@
 		"Your numbers": "您的數據",
 		"Your organisation restricts ExpenseCheck access. You are not on the allowed-users list and you are not a member of any allowed group.": "貴組織限制了 ExpenseCheck 訪問。您不在允許使用者列表中，也不屬於任何允許的群組。",
 		"Your settlement export finished building. Open ExpenseCheck to download it.": "您的結算匯出已產生。請開啟 ExpenseCheck 下載。",
-		"{n} claim(s) awaiting your approval": "{n} ",
-		"{n} claim(s) sent back for changes": "{n} ",
-		"{n} draft(s) to finish": "{n} ",
 		"{n} pending": "{n} ",
-		"{n} receipt(s) to file": "{n} ",
+		"_… and %n more_::_… and %n more_": [
+			"……還有 %n 筆"
+		],
 		"… and %n more": "……還有 %n 筆"
 	}
 }

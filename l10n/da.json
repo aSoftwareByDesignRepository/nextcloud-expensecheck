@@ -14,6 +14,22 @@
 		"1 row needs a value on this instance": "1 række kræver en værdi på denne instans",
 		"1 row skipped.": "1 række sprunget over.",
 		"1 setting": "1 indstilling",
+		"_%n claim awaiting your approval_::_%n claims awaiting your approval_": [
+			"1 udlæg afventer din godkendelse",
+			"%n udlæg afventer din godkendelse"
+		],
+		"_%n claim sent back for changes_::_%n claims sent back for changes_": [
+			"1 udlæg sendt tilbage til ændring",
+			"%n udlæg sendte tilbage til ændring"
+		],
+		"_%n draft to finish_::_%n drafts to finish_": [
+			"1 kladde at færdiggøre",
+			"%n kladder at færdiggøre"
+		],
+		"_%n receipt to file_::_%n receipts to file_": [
+			"1 kvittering at arkivere",
+			"%n kvitteringer at arkivere"
+		],
 		"_1 result_::_%n results_": [
 			"1 resultat",
 			"%n resultater"
@@ -30,7 +46,7 @@
 		"A scoped change with acceptance criteria and a delivery date — billed as project work.": "En afgrænset ændring med acceptkriterier og en leveringsdato — faktureres som projektarbejde.",
 		"A transfer started by %s is already running.": "En overførsel startet af %s kører allerede.",
 		"Access": "Adgang",
-		"Access denied": "Access denied",
+		"Access denied": "Adgang nægtet",
 		"Access mode": "Adgangstilstand",
 		"Access policy saved.": "Adgangspolitik gemt.",
 		"Actions": "Handlinger",
@@ -69,7 +85,7 @@
 		"Allowed groups": "Tilladte grupper",
 		"Allowed users": "Tilladte brugere",
 		"Already claimed: %s": "Allerede taget: %s",
-		"Already in claim {no}": "Allerede i udlæg {no}",
+		"Already in claim {number}": "Allerede i udlæg {number}",
 		"Amount": "Beløb",
 		"An approver asked for changes. Open ExpenseCheck to review the note and resubmit.": "En godkender bad om ændringer. Åbn ExpenseCheck for at læse noten og indsende igen.",
 		"an_error_occurred": "Der opstod en fejl",
@@ -609,6 +625,7 @@
 		"The business reason — legally required for entertainment expenses.": "Forretningsårsagen — lovpåkrævet ved repræsentationsudgifter.",
 		"the companion apps": "companion-apps",
 		"the ExpenseCheck mobile companion app": "ExpenseChecks mobile companion-app",
+		"The export could not be generated.": "Eksporten kunne ikke genereres.",
 		"The export is not ready yet.": "Eksporten er ikke klar endnu.",
 		"The field is marked — enter the reason and retry.": "Feltet er markeret — indtast årsagen, og prøv igen.",
 		"The following expense claims are waiting for your approval:": "Følgende udlæg venter på din godkendelse:",
@@ -649,6 +666,7 @@
 		"This will update %1$s and %2$s — nothing is deleted.": "Dette opdaterer %1$s og %2$s — intet slettes.",
 		"Tick the confirmation and send again.": "Sæt flueben i bekræftelsen og send igen.",
 		"Timezone": "Tidszone",
+		"Try again — if it keeps failing, report this problem.": "Prøv igen — hvis det bliver ved med at fejle, rapporter problemet.",
 		"Title": "Titel",
 		"Toggle navigation menu": "Vis eller skjul navigationsmenu",
 		"Too many attempts — wait a minute and try again.": "For mange forsøg — vent et minut og prøv igen.",
@@ -712,11 +730,11 @@
 		"Your numbers": "Dine tal",
 		"Your organisation restricts ExpenseCheck access. You are not on the allowed-users list and you are not a member of any allowed group.": "organisationen begrænser ExpenseCheck-adgang. Du er ikke på listen over tilladte brugere, og du er ikke medlem af nogen tilladt gruppe.",
 		"Your settlement export finished building. Open ExpenseCheck to download it.": "Din afregningseksport er færdig. Åbn ExpenseCheck for at hente den.",
-		"{n} claim(s) awaiting your approval": "{n} udlæg afventer din godkendelse",
-		"{n} claim(s) sent back for changes": "{n} udlæg sendt tilbage til ændring",
-		"{n} draft(s) to finish": "{n} kladde(r) at færdiggøre",
 		"{n} pending": "{n} afventer",
-		"{n} receipt(s) to file": "{n} kvittering(er) at arkivere",
+		"_… and %n more_::_… and %n more_": [
+			"… og %n flere",
+			"… og %n flere"
+		],
 		"… and %n more": "… og %n flere"
 	}
 }

@@ -162,6 +162,8 @@ class AttachmentService
 			$this->nodeFor($a)->delete();
 		} catch (DomainException) {
 			// File already gone — the row still goes.
+			$this->attachments->delete($a);
+			return;
 		}
 		$this->attachments->delete($a);
 	}

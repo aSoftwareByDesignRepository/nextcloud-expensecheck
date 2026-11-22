@@ -14,6 +14,22 @@
 		"1 row needs a value on this instance": "1 rad trenger en verdi på denne instansen",
 		"1 row skipped.": "1 rad hoppet over.",
 		"1 setting": "1 innstilling",
+		"_%n claim awaiting your approval_::_%n claims awaiting your approval_": [
+			"1 utlegg venter på din godkjenning",
+			"%n utlegg venter på din godkjenning"
+		],
+		"_%n claim sent back for changes_::_%n claims sent back for changes_": [
+			"1 utlegg sendt tilbake for endringer",
+			"%n utlegg sendt tilbake for endringer"
+		],
+		"_%n draft to finish_::_%n drafts to finish_": [
+			"1 utkast å fullføre",
+			"%n utkast å fullføre"
+		],
+		"_%n receipt to file_::_%n receipts to file_": [
+			"1 kvittering å arkivere",
+			"%n kvitteringer å arkivere"
+		],
 		"_1 result_::_%n results_": [
 			"1 resultat",
 			"%n resultater"
@@ -30,7 +46,7 @@
 		"A scoped change with acceptance criteria and a delivery date — billed as project work.": "En avgrenset endring med akseptkriterier og en leveringsdato — faktureres som prosjektarbeid.",
 		"A transfer started by %s is already running.": "En overføring startet av %s kjører allerede.",
 		"Access": "Tilgang",
-		"Access denied": "Access denied",
+		"Access denied": "Tilgang nektet",
 		"Access mode": "Tilgangsmodus",
 		"Access policy saved.": "Tilgangspolicy lagret.",
 		"Actions": "Handlinger",
@@ -69,7 +85,7 @@
 		"Allowed groups": "Tillatte grupper",
 		"Allowed users": "Tillatte brukere",
 		"Already claimed: %s": "Allerede tildelt: %s",
-		"Already in claim {no}": "Allerede i utlegg {no}",
+		"Already in claim {number}": "Allerede i utlegg {number}",
 		"Amount": "Beløp",
 		"An approver asked for changes. Open ExpenseCheck to review the note and resubmit.": "En godkjenner ba om endringer. Åpne ExpenseCheck for å lese notatet og sende inn igjen.",
 		"an_error_occurred": "Det oppstod en feil",
@@ -247,7 +263,7 @@
 		"Email is best-effort — no reply SLA. Need booked help? Use Support & us.": "E-post besvares etter beste evne – ingen svartidsgaranti. Trenger du planlagt hjelp? Bruk «Støtt oss».",
 		"Encryption passphrase": "Krypteringspassordfrase",
 		"Entertainment expense": "Representasjonsutgift",
-		"Entertainment expense — a category-flagged receipt (Bewirtung) that requires the names of all entertained persons and the business occasion.": "Representasjonsutgift — en kategorimarkert kvittering (Bewirtung) som krever navnene på alle beværtede personer og det forretningsmessige anledningen.",
+		"Entertainment expense — a category-flagged receipt (Bewirtung) that requires the names of all entertained persons and the business occasion.": "Representasjonsutgift — en kategorimarkert kvittering (Bewirtung) som krever navnene på alle bevertede personer og den forretningsmessige anledningen.",
 		"Exchange rate": "Valutakurs",
 		"Expense categories and their rules.": "Utgiftskategorier og deres regler.",
 		"ExpenseCheck": "ExpenseCheck",
@@ -609,6 +625,7 @@
 		"The business reason — legally required for entertainment expenses.": "Forretningsårsaken — lovpålagt for representasjonsutgifter.",
 		"the companion apps": "følge-appene",
 		"the ExpenseCheck mobile companion app": "ExpenseChecks mobile følgeapp",
+		"The export could not be generated.": "Eksporten kunne ikke genereres.",
 		"The export is not ready yet.": "Eksporten er ikke klar ennå.",
 		"The field is marked — enter the reason and retry.": "Feltet er markert — skriv inn årsaken og prøv igjen.",
 		"The following expense claims are waiting for your approval:": "Følgende utlegg venter på din godkjenning:",
@@ -649,6 +666,7 @@
 		"This will update %1$s and %2$s — nothing is deleted.": "Dette oppdaterer %1$s og %2$s — ingenting slettes.",
 		"Tick the confirmation and send again.": "Huk av bekreftelsen og send på nytt.",
 		"Timezone": "Tidssone",
+		"Try again — if it keeps failing, report this problem.": "Prøv igjen — hvis det fortsetter å feile, rapporter problemet.",
 		"Title": "Tittel",
 		"Toggle navigation menu": "Vis eller skjul navigasjonsmeny",
 		"Too many attempts — wait a minute and try again.": "For mange forsøk — vent ett minutt og prøv igjen.",
@@ -712,11 +730,11 @@
 		"Your numbers": "Tallene dine",
 		"Your organisation restricts ExpenseCheck access. You are not on the allowed-users list and you are not a member of any allowed group.": "Organisasjonen din begrenser ExpenseCheck-tilgang. Du er ikke på listen over tillatte brukere, og er ikke medlem av noen tillatte grupper.",
 		"Your settlement export finished building. Open ExpenseCheck to download it.": "Oppgjørseksporten din er ferdig. Åpne ExpenseCheck for å laste den ned.",
-		"{n} claim(s) awaiting your approval": "{n} utlegg venter på din godkjenning",
-		"{n} claim(s) sent back for changes": "{n} utlegg sendt tilbake for endringer",
-		"{n} draft(s) to finish": "{n} utkast å fullføre",
 		"{n} pending": "{n} ventende",
-		"{n} receipt(s) to file": "{n} kvittering(er) å arkivere",
+		"_… and %n more_::_… and %n more_": [
+			"… og %n til",
+			"… og %n til"
+		],
 		"… and %n more": "… og %n til"
 	}
 }

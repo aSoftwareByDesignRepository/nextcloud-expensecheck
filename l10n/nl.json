@@ -14,6 +14,22 @@
 		"1 row needs a value on this instance": "1 rij heeft een waarde nodig op deze instantie",
 		"1 row skipped.": "1 rij overgeslagen.",
 		"1 setting": "1 instelling",
+		"_%n claim awaiting your approval_::_%n claims awaiting your approval_": [
+			"1 declaratie wacht op uw goedkeuring",
+			"%n declaraties wachten op uw goedkeuring"
+		],
+		"_%n claim sent back for changes_::_%n claims sent back for changes_": [
+			"1 declaratie terug voor wijzigingen",
+			"%n declaraties terug voor wijzigingen"
+		],
+		"_%n draft to finish_::_%n drafts to finish_": [
+			"1 concept af te maken",
+			"%n concepten af te maken"
+		],
+		"_%n receipt to file_::_%n receipts to file_": [
+			"1 bon te archiveren",
+			"%n bonnen te archiveren"
+		],
 		"_1 result_::_%n results_": [
 			"1 resultaat",
 			"%n resultaten"
@@ -30,7 +46,7 @@
 		"A scoped change with acceptance criteria and a delivery date — billed as project work.": "Een afgebakende wijziging met acceptatiecriteria en een leverdatum — gefactureerd als projectwerk.",
 		"A transfer started by %s is already running.": "Er loopt al een door %s gestarte overdracht.",
 		"Access": "Toegang",
-		"Access denied": "Access denied",
+		"Access denied": "Toegang geweigerd",
 		"Access mode": "Toegangsmodus",
 		"Access policy saved.": "Toegangsbeleid opgeslagen.",
 		"Actions": "Acties",
@@ -69,7 +85,7 @@
 		"Allowed groups": "Toegestane groepen",
 		"Allowed users": "Toegestane gebruikers",
 		"Already claimed: %s": "Al toegewezen: %s",
-		"Already in claim {no}": "Al in declaratie {no}",
+		"Already in claim {number}": "Al in declaratie {number}",
 		"Amount": "Bedrag",
 		"An approver asked for changes. Open ExpenseCheck to review the note and resubmit.": "Een goedkeurder vroeg om wijzigingen. Open ExpenseCheck om de notitie te lezen en opnieuw in te dienen.",
 		"an_error_occurred": "Er is een fout opgetreden",
@@ -609,6 +625,7 @@
 		"The business reason — legally required for entertainment expenses.": "De zakelijke reden — wettelijk verplicht voor representatiekosten.",
 		"the companion apps": "de companion-apps",
 		"the ExpenseCheck mobile companion app": "de mobiele companion-app van ExpenseCheck",
+		"The export could not be generated.": "De export kon niet worden gegenereerd.",
 		"The export is not ready yet.": "De export is nog niet klaar.",
 		"The field is marked — enter the reason and retry.": "Het veld is gemarkeerd — voer de reden in en probeer het opnieuw.",
 		"The following expense claims are waiting for your approval:": "De volgende declaraties wachten op jouw goedkeuring:",
@@ -649,6 +666,7 @@
 		"This will update %1$s and %2$s — nothing is deleted.": "Dit werkt %1$s en %2$s bij — er wordt niets verwijderd.",
 		"Tick the confirmation and send again.": "Vink de bevestiging aan en verstuur opnieuw.",
 		"Timezone": "Tijdzone",
+		"Try again — if it keeps failing, report this problem.": "Probeer het opnieuw — als het probleem aanhoudt, meld het.",
 		"Title": "Titel",
 		"Toggle navigation menu": "Navigatiemenu tonen of verbergen",
 		"Too many attempts — wait a minute and try again.": "Te veel pogingen — wacht een minuut en probeer het opnieuw.",
@@ -712,11 +730,11 @@
 		"Your numbers": "Uw cijfers",
 		"Your organisation restricts ExpenseCheck access. You are not on the allowed-users list and you are not a member of any allowed group.": "Uw organisatie beperkt de toegang tot ExpenseCheck. U staat niet op de lijst met toegestane gebruikers en u bent geen lid van een toegestane groep.",
 		"Your settlement export finished building. Open ExpenseCheck to download it.": "Uw afrekeningsexport is klaar. Open ExpenseCheck om te downloaden.",
-		"{n} claim(s) awaiting your approval": "{n} declaratie(s) wacht op uw goedkeuring",
-		"{n} claim(s) sent back for changes": "{n} declaratie(s) terug voor wijzigingen",
-		"{n} draft(s) to finish": "{n} concept(en) af te maken",
 		"{n} pending": "{n} in behandeling",
-		"{n} receipt(s) to file": "{n} bon(nen) te archiveren",
+		"_… and %n more_::_… and %n more_": [
+			"… en nog %n",
+			"… en nog %n"
+		],
 		"… and %n more": "… en nog %n"
 	}
 }

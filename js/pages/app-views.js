@@ -434,7 +434,7 @@
 						item.appendChild(el('strong', { text: title }));
 						item.appendChild(el('p', { class: 'exp-card__meta', text: route + (g.vehicle_label ? ' · ' + g.vehicle_label : '') }));
 						if (claimed[ref]) {
-							item.appendChild(E.badge('info', t('Already in claim {no}', { no: claimed[ref] })));
+							item.appendChild(E.badge('info', t('Already in claim {number}', { number: claimed[ref] })));
 						} else {
 							var catF = labeled('Category', catsFor('mileage'), 'id', 'name');
 							var rateF = labeled('Rate', rates.filter(function (rt) {
@@ -476,7 +476,7 @@
 						item.appendChild(el('strong', { text: fmtDate(cb.entry_date) + ' · −' + money(cb.amount_minor, 'EUR') }));
 						item.appendChild(el('p', { class: 'exp-card__meta', text: (cb.vehicle_label || '') + (cb.notes ? ' — ' + cb.notes : '') }));
 						if (claimed[ref]) {
-							item.appendChild(E.badge('info', t('Already in claim {no}', { no: claimed[ref] })));
+							item.appendChild(E.badge('info', t('Already in claim {number}', { number: claimed[ref] })));
 						} else {
 							var catF = labeled('Category', catsFor('receipt'), 'id', 'name');
 							var ccF = labeled('Cost center', ccs, 'id', 'name');
@@ -907,7 +907,13 @@
 			var timer = setInterval(function () {
 				fetch(E.appBase() + '/api/settlements/exports/' + encodeURIComponent(d.request_id), { credentials: 'same-origin' })
 					.then(function (res) {
-						if (res.status === 409) { return; } // EXPORT_NOT_READY
+						if (res.status === 409) {
+							return res.json().then(function (e) {
+								if (!e || e.error !== 'EXPORT_NOT_READY') {
+									throw new Error((e && e.error) || 'EXPORT_FAILED');
+								}
+							});
+						}
 						clearInterval(timer);
 						if (!res.ok) {
 							return res.json().then(function (e) { throw new Error(e.error || 'EXPORT_FAILED'); });

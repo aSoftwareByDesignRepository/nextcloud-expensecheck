@@ -50,6 +50,8 @@ class RetentionCleanupJob extends TimedJob
 			try {
 				$this->attachmentService->delete($a, $a->getUploadedBy());
 			} catch (\Throwable $e) {
+				// best-effort per item: one bad attachment must not stall the
+				// purge — it is retried on the next daily run.
 				$this->logger->warning('expensecheck inbox purge failed', ['id' => $a->getId()]);
 			}
 		}

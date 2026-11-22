@@ -14,6 +14,26 @@
 		"1 row needs a value on this instance": "1 wiersz wymaga wartości na tej instancji",
 		"1 row skipped.": "1 wiersz pominięty.",
 		"1 setting": "1 ustawienie",
+		"_%n claim awaiting your approval_::_%n claims awaiting your approval_": [
+			"%n rozliczenie oczekuje na zatwierdzenie",
+			"%n rozliczenia oczekują na zatwierdzenie",
+			"%n rozliczeń oczekuje na zatwierdzenie"
+		],
+		"_%n claim sent back for changes_::_%n claims sent back for changes_": [
+			"%n rozliczenie odesłane do poprawek",
+			"%n rozliczenia odesłane do poprawek",
+			"%n rozliczeń odesłane do poprawek"
+		],
+		"_%n draft to finish_::_%n drafts to finish_": [
+			"%n wersja robocza do ukończenia",
+			"%n wersje robocze do ukończenia",
+			"%n wersji roboczych do ukończenia"
+		],
+		"_%n receipt to file_::_%n receipts to file_": [
+			"%n paragon do zarchiwizowania",
+			"%n paragony do zarchiwizowania",
+			"%n paragonów do zarchiwizowania"
+		],
 		"_1 result_::_%n results_": [
 			"1 wynik",
 			"%n wyniki",
@@ -32,7 +52,7 @@
 		"A scoped change with acceptance criteria and a delivery date — billed as project work.": "Zmiana o ustalonym zakresie, z kryteriami odbioru i terminem dostawy — rozliczana jako praca projektowa.",
 		"A transfer started by %s is already running.": "Transfer uruchomiony przez %s jest już w toku.",
 		"Access": "Dostęp",
-		"Access denied": "Access denied",
+		"Access denied": "Odmowa dostępu",
 		"Access mode": "Tryb dostępu",
 		"Access policy saved.": "Polityka dostępu zapisana.",
 		"Actions": "Akcje",
@@ -65,13 +85,13 @@
 		"All statuses": "Wszystkie statusy",
 		"all-claims": "all-claims",
 		"Allocations must cover a cost center and total 100% per line.": "Każda pozycja musi być przypisana do MPK w 100%.",
-		"Allow mileage claims": "Zezwalaj na rozliczenia kilometrów",
+		"Allow mileage claims": "Zezwalaj na wnioski kilometrowe",
 		"Allow route evidence": "Zezwalaj na dowody trasy",
 		"Allow self-approval": "Zezwalaj na samozatwierdzanie",
 		"Allowed groups": "Dozwolone grupy",
 		"Allowed users": "Dozwoleni użytkownicy",
 		"Already claimed: %s": "Już przypisane: %s",
-		"Already in claim {no}": "Już w rozliczeniu {no}",
+		"Already in claim {number}": "Już w rozliczeniu {number}",
 		"Amount": "Kwota",
 		"An approver asked for changes. Open ExpenseCheck to review the note and resubmit.": "Zatwierdzający poprosił o zmiany. Otwórz ExpenseCheck, aby przeczytać notatkę i wysłać ponownie.",
 		"an_error_occurred": "Wystąpił błąd",
@@ -131,7 +151,7 @@
 		"Cancel this claim?": "Anulować to rozliczenie?",
 		"Cancelled": "Anulowane",
 		"Cannot read this file — wrong passphrase, wrong app, or a damaged file.": "Nie można odczytać tego pliku — zła fraza, zła aplikacja lub uszkodzony plik.",
-		"Captured receipts not yet filed to a claim line.": "Zarejestrowane dowody zakupu nieprzypisane jeszcze do pozycji wniosku.",
+		"Captured receipts not yet filed to a claim line.": "Zarejestrowane dowody zakupu nie są jeszcze przypisane do pozycji wniosku.",
 		"Categories": "Kategorie",
 		"Category": "Kategoria",
 		"Chains": "Ścieżki akceptacji",
@@ -611,6 +631,7 @@
 		"The business reason — legally required for entertainment expenses.": "Powód biznesowy — wymagany prawnie przy kosztach reprezentacyjnych.",
 		"the companion apps": "aplikacje towarzyszące",
 		"the ExpenseCheck mobile companion app": "mobilną aplikację towarzyszącą ExpenseCheck",
+		"The export could not be generated.": "Nie można wygenerować eksportu.",
 		"The export is not ready yet.": "Eksport nie jest jeszcze gotowy.",
 		"The field is marked — enter the reason and retry.": "Pole jest oznaczone — wpisz powód i spróbuj ponownie.",
 		"The following expense claims are waiting for your approval:": "Następujące rozliczenia oczekują na Państwa akceptację:",
@@ -651,6 +672,7 @@
 		"This will update %1$s and %2$s — nothing is deleted.": "Spowoduje to aktualizację %1$s i %2$s — nic nie zostanie usunięte.",
 		"Tick the confirmation and send again.": "Zaznacz potwierdzenie i wyślij ponownie.",
 		"Timezone": "Strefa czasowa",
+		"Try again — if it keeps failing, report this problem.": "Spróbuj ponownie — jeśli błąd się powtarza, zgłoś problem.",
 		"Title": "Tytuł",
 		"Toggle navigation menu": "Pokaż lub ukryj menu nawigacji",
 		"Too many attempts — wait a minute and try again.": "Za dużo prób — odczekaj minutę i spróbuj ponownie.",
@@ -714,11 +736,12 @@
 		"Your numbers": "Liczby użytkownika",
 		"Your organisation restricts ExpenseCheck access. You are not on the allowed-users list and you are not a member of any allowed group.": "Przypisana organizacja ogranicza dostęp do ExpenseCheck. Nie jesteś na liście dozwolonych użytkowników i nie jesteś członkiem żadnej dozwolonej grupy.",
 		"Your settlement export finished building. Open ExpenseCheck to download it.": "Państwa eksport rozliczenia jest gotowy. Otwórz ExpenseCheck, aby go pobrać.",
-		"{n} claim(s) awaiting your approval": "{n} rozliczenie(-a) oczekuje na zatwierdzenie",
-		"{n} claim(s) sent back for changes": "{n} rozliczenie(-a) odesłane do poprawek",
-		"{n} draft(s) to finish": "{n} wersja(-e) robocza(-e) do ukończenia",
 		"{n} pending": "{n} oczekujących",
-		"{n} receipt(s) to file": "{n} paragon(y) do zarchiwizowania",
+		"_… and %n more_::_… and %n more_": [
+			"… i %n więcej",
+			"… i %n więcej",
+			"… i %n więcej"
+		],
 		"… and %n more": "… i %n więcej"
 	}
 }

@@ -108,6 +108,10 @@ window.EXPErrorCopy = (function () {
 			'The export is not ready yet.',
 			'Wait a moment and try again.'
 		],
+		EXPORT_FAILED: [
+			'The export could not be generated.',
+			'Try again — if it keeps failing, report this problem.'
+		],
 		FILE_UNREADABLE: [
 			'This file could not be read.',
 			'Check the file and upload it again.'

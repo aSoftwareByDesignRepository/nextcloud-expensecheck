@@ -14,6 +14,22 @@
 		"1 row needs a value on this instance": "1 Zeile benötigt einen Wert auf dieser Instanz",
 		"1 row skipped.": "1 Zeile übersprungen.",
 		"1 setting": "1 Einstellung",
+		"_%n claim awaiting your approval_::_%n claims awaiting your approval_": [
+			"1 Abrechnung wartet auf Ihre Freigabe",
+			"%n Abrechnungen warten auf Ihre Freigabe"
+		],
+		"_%n claim sent back for changes_::_%n claims sent back for changes_": [
+			"1 Abrechnung zur Überarbeitung zurück",
+			"%n Abrechnungen zur Überarbeitung zurück"
+		],
+		"_%n draft to finish_::_%n drafts to finish_": [
+			"1 Entwurf fertigzustellen",
+			"%n Entwürfe fertigzustellen"
+		],
+		"_%n receipt to file_::_%n receipts to file_": [
+			"1 Beleg abzulegen",
+			"%n Belege abzulegen"
+		],
 		"_1 result_::_%n results_": [
 			"1 Ergebnis",
 			"%n Ergebnisse"
@@ -30,7 +46,7 @@
 		"A scoped change with acceptance criteria and a delivery date — billed as project work.": "Eine abgegrenzte Änderung mit Abnahmekriterien und Liefertermin — als Auftrag abrechenbar.",
 		"A transfer started by %s is already running.": "Ein von %s gestarteter Transfer läuft bereits.",
 		"Access": "Zugriff",
-		"Access denied": "Access denied",
+		"Access denied": "Zugriff verweigert",
 		"Access mode": "Zugriffsmodus",
 		"Access policy saved.": "Zugriffsrichtlinie gespeichert.",
 		"Actions": "Aktionen",
@@ -69,7 +85,7 @@
 		"Allowed groups": "Erlaubte Gruppen",
 		"Allowed users": "Erlaubte Benutzer",
 		"Already claimed: %s": "Bereits zugeordnet: %s",
-		"Already in claim {no}": "Bereits in Abrechnung {no}",
+		"Already in claim {number}": "Bereits in Abrechnung {number}",
 		"Amount": "Betrag",
 		"An approver asked for changes. Open ExpenseCheck to review the note and resubmit.": "Eine genehmigende Person hat Änderungen angefordert. Öffnen Sie ExpenseCheck, um die Notiz zu lesen und erneut einzureichen.",
 		"an_error_occurred": "Ein Fehler ist aufgetreten",
@@ -609,6 +625,7 @@
 		"The business reason — legally required for entertainment expenses.": "Der geschäftliche Anlass — bei Bewirtungsauslagen gesetzlich vorgeschrieben.",
 		"the companion apps": "die Begleit-Apps",
 		"the ExpenseCheck mobile companion app": "die ExpenseCheck Mobile-Begleit-App",
+		"The export could not be generated.": "Der Export konnte nicht erstellt werden.",
 		"The export is not ready yet.": "Der Export ist noch nicht bereit.",
 		"The field is marked — enter the reason and retry.": "Das Feld ist markiert — Begründung eintragen und erneut senden.",
 		"The following expense claims are waiting for your approval:": "Die folgenden Ausgabeanträge warten auf Ihre Genehmigung:",
@@ -649,6 +666,7 @@
 		"This will update %1$s and %2$s — nothing is deleted.": "Dies aktualisiert %1$s und %2$s — nichts wird gelöscht.",
 		"Tick the confirmation and send again.": "Setzen Sie das Bestätigungshäkchen und senden Sie erneut.",
 		"Timezone": "Zeitzone",
+		"Try again — if it keeps failing, report this problem.": "Erneut versuchen — wenn es weiterhin fehlschlägt, melden Sie das Problem.",
 		"Title": "Titel",
 		"Toggle navigation menu": "Navigationsmenü umschalten",
 		"Too many attempts — wait a minute and try again.": "Zu viele Versuche — eine Minute warten und erneut versuchen.",
@@ -712,11 +730,11 @@
 		"Your numbers": "Ihre Zahlen",
 		"Your organisation restricts ExpenseCheck access. You are not on the allowed-users list and you are not a member of any allowed group.": "Ihre Organisation schränkt den ExpenseCheck-Zugang ein. Sie stehen nicht auf der Liste erlaubter Nutzer und gehören keiner erlaubten Gruppe an.",
 		"Your settlement export finished building. Open ExpenseCheck to download it.": "Ihr Abrechnungsexport ist fertig. Öffnen Sie ExpenseCheck zum Herunterladen.",
-		"{n} claim(s) awaiting your approval": "{n} Abrechnung(en) wartet auf Ihre Freigabe",
-		"{n} claim(s) sent back for changes": "{n} Abrechnung(en) zur Überarbeitung zurück",
-		"{n} draft(s) to finish": "{n} Entwurf/Entwürfe fertigstellen",
 		"{n} pending": "{n} ausstehend",
-		"{n} receipt(s) to file": "{n} Beleg(e) abzulegen",
+		"_… and %n more_::_… and %n more_": [
+			"… und %n weitere",
+			"… und %n weitere"
+		],
 		"… and %n more": "… und %n weitere"
 	}
 }

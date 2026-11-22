@@ -14,6 +14,18 @@
 		"1 row needs a value on this instance": "1 satırın bu kurulumda bir değere ihtiyacı var",
 		"1 row skipped.": "1 satır atlandı.",
 		"1 setting": "1 ayar",
+		"_%n claim awaiting your approval_::_%n claims awaiting your approval_": [
+			"%n masraf onayınızı bekliyor"
+		],
+		"_%n claim sent back for changes_::_%n claims sent back for changes_": [
+			"%n masraf değişiklik için geri gönderildi"
+		],
+		"_%n draft to finish_::_%n drafts to finish_": [
+			"%n taslak tamamlanacak"
+		],
+		"_%n receipt to file_::_%n receipts to file_": [
+			"%n makbuz dosyalanacak"
+		],
 		"_1 result_::_%n results_": [
 			"%n sonuç"
 		],
@@ -28,7 +40,7 @@
 		"A scoped change with acceptance criteria and a delivery date — billed as project work.": "Kabul kriterleri ve teslim tarihi belirlenmiş, kapsamlı bir değişiklik — proje işi olarak faturalandırılır.",
 		"A transfer started by %s is already running.": "%s tarafından başlatılan bir aktarım zaten çalışıyor.",
 		"Access": "Erişim",
-		"Access denied": "Access denied",
+		"Access denied": "Erişim reddedildi",
 		"Access mode": "Erişim modu",
 		"Access policy saved.": "Erişim ilkesi kaydedildi.",
 		"Actions": "İşlemler",
@@ -67,7 +79,7 @@
 		"Allowed groups": "İzin verilen gruplar",
 		"Allowed users": "İzin verilen kullanıcılar",
 		"Already claimed: %s": "Zaten atandı: %s",
-		"Already in claim {no}": "Zaten bildirimde {no}",
+		"Already in claim {number}": "Zaten bildirimde {number}",
 		"Amount": "Tutar",
 		"An approver asked for changes. Open ExpenseCheck to review the note and resubmit.": "Bir onaylayıcı değişiklik istedi. Notu okuyup yeniden göndermek için ExpenseCheck’i açın.",
 		"an_error_occurred": "Bir sorun çıktı",
@@ -607,6 +619,7 @@
 		"The business reason — legally required for entertainment expenses.": "İş gerekçesi — temsil giderleri için yasal olarak zorunludur.",
 		"the companion apps": "eşlik uygulamaları",
 		"the ExpenseCheck mobile companion app": "ExpenseCheck mobil yardımcı uygulamasını",
+		"The export could not be generated.": "Dışa aktarma oluşturulamadı.",
 		"The export is not ready yet.": "Dışa aktarma henüz hazır değil.",
 		"The field is marked — enter the reason and retry.": "Alan işaretli — nedeni girip tekrar deneyin.",
 		"The following expense claims are waiting for your approval:": "Aşağıdaki masraf bildirimleri onayınızı bekliyor:",
@@ -647,6 +660,7 @@
 		"This will update %1$s and %2$s — nothing is deleted.": "Bu işlem %1$s ve %2$s güncelleyecek — hiçbir şey silinmeyecek.",
 		"Tick the confirmation and send again.": "Onayı işaretleyin ve tekrar gönderin.",
 		"Timezone": "Saat dilimi",
+		"Try again — if it keeps failing, report this problem.": "Tekrar deneyin — sorun devam ederse bildirin.",
 		"Title": "Başlık",
 		"Toggle navigation menu": "Gezinme menüsünü aç/kapat",
 		"Too many attempts — wait a minute and try again.": "Çok fazla deneme — bir dakika bekleyip yeniden deneyin.",
@@ -710,11 +724,10 @@
 		"Your numbers": "Rakamlarınız",
 		"Your organisation restricts ExpenseCheck access. You are not on the allowed-users list and you are not a member of any allowed group.": "Kurumunuz ExpenseCheck erişimini kısıtlıyor. İzin verilen kullanıcılar listesinde yer almıyorsunuz ve izin verilen bir grubun üyesi değilsiniz.",
 		"Your settlement export finished building. Open ExpenseCheck to download it.": "Ödeme dışa aktarımınız hazır. İndirmek için ExpenseCheck’i açın.",
-		"{n} claim(s) awaiting your approval": "{n} masraf onayınızı bekliyor",
-		"{n} claim(s) sent back for changes": "{n} masraf değişiklik için geri gönderildi",
-		"{n} draft(s) to finish": "{n} taslak tamamlanacak",
 		"{n} pending": "{n} bekliyor",
-		"{n} receipt(s) to file": "{n} makbuz dosyalanacak",
+		"_… and %n more_::_… and %n more_": [
+			"… ve %n tane daha"
+		],
 		"… and %n more": "… ve %n tane daha"
 	}
 }

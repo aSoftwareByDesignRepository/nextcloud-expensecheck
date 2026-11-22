@@ -14,6 +14,22 @@
 		"1 row needs a value on this instance": "1 rad behöver ett värde på den här instansen",
 		"1 row skipped.": "1 rad hoppades över.",
 		"1 setting": "1 inställning",
+		"_%n claim awaiting your approval_::_%n claims awaiting your approval_": [
+			"1 utlägg väntar på ditt godkännande",
+			"%n utlägg väntar på ditt godkännande"
+		],
+		"_%n claim sent back for changes_::_%n claims sent back for changes_": [
+			"1 utlägg skickat tillbaka för ändringar",
+			"%n utlägg skickade tillbaka för ändringar"
+		],
+		"_%n draft to finish_::_%n drafts to finish_": [
+			"1 utkast att slutföra",
+			"%n utkast att slutföra"
+		],
+		"_%n receipt to file_::_%n receipts to file_": [
+			"1 kvitto att arkivera",
+			"%n kvitton att arkivera"
+		],
 		"_1 result_::_%n results_": [
 			"1 resultat",
 			"%n resultat"
@@ -30,7 +46,7 @@
 		"A scoped change with acceptance criteria and a delivery date — billed as project work.": "En avgränsad ändring med acceptanskriterier och ett leveransdatum — faktureras som projektarbete.",
 		"A transfer started by %s is already running.": "En överföring som startades av %s körs redan.",
 		"Access": "Åtkomst",
-		"Access denied": "Access denied",
+		"Access denied": "Åtkomst nekad",
 		"Access mode": "Åtkomstläge",
 		"Access policy saved.": "Åtkomstpolicy sparad.",
 		"Actions": "Åtgärder",
@@ -69,7 +85,7 @@
 		"Allowed groups": "Tillåtna grupper",
 		"Allowed users": "Tillåtna användare",
 		"Already claimed: %s": "Redan tilldelad: %s",
-		"Already in claim {no}": "Redan i utlägg {no}",
+		"Already in claim {number}": "Redan i utlägg {number}",
 		"Amount": "Belopp",
 		"An approver asked for changes. Open ExpenseCheck to review the note and resubmit.": "En godkännare bad om ändringar. Öppna ExpenseCheck för att läsa noten och skicka in igen.",
 		"an_error_occurred": "Ett fel uppstod",
@@ -117,7 +133,7 @@
 		"Awaiting your approval": "Väntar på ditt godkännande",
 		"awaiting your decision": "inväntar ditt beslut",
 		"Back to Nextcloud": "Tillbaka till Nextcloud",
-		"Batch detail": "Batchdetaljer",
+		"Batch detail": "Batchöversikt",
 		"Batch settled.": "Batch utbetald.",
 		"Batches": "Batchar",
 		"Breadcrumb": "Brödsmula",
@@ -567,7 +583,7 @@
 		"Settlement": "Avräkning",
 		"Settlement batch": "Utbetalningsbatch",
 		"Settlement batch detail and export.": "Detaljer och export av en utbetalningsbatch.",
-		"Settlement batch — the set of claims paid together plus the exported CSV/ODS artifact and its file hash for bookkeeping.": "Utbetalningsbatch — uppsättningen utlägg som betalas tillsammans plus den exporterade CSV/ODS-filen och dess filhash för bokföringen.",
+		"Settlement batch — the set of claims paid together plus the exported CSV/ODS artifact and its file hash for bookkeeping.": "Utbetalningsbatch — uppsättningen utlägg som betalas tillsammans plus den exporterade CSV/ODS-filen och dess kontrollsumma för bokföringen.",
 		"Settlement period closed": "Avräkningsperiod stängd",
 		"Settlement period closed (%s claims)": "Avräkningsperiod stängd (%s utlägg)",
 		"Settlement queue": "Utbetalningskö",
@@ -609,6 +625,7 @@
 		"The business reason — legally required for entertainment expenses.": "Affärsskälet — lagstadgat för representationsutgifter.",
 		"the companion apps": "kompanjonapparna",
 		"the ExpenseCheck mobile companion app": "ExpenseChecks mobila kompanjonapp",
+		"The export could not be generated.": "Exporten kunde inte skapas.",
 		"The export is not ready yet.": "Exporten är inte klar ännu.",
 		"The field is marked — enter the reason and retry.": "Fältet är markerat — ange orsaken och försök igen.",
 		"The following expense claims are waiting for your approval:": "Följande utlägg väntar på ditt godkännande:",
@@ -649,6 +666,7 @@
 		"This will update %1$s and %2$s — nothing is deleted.": "Detta uppdaterar %1$s och %2$s — inget raderas.",
 		"Tick the confirmation and send again.": "Bocka i bekräftelsen och skicka igen.",
 		"Timezone": "Tidszon",
+		"Try again — if it keeps failing, report this problem.": "Försök igen — om det fortsätter att misslyckas, rapportera problemet.",
 		"Title": "Titel",
 		"Toggle navigation menu": "Visa eller dölj navigeringsmeny",
 		"Too many attempts — wait a minute and try again.": "För många försök — vänta en minut och försök igen.",
@@ -712,11 +730,11 @@
 		"Your numbers": "Dina siffror",
 		"Your organisation restricts ExpenseCheck access. You are not on the allowed-users list and you are not a member of any allowed group.": "Dina organisation begränsar åtkomsten till ExpenseCheck. finns inte på listan över tillåtna användare och är inte medlem i någon tillåten grupp.",
 		"Your settlement export finished building. Open ExpenseCheck to download it.": "Din avräkningsexport är klar. Öppna ExpenseCheck för att hämta den.",
-		"{n} claim(s) awaiting your approval": "{n} utlägg väntar på ditt godkännande",
-		"{n} claim(s) sent back for changes": "{n} utlägg skickat tillbaka för ändringar",
-		"{n} draft(s) to finish": "{n} utkast att slutföra",
 		"{n} pending": "{n} väntande",
-		"{n} receipt(s) to file": "{n} kvitto(n) att arkivera",
+		"_… and %n more_::_… and %n more_": [
+			"… och %n till",
+			"… och %n till"
+		],
 		"… and %n more": "… och %n till"
 	}
 }

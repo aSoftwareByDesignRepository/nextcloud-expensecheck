@@ -14,6 +14,22 @@
 		"1 row needs a value on this instance": "1 row needs a value on this instance",
 		"1 row skipped.": "1 row skipped.",
 		"1 setting": "1 setting",
+		"_%n claim awaiting your approval_::_%n claims awaiting your approval_": [
+			"1 claim awaiting your approval",
+			"%n claims awaiting your approval"
+		],
+		"_%n claim sent back for changes_::_%n claims sent back for changes_": [
+			"1 claim sent back for changes",
+			"%n claims sent back for changes"
+		],
+		"_%n draft to finish_::_%n drafts to finish_": [
+			"1 draft to finish",
+			"%n drafts to finish"
+		],
+		"_%n receipt to file_::_%n receipts to file_": [
+			"1 receipt to file",
+			"%n receipts to file"
+		],
 		"_1 result_::_%n results_": [
 			"1 result",
 			"%n results"
@@ -69,7 +85,7 @@
 		"Allowed groups": "Allowed groups",
 		"Allowed users": "Allowed users",
 		"Already claimed: %s": "Already claimed: %s",
-		"Already in claim {no}": "Already in claim {no}",
+		"Already in claim {number}": "Already in claim {number}",
 		"Amount": "Amount",
 		"An approver asked for changes. Open ExpenseCheck to review the note and resubmit.": "An approver asked for changes. Open ExpenseCheck to review the note and resubmit.",
 		"an_error_occurred": "an_error_occurred",
@@ -242,7 +258,7 @@
 		"Draft": "Draft",
 		"Draft and submit expense claims from your phone — the same claims you see in the browser.": "Draft and submit expense claims from your phone — the same claims you see in the browser.",
 		"Draft created.": "Draft created.",
-		"Drivers claim kilometres here, linked to MobilityCheck trips. Disable MobilityCheck’s own expense submit in its settings.": "Drivers claim kilometres here, linked to MobilityCheck trips. Disable MobilityCheck\\u2019s own expense submit in its set",
+		"Drivers claim kilometres here, linked to MobilityCheck trips. Disable MobilityCheck’s own expense submit in its settings.": "Drivers claim kilometres here, linked to MobilityCheck trips. Disable MobilityCheck’s own expense submit in its set",
 		"Effective from": "Effective from",
 		"Email is best-effort — no reply SLA. Need booked help? Use Support & us.": "Email is best-effort — no reply SLA. Need booked help? Use Support & us.",
 		"Encryption passphrase": "Encryption passphrase",
@@ -348,7 +364,7 @@
 		"Mileage": "Mileage",
 		"Mileage claims are disabled for this org.": "Mileage claims are disabled for this org.",
 		"Mileage claims are disabled here; drivers claim private-car kilometres in MobilityCheck. Applies to new claims only.": "Mileage claims are disabled here; drivers claim private-car kilometres in MobilityCheck. Applies to new claims only.",
-		"Mileage claims are turned off here. Drivers submit private-car kilometres in MobilityCheck’s own module.": "Mileage claims are turned off here. Drivers submit private-car kilometres in MobilityCheck\\u2019s own module.",
+		"Mileage claims are turned off here. Drivers submit private-car kilometres in MobilityCheck’s own module.": "Mileage claims are turned off here. Drivers submit private-car kilometres in MobilityCheck’s own module.",
 		"Mileage — a distance claim: kilometres times the catalog rate effective on the trip date. GPS-derived distance is marked as such for the approver.": "Mileage — a distance claim: kilometres times the catalog rate effective on the trip date. GPS-derived distance is marked",
 		"Mobile": "Mobile",
 		"Mobile & terminal": "Mobile & terminal",
@@ -358,8 +374,8 @@
 		"Mobile seats": "Mobile seats",
 		"Mobile seats used": "Mobile seats used",
 		"MobilityCheck coexistence": "MobilityCheck coexistence",
-		"MobilityCheck’s own expense submit is currently ON — switch it off under MobilityCheck → Settings for Mode B.": "MobilityCheck\\u2019s own expense submit is currently ON — switch it off under MobilityCheck → Settings for Mode B.",
-		"MobilityCheck’s own expense submit is off.": "MobilityCheck\\u2019s own expense submit is off.",
+		"MobilityCheck’s own expense submit is currently ON — switch it off under MobilityCheck → Settings for Mode B.": "MobilityCheck’s own expense submit is currently ON — switch it off under MobilityCheck → Settings for Mode B.",
+		"MobilityCheck’s own expense submit is off.": "MobilityCheck’s own expense submit is off.",
 		"Mode": "Mode",
 		"Mode A — MobilityCheck settles": "Mode A — MobilityCheck settles",
 		"Mode A — MobilityCheck settles vehicle money": "Mode A — MobilityCheck settles vehicle money",
@@ -411,7 +427,7 @@
 		"OK — a longer passphrase is safer.": "OK — a longer passphrase is safer.",
 		"On Google Play. Your organisation licenses official mobile seats — the web app stays free.": "On Google Play. Your organisation licenses official mobile seats — the web app stays free.",
 		"On this page": "On this page",
-		"One approval queue and one settlement for all employee money. Requires MobilityCheck’s own expense submit to be switched off there.": "One approval queue and one settlement for all employee money. Requires MobilityCheck\\u2019s own expense submit to be swi",
+		"One approval queue and one settlement for all employee money. Requires MobilityCheck’s own expense submit to be switched off there.": "One approval queue and one settlement for all employee money. Requires MobilityCheck’s own expense submit to be swi",
 		"Only approved claims can be settled.": "Only approved claims can be settled.",
 		"Only the users and groups below — plus app admins — can open the app.": "Only the users and groups below — plus app admins — can open the app.",
 		"Open": "Open",
@@ -609,6 +625,7 @@
 		"The business reason — legally required for entertainment expenses.": "The business reason — legally required for entertainment expenses.",
 		"the companion apps": "the companion apps",
 		"the ExpenseCheck mobile companion app": "the ExpenseCheck mobile companion app",
+		"The export could not be generated.": "The export could not be generated.",
 		"The export is not ready yet.": "The export is not ready yet.",
 		"The field is marked — enter the reason and retry.": "The field is marked — enter the reason and retry.",
 		"The following expense claims are waiting for your approval:": "The following expense claims are waiting for your approval:",
@@ -649,6 +666,7 @@
 		"This will update %1$s and %2$s — nothing is deleted.": "This will update %1$s and %2$s — nothing is deleted.",
 		"Tick the confirmation and send again.": "Tick the confirmation and send again.",
 		"Timezone": "Timezone",
+		"Try again — if it keeps failing, report this problem.": "Try again — if it keeps failing, report this problem.",
 		"Title": "Title",
 		"Toggle navigation menu": "Toggle navigation menu",
 		"Too many attempts — wait a minute and try again.": "Too many attempts — wait a minute and try again.",
@@ -712,11 +730,11 @@
 		"Your numbers": "Your numbers",
 		"Your organisation restricts ExpenseCheck access. You are not on the allowed-users list and you are not a member of any allowed group.": "Your organisation restricts ExpenseCheck access. You are not on the allowed-users list and you are not a member of any allowed group.",
 		"Your settlement export finished building. Open ExpenseCheck to download it.": "Your settlement export finished building. Open ExpenseCheck to download it.",
-		"{n} claim(s) awaiting your approval": "{n} claim(s) awaiting your approval",
-		"{n} claim(s) sent back for changes": "{n} claim(s) sent back for changes",
-		"{n} draft(s) to finish": "{n} draft(s) to finish",
 		"{n} pending": "{n} pending",
-		"{n} receipt(s) to file": "{n} receipt(s) to file",
+		"_… and %n more_::_… and %n more_": [
+			"… and %n more",
+			"… and %n more"
+		],
 		"… and %n more": "… and %n more"
 	}
 }

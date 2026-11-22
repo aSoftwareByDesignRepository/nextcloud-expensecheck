@@ -14,6 +14,22 @@
 		"1 row needs a value on this instance": "1 riga richiede un valore su questa istanza",
 		"1 row skipped.": "1 riga saltata.",
 		"1 setting": "1 impostazione",
+		"_%n claim awaiting your approval_::_%n claims awaiting your approval_": [
+			"1 nota spese in attesa della Sua approvazione",
+			"%n note spese in attesa della Sua approvazione"
+		],
+		"_%n claim sent back for changes_::_%n claims sent back for changes_": [
+			"1 nota spese restituita per modifiche",
+			"%n note spese restituite per modifiche"
+		],
+		"_%n draft to finish_::_%n drafts to finish_": [
+			"1 bozza da completare",
+			"%n bozze da completare"
+		],
+		"_%n receipt to file_::_%n receipts to file_": [
+			"1 scontrino da archiviare",
+			"%n scontrini da archiviare"
+		],
 		"_1 result_::_%n results_": [
 			"1 risultato",
 			"%n risultati"
@@ -30,7 +46,7 @@
 		"A scoped change with acceptance criteria and a delivery date — billed as project work.": "Una modifica delimitata con criteri di accettazione e data di consegna — fatturata come lavoro di progetto.",
 		"A transfer started by %s is already running.": "Un trasferimento avviato da %s è già in esecuzione.",
 		"Access": "Accesso",
-		"Access denied": "Access denied",
+		"Access denied": "Accesso negato",
 		"Access mode": "Modalità di accesso",
 		"Access policy saved.": "Criterio di accesso salvato.",
 		"Actions": "Azioni",
@@ -69,7 +85,7 @@
 		"Allowed groups": "Gruppi autorizzati",
 		"Allowed users": "Utenti autorizzati",
 		"Already claimed: %s": "Già assegnato: %s",
-		"Already in claim {no}": "Già nella nota {no}",
+		"Already in claim {number}": "Già nella nota {number}",
 		"Amount": "Importo",
 		"An approver asked for changes. Open ExpenseCheck to review the note and resubmit.": "Un approvatore ha chiesto modifiche. Apra ExpenseCheck per leggere la nota e reinviare.",
 		"an_error_occurred": "Si è verificato un errore",
@@ -609,6 +625,7 @@
 		"The business reason — legally required for entertainment expenses.": "Il motivo aziendale — obbligatorio per legge per le spese di rappresentanza.",
 		"the companion apps": "le app companion",
 		"the ExpenseCheck mobile companion app": "l’app mobile companion di ExpenseCheck",
+		"The export could not be generated.": "Impossibile generare l’esportazione.",
 		"The export is not ready yet.": "L’esportazione non è ancora pronta.",
 		"The field is marked — enter the reason and retry.": "Il campo è segnalato — inserire il motivo e riprovare.",
 		"The following expense claims are waiting for your approval:": "Le seguenti note spese attendono la Sua approvazione:",
@@ -649,6 +666,7 @@
 		"This will update %1$s and %2$s — nothing is deleted.": "Verranno aggiornate %1$s e %2$s — non verrà eliminato nulla.",
 		"Tick the confirmation and send again.": "Selezioni la conferma e invii di nuovo.",
 		"Timezone": "Fuso orario",
+		"Try again — if it keeps failing, report this problem.": "Riprova — se continua a fallire, segnala il problema.",
 		"Title": "Titolo",
 		"Toggle navigation menu": "Mostra o nascondi il menu di navigazione",
 		"Too many attempts — wait a minute and try again.": "Troppi tentativi — attendi un minuto e riprova.",
@@ -712,11 +730,11 @@
 		"Your numbers": "I Suoi numeri",
 		"Your organisation restricts ExpenseCheck access. You are not on the allowed-users list and you are not a member of any allowed group.": "La propria organizzazione limita l'accesso a ExpenseCheck. Non sei nell'elenco degli utenti consentiti e non sei membro di alcun gruppo consentito.",
 		"Your settlement export finished building. Open ExpenseCheck to download it.": "La sua esportazione di liquidazione è pronta. Apra ExpenseCheck per scaricarla.",
-		"{n} claim(s) awaiting your approval": "{n} nota(e) spese in attesa della Sua approvazione",
-		"{n} claim(s) sent back for changes": "{n} nota(e) spese restituita(e) per modifiche",
-		"{n} draft(s) to finish": "{n} bozza(e) da completare",
 		"{n} pending": "{n} in attesa",
-		"{n} receipt(s) to file": "{n} scontrino(i) da archiviare",
+		"_… and %n more_::_… and %n more_": [
+			"… e altre %n",
+			"… e altre %n"
+		],
 		"… and %n more": "… e altre %n"
 	}
 }

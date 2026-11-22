@@ -290,22 +290,22 @@ class PageController extends Controller
 		$queue = [];
 		if (count($pending) > 0) {
 			$queue[] = ['href' => $this->urlGenerator->linkToRoute('expensecheck.page.inbox'),
-				'label' => $this->l10n->t('{n} claim(s) awaiting your approval', ['n' => count($pending)]),
+				'label' => $this->l10n->n('%n claim awaiting your approval', '%n claims awaiting your approval', count($pending)),
 				'icon' => 'inbox'];
 		}
 		if ($changes > 0) {
 			$queue[] = ['href' => $this->urlGenerator->linkToRoute('expensecheck.page.claims'),
-				'label' => $this->l10n->t('{n} claim(s) sent back for changes', ['n' => $changes]),
+				'label' => $this->l10n->n('%n claim sent back for changes', '%n claims sent back for changes', $changes),
 				'icon' => 'repeat'];
 		}
 		if ($drafts > 0) {
 			$queue[] = ['href' => $this->urlGenerator->linkToRoute('expensecheck.page.claims'),
-				'label' => $this->l10n->t('{n} draft(s) to finish', ['n' => $drafts]),
+				'label' => $this->l10n->n('%n draft to finish', '%n drafts to finish', $drafts),
 				'icon' => 'file-text'];
 		}
 		if ($unfiled > 0) {
 			$queue[] = ['href' => $this->urlGenerator->linkToRoute('expensecheck.page.receiptsInbox'),
-				'label' => $this->l10n->t('{n} receipt(s) to file', ['n' => $unfiled]),
+				'label' => $this->l10n->n('%n receipt to file', '%n receipts to file', $unfiled),
 				'icon' => 'upload'];
 		}
 		return [

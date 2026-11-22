@@ -14,6 +14,26 @@
 		"1 row needs a value on this instance": "1 строка должна иметь значение в этом случае",
 		"1 row skipped.": "1 строка пропущена.",
 		"1 setting": "1 настройка",
+		"_%n claim awaiting your approval_::_%n claims awaiting your approval_": [
+			"%n отчёт ожидает вашего одобрения",
+			"%n отчёта ожидают вашего одобрения",
+			"%n отчётов ожидают вашего одобрения"
+		],
+		"_%n claim sent back for changes_::_%n claims sent back for changes_": [
+			"%n отчёт возвращён на доработку",
+			"%n отчёта возвращены на доработку",
+			"%n отчётов возвращены на доработку"
+		],
+		"_%n draft to finish_::_%n drafts to finish_": [
+			"%n черновик осталось завершить",
+			"%n черновика осталось завершить",
+			"%n черновиков осталось завершить"
+		],
+		"_%n receipt to file_::_%n receipts to file_": [
+			"%n квитанцию нужно разместить",
+			"%n квитанции нужно разместить",
+			"%n квитанций нужно разместить"
+		],
 		"_1 result_::_%n results_": [
 			"1 результат",
 			"%n результата",
@@ -32,7 +52,7 @@
 		"A scoped change with acceptance criteria and a delivery date — billed as project work.": "Изменение с определённым объёмом, критериями приёмки и сроком поставки — оплачивается как проектная работа.",
 		"A transfer started by %s is already running.": "Перенос, запущенный пользователем %s, уже выполняется.",
 		"Access": "Доступ",
-		"Access denied": "Access denied",
+		"Access denied": "Доступ запрещён",
 		"Access mode": "Режим доступа",
 		"Access policy saved.": "Политика доступа сохранена.",
 		"Actions": "Действия",
@@ -71,7 +91,7 @@
 		"Allowed groups": "Разрешённые группы",
 		"Allowed users": "Разрешённые пользователи",
 		"Already claimed: %s": "Уже назначено: %s",
-		"Already in claim {no}": "Уже в отчёте {no}",
+		"Already in claim {number}": "Уже в отчёте {number}",
 		"Amount": "Сумма",
 		"An approver asked for changes. Open ExpenseCheck to review the note and resubmit.": "Согласующий запросил изменения. Откройте ExpenseCheck, чтобы прочитать заметку и отправить заново.",
 		"an_error_occurred": "Произошла ошибка",
@@ -611,6 +631,7 @@
 		"The business reason — legally required for entertainment expenses.": "Деловая причина — обязательна по закону для представительских расходов.",
 		"the companion apps": "Спутниковые приложения",
 		"the ExpenseCheck mobile companion app": "мобильное приложение-компаньон ExpenseCheck",
+		"The export could not be generated.": "Не удалось создать экспорт.",
 		"The export is not ready yet.": "Экспорт ещё не готов.",
 		"The field is marked — enter the reason and retry.": "Поле отмечено — введите причину и повторите.",
 		"The following expense claims are waiting for your approval:": "Следующие отчёты ожидают вашего утверждения:",
@@ -651,6 +672,7 @@
 		"This will update %1$s and %2$s — nothing is deleted.": "Будут обновлены %1$s и %2$s — ничего не удаляется.",
 		"Tick the confirmation and send again.": "Отметьте подтверждение и отправьте снова.",
 		"Timezone": "Часовой пояс",
+		"Try again — if it keeps failing, report this problem.": "Повторите попытку — если ошибка повторяется, сообщите о проблеме.",
 		"Title": "Название",
 		"Toggle navigation menu": "Переключить меню навигации",
 		"Too many attempts — wait a minute and try again.": "Слишком много попыток — подождите минуту и попробуйте снова.",
@@ -714,11 +736,12 @@
 		"Your numbers": "Ваши показатели",
 		"Your organisation restricts ExpenseCheck access. You are not on the allowed-users list and you are not a member of any allowed group.": "Ваша организация ограничивает доступ к ExpenseCheck. Вас нет в списке разрешённых пользователей и вы не член ни одной разрешённой группы.",
 		"Your settlement export finished building. Open ExpenseCheck to download it.": "Ваш экспорт расчёта готов. Откройте ExpenseCheck для скачивания.",
-		"{n} claim(s) awaiting your approval": "{n} ()   ",
-		"{n} claim(s) sent back for changes": "{n} ()   ",
-		"{n} draft(s) to finish": "{n} () ",
 		"{n} pending": "{n} ",
-		"{n} receipt(s) to file": "{n} () ",
+		"_… and %n more_::_… and %n more_": [
+			"… и ещё %n",
+			"… и ещё %n",
+			"… и ещё %n"
+		],
 		"… and %n more": "… и ещё %n"
 	}
 }

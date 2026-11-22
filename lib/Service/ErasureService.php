@@ -75,7 +75,12 @@ class ErasureService {
 					// already gone; make sure the row is still removed.
 					try {
 						$this->attachments->delete($a);
-					} catch (\Throwable) {
+					} catch (\Throwable $inner) {
+						// Erasure is GDPR-critical: a surviving row keeps the
+						// PII link — only tolerate a row that is really gone.
+						if ($this->attachments->findById($a->getId()) !== null) {
+							throw $inner;
+						}
 						$this->logger->info('expensecheck erasure: attachment row already removed', ['id' => $a->getId()]);
 					}
 				}

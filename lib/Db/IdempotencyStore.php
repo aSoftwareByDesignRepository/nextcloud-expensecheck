@@ -52,8 +52,15 @@ class IdempotencyStore
 			]);
 		try {
 			$qb->executeStatement();
-		} catch (\OCP\DB\Exception) {
-			// Lost the insert race — the winner's row is the answer.
+		} catch (\OCP\DB\Exception $e) {
+			// Lost the insert race — the winner's row is the answer. When the
+			// row is not readable either, this was a real failure, not a race:
+			// report it instead of fabricating a success row.
+			$existing = $this->find($key);
+			if ($existing === null) {
+				throw $e;
+			}
+			return $existing;
 		}
 		return $this->find($key) ?? ['key' => $key, 'user_id' => $uid, 'claim_id' => $claimId, 'created_at' => ''];
 	}

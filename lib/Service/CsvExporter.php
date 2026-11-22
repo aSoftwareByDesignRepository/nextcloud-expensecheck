@@ -12,7 +12,7 @@ namespace OCA\ExpenseCheck\Service;
  */
 class CsvExporter
 {
-	private const DANGER_PREFIXES = ['=', '+', '-', '@', "\t", "\r"];
+	private const DANGER_PREFIXES = ['=', '+', '-', '@', "\t", "\r", "\x0b"];
 
 	/**
 	 * @param list<string> $header

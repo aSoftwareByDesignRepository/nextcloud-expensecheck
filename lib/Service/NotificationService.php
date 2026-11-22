@@ -156,10 +156,15 @@ class NotificationService
 			$row->setChannel($channel);
 			$row->setCreatedAt(new \DateTime());
 			$this->log->insert($row);
-		} catch (\Throwable $e) {
-			// Duplicate dedupe key (concurrent send) is benign — first sender won.
-			$this->logger->info('expensecheck notification log insert failed', [
-				'event' => $event, 'exception' => $e,
+		} catch (\OCP\DB\Exception $e) {
+			// Duplicate dedupe key (concurrent send) is benign — first sender
+			// won. Any other insert failure is a real error: losing the dedupe
+			// row silently invites a duplicate send later.
+			if ($e->getReason() !== \OCP\DB\Exception::REASON_UNIQUE_CONSTRAINT_VIOLATION) {
+				throw $e;
+			}
+			$this->logger->info('expensecheck notification log dedupe hit', [
+				'event' => $event,
 			]);
 		}
 	}

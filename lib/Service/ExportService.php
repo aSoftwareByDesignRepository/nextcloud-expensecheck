@@ -111,6 +111,9 @@ class ExportService
 			}
 			return ['state' => 'ready', 'ready_at' => $entry['ready_at'], 'expires_at' => $entry['expires_at']];
 		}
+		if ($entry['state'] === 'failed') {
+			throw new DomainException('EXPORT_FAILED', 'The export could not be generated.', 409);
+		}
 		throw new DomainException('EXPORT_NOT_READY', 'Export is still being generated.', 409);
 	}
 
@@ -170,7 +173,8 @@ class ExportService
 		$expired = 0;
 		$readyUids = [];
 		foreach ($state as $id => $entry) {
-			if (($entry['state'] === 'pending' && ($entry['created_at'] + self::PENDING_TTL) < $now)
+			if ((($entry['state'] === 'pending' || $entry['state'] === 'failed')
+					&& ($entry['created_at'] + self::PENDING_TTL) < $now)
 				|| ($entry['state'] === 'ready' && ($entry['expires_at'] ?? 0) < $now)) {
 				unset($state[$id]);
 				$expired++;
@@ -197,9 +201,13 @@ class ExportService
 					$readyUids[] = $entry['requester'];
 				}
 			} catch (\Throwable $e) {
+				// non-fatal per entry: one bad export must not stall the sweep
+				// — mark it failed so poll() reports the truth and a broken
+				// render is not retried on every cron run.
 				$this->logger->warning('expensecheck async export failed', [
 					'request_id' => $id, 'exception' => $e,
 				]);
+				$state[$id]['state'] = 'failed';
 			}
 		}
 		$this->saveState($state);

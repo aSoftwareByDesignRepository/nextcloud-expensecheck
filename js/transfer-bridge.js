@@ -62,20 +62,19 @@
 	const t = (s) => (window.OC && OC.L10N && OC.L10N.translate)
 		? OC.L10N.translate('expensecheck', s) : s;
 	function announce(text, kind) {
+		// OC.Notification is gone on NC>=31 — EXPToasts (common/toasts.js)
+		// is the only visible channel; the live-region write in alert()/
+		// polite() stays as belt.
 		try {
-			const toasts = window.EXPToasts;
-			if (toasts && kind === 'error' && typeof toasts.error === 'function') {
-				toasts.error(String(text));
+			if (kind === 'error' && window.EXPToasts && typeof window.EXPToasts.error === 'function') {
+				window.EXPToasts.error(String(text));
 				return;
 			}
-			if (toasts && typeof toasts.success === 'function') {
-				toasts.success(String(text));
+			if (window.EXPToasts && typeof window.EXPToasts.success === 'function') {
+				window.EXPToasts.success(String(text));
 				return;
 			}
-		} catch (e) { /* fall through to the platform fallback */ }
-		if (window.OC && OC.Notification && OC.Notification.showTemporary) {
-			OC.Notification.showTemporary(text);
-		}
+		} catch (e) { /* toast layer must never break the transfer flow */ }
 	}
 	function live(text) {
 		const el = document.getElementById('exp-transfer-result-live');
