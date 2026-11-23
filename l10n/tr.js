@@ -688,7 +688,7 @@ OC.L10N.register(
 	"Upload receipt" : "Fiş yükle",
 	"Use one of the allowed types shown in the picker." : "Seçicide gösterilen izin verilen türlerden birini kullanın.",
 	"User ID" : "Kullanıcı kimliği",
-	"Uses Nextcloud Login Flow — your main password is never stored in the app." : "Nextcloud Login Flow kullanır — ana parolan uygulamada asla saklanmaz.",
+	"Sign in with a Nextcloud app password — your main password is never stored in the app." : "Nextcloud uygulama parolasıyla giriş yapın — ana parolanız uygulamada asla saklanmaz.",
 	"Valid" : "Geçerli",
 	"Valid until" : "Şu tarihe kadar geçerli",
 	"Validating" : "Doğrulanıyor",

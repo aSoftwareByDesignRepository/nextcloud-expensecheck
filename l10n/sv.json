@@ -708,7 +708,7 @@
 		"Upload receipt": "Ladda upp kvitto",
 		"Use one of the allowed types shown in the picker.": "Använd en av de tillåtna typerna som visas i väljaren.",
 		"User ID": "Användar-ID",
-		"Uses Nextcloud Login Flow — your main password is never stored in the app.": "Använder Nextcloud Login Flow — ditt huvudlösenord sparas aldrig i appen.",
+		"Sign in with a Nextcloud app password — your main password is never stored in the app.": "Logga in med ett Nextcloud-applösenord — ditt huvudlösenord sparas aldrig i appen.",
 		"Valid": "Giltig",
 		"Valid until": "Giltig till",
 		"Validating": "Validerar",

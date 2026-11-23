@@ -688,7 +688,7 @@ OC.L10N.register(
 	"Upload receipt" : "Загрузить чек",
 	"Use one of the allowed types shown in the picker." : "Используйте один из разрешённых типов в селекторе.",
 	"User ID" : "ID пользователя",
-	"Uses Nextcloud Login Flow — your main password is never stored in the app." : "Используется Nextcloud Login Flow — ваш основной пароль никогда не хранится в приложении.",
+	"Sign in with a Nextcloud app password — your main password is never stored in the app." : "Войдите с паролем приложения Nextcloud — ваш основной пароль никогда не хранится в приложении.",
 	"Valid" : "Действительна",
 	"Valid until" : "действителен до",
 	"Validating" : "Проверка",

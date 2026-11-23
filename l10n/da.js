@@ -688,7 +688,7 @@ OC.L10N.register(
 	"Upload receipt" : "Upload kvittering",
 	"Use one of the allowed types shown in the picker." : "Brug en af de tilladte typer, der vises i vælgeren.",
 	"User ID" : "Bruger-id",
-	"Uses Nextcloud Login Flow — your main password is never stored in the app." : "Bruger Nextcloud Login Flow — din hovedadgangskode gemmes aldrig i appen.",
+	"Sign in with a Nextcloud app password — your main password is never stored in the app." : "Log ind med en Nextcloud-appadgangskode — din hovedadgangskode gemmes aldrig i appen.",
 	"Valid" : "Gyldig",
 	"Valid until" : "Gyldig til",
 	"Validating" : "Validerer",

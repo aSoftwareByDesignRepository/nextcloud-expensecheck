@@ -708,7 +708,7 @@
 		"Upload receipt": "Beleg hochladen",
 		"Use one of the allowed types shown in the picker.": "Verwenden Sie einen der im Auswahlfeld erlaubten Typen.",
 		"User ID": "Benutzer-ID",
-		"Uses Nextcloud Login Flow — your main password is never stored in the app.": "Nutzt den Nextcloud-Login-Flow — dein Hauptpasswort wird nie in der App gespeichert.",
+		"Sign in with a Nextcloud app password — your main password is never stored in the app.": "Melden Sie sich mit einem Nextcloud-App-Passwort an — Ihr Hauptpasswort wird nie in der App gespeichert.",
 		"Valid": "Gültig",
 		"Valid until": "Gültig bis",
 		"Validating": "Wird geprüft",

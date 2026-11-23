@@ -701,7 +701,7 @@
 		"Upload receipt": "上傳憑證",
 		"Use one of the allowed types shown in the picker.": "請使用選擇器中顯示的允許類型。",
 		"User ID": "使用者 ID",
-		"Uses Nextcloud Login Flow — your main password is never stored in the app.": "使用 Nextcloud 登入流程——你的主密碼不會儲存在應用中。",
+		"Sign in with a Nextcloud app password — your main password is never stored in the app.": "使用 Nextcloud 應用程式密碼登入——你的主密碼不會儲存在應用中。",
 		"Valid": "有效",
 		"Valid until": "有效期限至",
 		"Validating": "正在驗證",

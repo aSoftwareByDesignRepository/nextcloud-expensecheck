@@ -688,7 +688,7 @@ OC.L10N.register(
 	"Upload receipt" : "Bon uploaden",
 	"Use one of the allowed types shown in the picker." : "Gebruik een van de toegestane typen die in de keuzelijst worden getoond.",
 	"User ID" : "Gebruikers-ID",
-	"Uses Nextcloud Login Flow — your main password is never stored in the app." : "Gebruikt Nextcloud Login Flow — je hoofdwachtwoord wordt nooit in de app opgeslagen.",
+	"Sign in with a Nextcloud app password — your main password is never stored in the app." : "Meld u aan met een Nextcloud-app-wachtwoord — uw hoofdwachtwoord wordt nooit in de app opgeslagen.",
 	"Valid" : "Geldig",
 	"Valid until" : "Geldig tot",
 	"Validating" : "Bezig met valideren",

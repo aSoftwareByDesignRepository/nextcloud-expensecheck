@@ -688,7 +688,7 @@ OC.L10N.register(
 	"Upload receipt" : "Prześlij dowód",
 	"Use one of the allowed types shown in the picker." : "Użyj jednego z dozwolonych typów pokazanych w selektorze.",
 	"User ID" : "ID użytkownika",
-	"Uses Nextcloud Login Flow — your main password is never stored in the app." : "Korzysta z Nextcloud Login Flow — twoje główne hasło nigdy nie jest przechowywane w aplikacji.",
+	"Sign in with a Nextcloud app password — your main password is never stored in the app." : "Zaloguj się hasłem aplikacji Nextcloud — twoje główne hasło nigdy nie jest przechowywane w aplikacji.",
 	"Valid" : "Ważna",
 	"Valid until" : "Ważne do",
 	"Validating" : "Sprawdzanie",

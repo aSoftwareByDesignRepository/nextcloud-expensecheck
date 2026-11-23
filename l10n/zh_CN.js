@@ -688,7 +688,7 @@ OC.L10N.register(
 	"Upload receipt" : "上传票据",
 	"Use one of the allowed types shown in the picker." : "请使用选择器中显示的允许类型。",
 	"User ID" : "用户 ID",
-	"Uses Nextcloud Login Flow — your main password is never stored in the app." : "使用 Nextcloud 登录流程——你的主密码不会存储在应用中。",
+	"Sign in with a Nextcloud app password — your main password is never stored in the app." : "使用 Nextcloud 应用密码登录——你的主密码不会存储在应用中。",
 	"Valid" : "有效",
 	"Valid until" : "有效期至",
 	"Validating" : "正在校验",
