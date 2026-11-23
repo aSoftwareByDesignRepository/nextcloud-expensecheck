@@ -103,7 +103,7 @@
 		items.forEach(function (c) {
 			var cells = [];
 			if (opts.selectLabel) {
-				var lab = el('label', { class: 'exp-checkbox exp-table__check' });
+				var lab = el('label', { class: 'exp-checkbox' });
 				var cb = el('input', { type: 'checkbox' });
 				cb.addEventListener('change', function () { opts.select(c, cb.checked); });
 				lab.appendChild(cb);
@@ -1568,7 +1568,7 @@
 					t('One approval queue and one settlement for all employee money. Requires MobilityCheck’s own expense submit to be switched off there.')));
 				section.appendChild(cards);
 
-				var mcState = el('p', { class: 'exp-field-hint' });
+				var mcState = el('p', { class: 'exp-hint' });
 				mcState.appendChild(document.createTextNode(
 					mc.expense_submit_enabled
 						? t('MobilityCheck’s own expense submit is currently ON — switch it off under MobilityCheck → Settings for Mode B.')

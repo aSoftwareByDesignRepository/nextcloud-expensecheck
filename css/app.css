@@ -899,3 +899,15 @@
 #app-content.exp-app .exp-btn--warn {
 	color: color-mix(in srgb, var(--color-warning-text, var(--color-warning, #8a6d00)) 45%, var(--color-main-text));
 }
+
+/* ---------- Section chip-nav (claim-detail) --------------------
+ * --sections variant: one horizontally scrolling row — a wrapped
+ * sticky bar would grow tall and cover content on narrow screens. */
+.exp-chipbar--sections {
+	flex-wrap: nowrap;
+	overflow-x: auto;
+	scrollbar-width: thin;
+}
+.exp-chipbar--sections .exp-chipbar__chip {
+	flex: 0 0 auto;
+}

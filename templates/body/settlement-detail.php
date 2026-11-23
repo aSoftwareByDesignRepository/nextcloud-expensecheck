@@ -2,7 +2,7 @@
 <section class="exp-surface" data-exp-view="settlement-detail" data-exp-batch-id="<?php p((string)($_['batchId'] ?? '')); ?>" aria-labelledby="exp-batch-h">
 	<h2 id="exp-batch-h"><?php p($l->t('Settlement batch')); ?></h2>
 	<div id="exp-batch-body" aria-live="polite"></div>
-	<div class="exp-actions exp-export-actions">
+	<div class="exp-actions">
 		<label class="exp-field" for="exp-export-format">
 			<span class="exp-label"><?php p($l->t('Format')); ?></span>
 			<select id="exp-export-format" class="exp-select">

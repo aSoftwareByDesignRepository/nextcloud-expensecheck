@@ -1,0 +1,6 @@
+{
+  "exp-lines": "JS mount hook for dynamic expense-line fieldsets (id-targeted)",
+  "exp-get-app__features-block": "layout-transparent section wrapper; children styled via exp-get-app__features",
+  "exp-get-app__play-label": "label text inside styled exp-get-app__play button",
+  "exp-transfer-report": "dialog body wrapper; content styled via exp-transfer-report__verdict + dialog chrome"
+}
