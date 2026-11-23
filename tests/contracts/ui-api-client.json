@@ -504,6 +504,74 @@
      ]
     }
    ]
+  },
+  {
+   "id": "category-admin-rule-fields",
+   "param": "allow_lines|justification_threshold|justification_min_length|requires_attendees|receipt_required|max_amount|max_is_hard|default_amount|sort|active|id",
+   "description": "Category admin create/edit must expose every server-side rule field that gates line UX on both clients (allow_lines fence, justification threshold + min length, requires_attendees/occasion pair, receipt_required, hard max cap) plus the id-bound edit path — no delete+recreate dead end.",
+   "errorCodes": [
+    "VALIDATION_FAILED",
+    "DUPLICATE_CODE",
+    "CATEGORY_NOT_FOUND"
+   ],
+   "server": [
+    {
+     "file": "lib/Service/CategoryService.php",
+     "needles": [
+      "allow_lines",
+      "justification_threshold",
+      "justification_min_length",
+      "requires_attendees",
+      "receipt_required",
+      "max_amount",
+      "max_is_hard",
+      "default_amount",
+      "sort",
+      "active"
+     ]
+    }
+   ],
+   "web": [
+    {
+     "file": "templates/body/categories.php",
+     "needles": [
+      "exp-cat-al-receipt",
+      "exp-cat-receipt-required",
+      "exp-cat-requires-attendees",
+      "justification_threshold",
+      "justification_min_length",
+      "max_amount",
+      "default_amount",
+      "exp-cat-sort",
+      "exp-cat-active",
+      "exp-cat-id"
+     ]
+    },
+    {
+     "file": "js/pages/app-views.js",
+     "needles": [
+      "allow_lines",
+      "justification_threshold",
+      "justification_min_length",
+      "requires_attendees",
+      "receipt_required",
+      "max_is_hard",
+      "default_amount",
+      "fillForm",
+      "exp-cat-id"
+     ]
+    }
+   ],
+   "mobile": [
+    {
+     "file": "src/screens/NewClaimScreen.tsx",
+     "needles": [
+      "allow_lines",
+      "justification_threshold_minor",
+      "requires_attendees"
+     ]
+    }
+   ]
   }
  ]
 }

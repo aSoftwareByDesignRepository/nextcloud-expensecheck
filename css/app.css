@@ -345,6 +345,29 @@ ol.exp-queue { display: block; list-style: decimal inside; }
 }
 .exp-chipbar__chip:hover, .exp-chipbar__chip:focus-visible { background: var(--color-background-hover); }
 
+/* ---------- Audit timeline (claim-detail decisions + events) ---------- */
+.exp-timeline {
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-2, 8px);
+}
+.exp-timeline__item {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: var(--exp-space-1, 4px) var(--exp-space-2, 8px);
+	font-size: var(--exp-fs-sm, 0.875rem);
+	line-height: 1.4;
+}
+.exp-timeline__when {
+	font-variant-numeric: tabular-nums;
+	color: var(--exp-muted, var(--color-text-maxcontrast));
+}
+.exp-timeline__sep {
+	color: var(--exp-muted, var(--color-text-maxcontrast));
+	opacity: 0.7;
+}
+
 /* ---------- Inline glossary term (§9.3) ---------- */
 .exp-glossary-term {
 	background: none; border: 0; padding: 0;

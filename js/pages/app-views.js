@@ -655,6 +655,7 @@
 			decs.forEach(function (d) {
 				decisionsHost.appendChild(el('div', { class: 'exp-timeline__item' }, [
 					el('span', { class: 'exp-timeline__when', text: fmtDateTime(d.created_at) }),
+					el('span', { class: 'exp-timeline__sep', text: '·' }),
 					el('span', { text: t('step {n}', { n: d.step_no }) + ' · ' + (d.decided_by || '') +
 						' · ' + (d.decision || '') + (d.note ? ' · ' + d.note : '') })
 				]));
@@ -667,8 +668,9 @@
 			evs.forEach(function (ev2) {
 				eventsHost.appendChild(el('div', { class: 'exp-timeline__item' }, [
 					el('span', { class: 'exp-timeline__when', text: fmtDateTime(ev2.created_at) }),
+					el('span', { class: 'exp-timeline__sep', text: '·' }),
 					el('span', { text: (ev2.actor || '') + ' ' + eventLabel(ev2.event) +
-						(ev2.from_status ? ' ' + statusLabel(ev2.from_status) + '→' + statusLabel(ev2.to_status) : '') })
+						(ev2.from_status ? ' ' + statusLabel(ev2.from_status) + ' → ' + statusLabel(ev2.to_status) : '') })
 				]));
 			});
 			actions.innerHTML = '';
@@ -1059,42 +1061,129 @@
 		load();
 	};
 
-	['admin-categories', 'admin-cost-centers'].forEach(function (name) {
-		views[name] = function (root) {
-			var isCat = name === 'admin-categories';
-			var listId = isCat ? 'exp-cat-list' : 'exp-cc-list';
-			var formId = isCat ? 'exp-cat-form' : 'exp-cc-form';
-			var ep = isCat ? '/admin/categories' : '/admin/cost-centers';
-			var list = document.getElementById(listId);
-			var form = document.getElementById(formId);
-			function load() {
-				return listFetch(list, null, function () { return api(ep); }, function (data) {
-					var items = (data && (data.categories || data.cost_centers)) || [];
-					items.forEach(function (c) {
-						if (c.deleted) return;
-						list.appendChild(el('div', { class: 'exp-card' }, [
-							el('strong', { text: c.code + ' — ' + c.name }),
-							el('p', { class: 'exp-card__meta', text: c.active ? t('Active') : t('Inactive') }),
-							el('div', { class: 'exp-detail-actions' }, [
-								adminDeleteBtn(t('Delete {name}? It stays visible on existing claims.', { name: c.name }), ep + '/' + c.id, load)
-							])
-						]));
-					});
-				})();
+	views['admin-categories'] = function (root) {
+		var ep = '/admin/categories';
+		var list = document.getElementById('exp-cat-list');
+		var form = document.getElementById('exp-cat-form');
+		var idIn = document.getElementById('exp-cat-id');
+		var cancelBtn = document.getElementById('exp-cat-cancel');
+		var LINE_TYPES = ['receipt', 'mileage', 'per_diem', 'flat'];
+		function alBox(t2) { return document.getElementById('exp-cat-al-' + t2.replace(/_/g, '-')); }
+		function minorToMajor(v) { return v === null || v === undefined ? '' : (v / 100).toFixed(2); }
+		function resetForm() {
+			form.reset();
+			idIn.value = '';
+			LINE_TYPES.forEach(function (t2) { alBox(t2).checked = true; });
+			cancelBtn.hidden = true;
+		}
+		function fillForm(c) {
+			idIn.value = c.id;
+			document.getElementById('exp-cat-code').value = c.code || '';
+			document.getElementById('exp-cat-name').value = c.name || '';
+			var allowed = String(c.allow_lines || '').split(',');
+			LINE_TYPES.forEach(function (t2) { alBox(t2).checked = allowed.indexOf(t2) !== -1; });
+			document.getElementById('exp-cat-receipt-required').checked = !!c.receipt_required;
+			document.getElementById('exp-cat-requires-attendees').checked = !!c.requires_attendees;
+			document.getElementById('exp-cat-just-threshold').value = minorToMajor(c.justification_threshold_minor);
+			document.getElementById('exp-cat-just-minlen').value = c.justification_min_length || '';
+			document.getElementById('exp-cat-max-amount').value = minorToMajor(c.max_amount_minor);
+			document.getElementById('exp-cat-max-hard').checked = !!c.max_is_hard;
+			document.getElementById('exp-cat-default-amount').value = minorToMajor(c.default_amount_minor);
+			document.getElementById('exp-cat-sort').value = c.sort || 0;
+			document.getElementById('exp-cat-active').checked = !!c.active;
+			cancelBtn.hidden = false;
+			form.scrollIntoView({ block: 'nearest' });
+		}
+		function ruleMeta(c) {
+			var bits = [];
+			if (c.receipt_required) bits.push(t('Receipt required'));
+			if (c.requires_attendees) bits.push(t('Requires attendees'));
+			if (c.justification_threshold_minor !== null && c.justification_threshold_minor !== undefined) {
+				bits.push(t('Justification') + ' ≥ ' + money(c.justification_threshold_minor, 'EUR'));
 			}
-			var submitBtn = form.querySelector('button[type="submit"]');
-			form.addEventListener('submit', function (ev) {
-				ev.preventDefault();
-				if (submitBtn) submitBtn.disabled = true;
-				var fd = new FormData(form);
-				api(ep, { method: 'POST', json: {
-					code: fd.get('code'), name: fd.get('name'), active: true
-				} }).then(function () { form.reset(); load(); }, E.handleError)
-					.finally(function () { if (submitBtn) submitBtn.disabled = false; });
-			});
-			load();
-		};
-	});
+			if (c.max_amount_minor !== null && c.max_amount_minor !== undefined) {
+				bits.push(t('Max amount') + ' ' + money(c.max_amount_minor, 'EUR') + (c.max_is_hard ? ' (' + t('Hard limit') + ')' : ''));
+			}
+			return bits.join(' · ');
+		}
+		function load() {
+			return listFetch(list, null, function () { return api(ep); }, function (data) {
+				var items = (data && data.categories) || [];
+				items.forEach(function (c) {
+					if (c.deleted) return;
+					var editBtn = el('button', { type: 'button', class: 'exp-btn', text: t('Edit') });
+					editBtn.addEventListener('click', function () { fillForm(c); });
+					var meta = (c.active ? t('Active') : t('Inactive')) +
+						' · ' + t('Line types') + ': ' + String(c.allow_lines || '').replace(/,/g, ', ') +
+						(ruleMeta(c) ? ' · ' + ruleMeta(c) : '');
+					list.appendChild(el('div', { class: 'exp-card' }, [
+						el('strong', { text: c.code + ' — ' + c.name }),
+						el('p', { class: 'exp-card__meta', text: meta }),
+						el('div', { class: 'exp-detail-actions' }, [
+							editBtn,
+							adminDeleteBtn(t('Delete {name}? It stays visible on existing claims.', { name: c.name }), ep + '/' + c.id, load)
+						])
+					]));
+				});
+			})();
+		}
+		var submitBtn = form.querySelector('button[type="submit"]');
+		form.addEventListener('submit', function (ev) {
+			ev.preventDefault();
+			if (submitBtn) submitBtn.disabled = true;
+			var fd = new FormData(form);
+			var types = LINE_TYPES.filter(function (t2) { return alBox(t2).checked; });
+			api(ep, { method: 'POST', json: {
+				id: fd.get('id') || null,
+				code: fd.get('code'), name: fd.get('name'),
+				active: document.getElementById('exp-cat-active').checked,
+				receipt_required: document.getElementById('exp-cat-receipt-required').checked,
+				requires_attendees: document.getElementById('exp-cat-requires-attendees').checked,
+				allow_lines: types.join(','),
+				justification_threshold: fd.get('justification_threshold') || '',
+				justification_min_length: fd.get('justification_min_length') || 0,
+				max_amount: fd.get('max_amount') || '',
+				max_is_hard: document.getElementById('exp-cat-max-hard').checked,
+				default_amount: fd.get('default_amount') || '',
+				sort: fd.get('sort') || 0
+			} }).then(function () { resetForm(); load(); }, E.handleError)
+				.finally(function () { if (submitBtn) submitBtn.disabled = false; });
+		});
+		cancelBtn.addEventListener('click', resetForm);
+		load();
+	};
+
+	views['admin-cost-centers'] = function (root) {
+		var ep = '/admin/cost-centers';
+		var list = document.getElementById('exp-cc-list');
+		var form = document.getElementById('exp-cc-form');
+		function load() {
+			return listFetch(list, null, function () { return api(ep); }, function (data) {
+				var items = (data && data.cost_centers) || [];
+				items.forEach(function (c) {
+					if (c.deleted) return;
+					list.appendChild(el('div', { class: 'exp-card' }, [
+						el('strong', { text: c.code + ' — ' + c.name }),
+						el('p', { class: 'exp-card__meta', text: c.active ? t('Active') : t('Inactive') }),
+						el('div', { class: 'exp-detail-actions' }, [
+							adminDeleteBtn(t('Delete {name}? It stays visible on existing claims.', { name: c.name }), ep + '/' + c.id, load)
+						])
+					]));
+				});
+			})();
+		}
+		var submitBtn = form.querySelector('button[type="submit"]');
+		form.addEventListener('submit', function (ev) {
+			ev.preventDefault();
+			if (submitBtn) submitBtn.disabled = true;
+			var fd = new FormData(form);
+			api(ep, { method: 'POST', json: {
+				code: fd.get('code'), name: fd.get('name'), active: true
+			} }).then(function () { form.reset(); load(); }, E.handleError)
+				.finally(function () { if (submitBtn) submitBtn.disabled = false; });
+		});
+		load();
+	};
 
 	views['admin-rates'] = function () {
 		var list = document.getElementById('exp-rates-list');
