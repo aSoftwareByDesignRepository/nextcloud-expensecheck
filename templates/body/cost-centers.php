@@ -1,7 +1,7 @@
 <?php /** @var \OCP\IL10N $l */ ?>
 <section class="exp-surface" data-exp-view="admin-cost-centers" aria-labelledby="exp-cc-h">
 	<h2 id="exp-cc-h"><?php p($l->t('Cost centers')); ?></h2>
-	<div id="exp-cc-list" class="exp-card-list"></div>
+	<div id="exp-cc-list"></div>
 	<form id="exp-cc-form" class="exp-form">
 		<div class="exp-field">
 			<label class="exp-label" for="exp-cc-code"><?php p($l->t('Code')); ?></label>

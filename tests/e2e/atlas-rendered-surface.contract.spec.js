@@ -50,7 +50,7 @@ const LIST_ALLOW = [
 	'.exp-picker',
 	'.exp-seat-search-results',
 	'.exp-nav-footer__menu',
-	'ul.exp-queue',
+	'ul.exp-deadline-list',
 	'.exp-get-app__features',
 	'.exp-settings-nav',
 	'.exp-chip-list',

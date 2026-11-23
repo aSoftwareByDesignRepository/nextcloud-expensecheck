@@ -1,7 +1,9 @@
 <?php /** @var \OCP\IL10N $l */ ?>
 <section class="exp-surface" data-exp-view="admin-rates" aria-labelledby="exp-rates-h">
 	<h2 id="exp-rates-h"><?php p($l->t('Rates')); ?></h2>
-	<div id="exp-rates-list" class="exp-card-list"></div>
+	<div id="exp-rates-list"></div>
+	<section class="exp-panel" aria-labelledby="exp-rate-form-h">
+	<h3 class="exp-panel__title" id="exp-rate-form-h"><?php p($l->t('Add rate')); ?></h3>
 	<form id="exp-rate-form" class="exp-form">
 		<div class="exp-field">
 			<label class="exp-label" for="exp-rate-type"><?php p($l->t('Rate type')); ?></label>
@@ -29,4 +31,5 @@
 		</div>
 		<button class="exp-btn exp-btn--primary" type="submit"><?php p($l->t('Save')); ?></button>
 	</form>
+	</section>
 </section>

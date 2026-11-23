@@ -17,17 +17,19 @@ $statusLabels = [
 
 	<?php $ob = $_['onboarding'] ?? null; ?>
 	<?php if ($ob !== null): ?>
-		<div class="exp-card exp-card--tint" id="exp-onboarding" role="group" aria-labelledby="exp-ob-h">
-			<div class="exp-toolbar exp-toolbar--between">
-				<h3 class="exp-section-h" id="exp-ob-h" style="margin:0"><?php p((string)$ob['role']); ?></h3>
-				<button type="button" class="exp-btn exp-btn--secondary" id="exp-ob-dismiss"><?php p($l->t('Dismiss')); ?></button>
+		<section class="exp-panel" id="exp-onboarding" aria-labelledby="exp-ob-h">
+			<div class="exp-list-head">
+				<h3 class="exp-list-head__title" id="exp-ob-h"><?php p((string)$ob['role']); ?></h3>
+				<div class="exp-list-head__actions">
+					<button type="button" class="exp-btn exp-btn--ghost exp-btn--sm" id="exp-ob-dismiss"><?php p($l->t('Dismiss')); ?></button>
+				</div>
 			</div>
-			<ol class="exp-queue" style="counter-reset: none; padding-left: 0; list-style-position: inside;">
+			<ol class="exp-steps">
 				<?php foreach ($ob['steps'] as $step): ?>
-					<li style="padding: var(--exp-space-2, 8px) 0;"><?php p((string)$step); ?></li>
+					<li><?php p((string)$step); ?></li>
 				<?php endforeach; ?>
 			</ol>
-		</div>
+		</section>
 	<?php endif; ?>
 
 	<div class="exp-stat-strip" role="list" aria-label="<?php p($l->t('Your numbers')); ?>">
@@ -46,41 +48,52 @@ $statusLabels = [
 		</a>
 	</div>
 
-	<h3 class="exp-section-h" id="exp-queue-h"><?php p($l->t('Needs your attention')); ?></h3>
-	<?php if ($queue === []): ?>
-		<p class="exp-empty"><?php p($l->t('All caught up — nothing needs your attention right now.')); ?></p>
-	<?php else: ?>
-		<ul class="exp-queue" aria-labelledby="exp-queue-h">
-			<?php foreach ($queue as $q): ?>
-				<li>
-					<a class="exp-queue__item" href="<?php p((string)$q['href']); ?>">
-						<span class="exp-nav__icon" aria-hidden="true"><?php print_unescaped(IconCatalog::render((string)$q['icon'])); ?></span>
-						<span><?php p((string)$q['label']); ?></span>
-					</a>
-				</li>
-			<?php endforeach; ?>
-		</ul>
-	<?php endif; ?>
+	<div class="exp-card-grid">
+		<section class="exp-panel" aria-labelledby="exp-queue-h">
+			<div class="exp-list-head">
+				<h3 class="exp-list-head__title" id="exp-queue-h"><?php p($l->t('Needs your attention')); ?></h3>
+				<div class="exp-list-head__actions">
+					<a class="exp-btn exp-btn--ghost exp-btn--sm" href="<?php p($_['urls']['inbox'] ?? '#'); ?>"><?php p($l->t('View all')); ?></a>
+				</div>
+			</div>
+			<?php if ($queue === []): ?>
+				<p class="exp-empty"><?php p($l->t('All caught up — nothing needs your attention right now.')); ?></p>
+			<?php else: ?>
+				<ul class="exp-deadline-list">
+					<?php foreach ($queue as $q): ?>
+						<li class="exp-deadline-list__item">
+							<a class="exp-deadline-list__link" href="<?php p((string)$q['href']); ?>">
+								<span class="exp-deadline-list__icon" aria-hidden="true"><?php print_unescaped(IconCatalog::render((string)$q['icon'])); ?></span>
+								<span class="exp-deadline-list__title"><?php p((string)$q['label']); ?></span>
+							</a>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
+		</section>
 
-	<div class="exp-toolbar exp-toolbar--between">
-		<h3 class="exp-section-h" id="exp-recent-h"><?php p($l->t('Recent claims')); ?></h3>
-		<a class="exp-btn exp-btn--primary" href="<?php p($_['urls']['newClaim'] ?? '#'); ?>"><?php p($l->t('New claim')); ?></a>
+		<section class="exp-panel" aria-labelledby="exp-recent-h">
+			<div class="exp-list-head">
+				<h3 class="exp-list-head__title" id="exp-recent-h"><?php p($l->t('Recent claims')); ?></h3>
+				<div class="exp-list-head__actions">
+					<a class="exp-btn exp-btn--primary exp-btn--sm" href="<?php p($_['urls']['newClaim'] ?? '#'); ?>"><?php p($l->t('New claim')); ?></a>
+				</div>
+			</div>
+			<?php if ($recent === []): ?>
+				<p class="exp-empty"><?php p($l->t('No claims yet — create your first one.')); ?></p>
+			<?php else: ?>
+				<ul class="exp-deadline-list">
+					<?php foreach ($recent as $r): ?>
+						<li class="exp-deadline-list__item">
+							<a class="exp-deadline-list__link" href="<?php p((string)$r['href']); ?>">
+								<span class="exp-deadline-list__title"><?php p((string)$r['title']); ?></span>
+								<span class="exp-deadline-list__meta"><?php p((string)$r['no']); ?></span>
+								<span class="exp-badge exp-badge--neutral"><?php p($statusLabels[$r['status']] ?? (string)$r['status']); ?></span>
+							</a>
+						</li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
+		</section>
 	</div>
-	<?php if ($recent === []): ?>
-		<p class="exp-empty"><?php p($l->t('No claims yet — create your first one.')); ?></p>
-	<?php else: ?>
-		<ul class="exp-queue" aria-labelledby="exp-recent-h">
-			<?php foreach ($recent as $r): ?>
-				<li>
-					<a class="exp-queue__item" href="<?php p((string)$r['href']); ?>">
-						<span class="exp-queue__main">
-							<strong><?php p((string)$r['no']); ?></strong>
-							<span><?php p((string)$r['title']); ?></span>
-						</span>
-						<span class="exp-queue__meta"><?php p($statusLabels[$r['status']] ?? (string)$r['status']); ?></span>
-					</a>
-				</li>
-			<?php endforeach; ?>
-		</ul>
-	<?php endif; ?>
 </section>

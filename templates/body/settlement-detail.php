@@ -4,7 +4,7 @@
 	<div id="exp-batch-body" aria-live="polite"></div>
 	<div class="exp-actions exp-export-actions">
 		<label class="exp-field" for="exp-export-format">
-			<span class="exp-field-label"><?php p($l->t('Format')); ?></span>
+			<span class="exp-label"><?php p($l->t('Format')); ?></span>
 			<select id="exp-export-format" class="exp-select">
 				<option value="csv">CSV</option>
 				<option value="ods">ODS</option>

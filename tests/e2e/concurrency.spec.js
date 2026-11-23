@@ -27,6 +27,14 @@ function basicAuth(user, pass) {
 }
 
 async function createDraft(request, user, pass, requestKey) {
+	const lk = await request.get(`${api}/lookups`, { headers: basicAuth(user, pass) })
+	const lookups = await lk.json()
+	// Submit must not hit a receipt gate — pick a category without
+	// receipt_required (doc-seed order puts TRAVEL first).
+	const categoryId = (lookups.categories || []).find((c) => !c.receipt_required && !c.requires_attendees)?.id
+	const costCenterId = (lookups.cost_centers || [])[0]?.id
+	expect(categoryId, 'lookups returned no category').toBeTruthy()
+	expect(costCenterId, 'lookups returned no cost center').toBeTruthy()
 	const res = await request.post(`${api}/claims`, {
 		headers: { ...basicAuth(user, pass), 'Content-Type': 'application/json' },
 		data: {
@@ -35,8 +43,8 @@ async function createDraft(request, user, pass, requestKey) {
 			request_key: requestKey,
 			lines: [{
 				line_type: 'receipt', occurred_on: '2026-12-15', // Nov 2026 is closed in the e2e fixture
-				category_id: 1, amount: '10.00',
-				allocations: [{ cost_center_id: 2, share_percent: '100' }],
+				category_id: categoryId, amount: '10.00',
+				allocations: [{ cost_center_id: costCenterId, share_percent: '100' }],
 			}],
 		},
 	})

@@ -5,6 +5,6 @@
 		<label class="exp-btn exp-btn--primary" for="exp-receipt-file"><?php p($l->t('Upload receipt')); ?></label>
 		<input id="exp-receipt-file" name="file" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,application/pdf,application/xml,text/xml" class="exp-sr-only">
 	</form>
-	<div id="exp-receipts-list" class="exp-card-list" role="list" aria-live="polite"></div>
+	<div id="exp-receipts-list" aria-live="polite"></div>
 	<p class="exp-empty" id="exp-receipts-empty" hidden><?php p($l->t('No unfiled receipts.')); ?></p>
 </section>

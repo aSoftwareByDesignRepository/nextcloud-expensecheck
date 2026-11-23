@@ -16,6 +16,18 @@
 
 /* ── Layout primitives ─────────────────────────────────────── */
 
+/* Uniform section rhythm: surface children space via the parent's gap,
+   not each child's own incidental margin (prevents 0px/24px mixes). */
+#app-content.exp-app .exp-surface {
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-5);
+}
+
+#app-content.exp-app .exp-surface.exp-surface > * {
+	margin-block: 0;
+}
+
 #app-content.exp-app .exp-card-grid {
 	display: grid;
 	grid-template-columns: 1fr;
@@ -417,6 +429,10 @@
 }
 
 #app-content.exp-app .exp-deadline-list__link {
+	/* The link is a flex item inside display:flex __item — without flex+min-width:0
+	   it cannot shrink below min-content width and overflows narrow viewports. */
+	flex: 1 1 0;
+	min-width: 0;
 	text-decoration: none;
 	color: var(--exp-text);
 }
@@ -739,6 +755,14 @@
 	border: 1px dashed var(--exp-border-strong);
 	border-radius: var(--exp-radius-md);
 	margin: 0;
+}
+/* One frame per surface: inside a panel or card the dashed box becomes
+   box-in-a-box. Strip the chrome there; standalone list empties keep it. */
+#app-content.exp-app .exp-panel .exp-empty,
+#app-content.exp-app .exp-card .exp-empty {
+	background: none;
+	border: none;
+	padding: var(--exp-space-3) var(--exp-space-2);
 }
 
 :is(#app-content.exp-app, .exp-dialog) .exp-loading {

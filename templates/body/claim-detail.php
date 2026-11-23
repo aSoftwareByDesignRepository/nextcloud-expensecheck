@@ -8,7 +8,7 @@
 		<a class="exp-chipbar__chip" href="#exp-sec-decisions"><?php p($l->t('Decisions')); ?></a>
 		<a class="exp-chipbar__chip" href="#exp-sec-audit"><?php p($l->t('Audit trail')); ?></a>
 	</nav>
-	<div id="exp-detail-actions" class="exp-actions"></div>
+	<div id="exp-detail-actions" class="exp-detail-actions"></div>
 	<section id="exp-sec-summary" aria-labelledby="exp-sec-summary-h">
 		<h3 id="exp-sec-summary-h" class="exp-section-h"><?php p($l->t('Summary')); ?></h3>
 		<div id="exp-detail-body" aria-live="polite"></div>

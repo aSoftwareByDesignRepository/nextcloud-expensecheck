@@ -39,10 +39,19 @@ test.describe('create-claim journey', () => {
 		sql(`INSERT INTO oc_exp_categories (code, name, receipt_required, requires_attendees,
 			allow_lines, active, sort, deleted)
 			VALUES ('BACHUS-MEAL', 'Meal (journey test)', 0, 1, 'receipt', 1, 99, 0)`)
+		// Single-mileage-rate fixture: the auto-pick proof needs exactly one
+		// active mileage rate, so park the doc-seed ones for the run.
+		sql(`DELETE FROM oc_exp_rate_entries WHERE code='KM'`)
+		sql(`UPDATE oc_exp_rate_entries SET active=0 WHERE rate_type='mileage'`)
+		sql(`INSERT INTO oc_exp_rate_entries (rate_type, code, name, currency, rate_minor,
+			effective_from, active, created_by, created_at)
+			VALUES ('mileage', 'KM', 'Kilometer rate', 'EUR', 30, '2026-01-01', 1, 'e2e', NOW())`)
 	})
 
 	test.afterAll(async () => {
 		sql(`DELETE FROM oc_exp_categories WHERE code='BACHUS-MEAL'`)
+		sql(`DELETE FROM oc_exp_rate_entries WHERE code='KM'`)
+		sql(`UPDATE oc_exp_rate_entries SET active=1 WHERE rate_type='mileage'`)
 		await context?.close()
 	})
 
@@ -144,9 +153,17 @@ test.describe('create-claim journey', () => {
 		await page.fill('[name="lines[0][occurred_on]"]', '2026-12-01')
 		const catSel = page.locator('select[name="lines[0][category_id]"]')
 		await expect(async () => {
-			expect(await catSel.locator('option').count()).toBeGreaterThan(1)
+			expect((await catSel.locator('option').allTextContents()).join('|')).toContain('Meal (journey test)')
 		}).toPass({ timeout: 10_000 })
-		await catSel.selectOption({ index: 1 })
+		const catOpts = await catSel.locator('option').elementHandles()
+		for (const h of catOpts) {
+			if ((await h.textContent()) === 'Meal (journey test)') {
+				await catSel.selectOption(await h.getAttribute('value'))
+				break
+			}
+		}
+		await page.fill('[name="lines[0][attendees]"]', 'Alex, Sam')
+		await page.fill('[name="lines[0][occasion]"]', 'Team dinner')
 		const ccSel = page.locator('select[name="lines[0][alloc_cc][]"]')
 		await ccSel.selectOption({ index: 1 })
 		await page.click('#exp-claim-form button[type="submit"]')

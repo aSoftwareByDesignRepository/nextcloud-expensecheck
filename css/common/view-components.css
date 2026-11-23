@@ -206,6 +206,9 @@ button.exp-stat-tile:hover, button.exp-stat-tile:focus-visible {
 	flex-wrap: wrap;
 	margin: 0 0 var(--exp-space-3, 12px);
 }
+/* Inside a gap'd flex panel the head's own margin doubles the spacing —
+   the parent's gap already supplies the rhythm. */
+.exp-panel > .exp-list-head { margin-bottom: 0; }
 .exp-list-head__title { margin: 0; font-size: var(--exp-fs-lg, 1.125rem); font-weight: 600; }
 .exp-list-head__count { color: var(--exp-muted, var(--color-text-maxcontrast)); font-size: var(--exp-fs-sm, 0.875rem); font-variant-numeric: var(--exp-tab-num, tabular-nums); }
 .exp-list-head__actions { margin-inline-start: auto; display: flex; gap: var(--exp-space-2, 8px); flex-wrap: wrap; }

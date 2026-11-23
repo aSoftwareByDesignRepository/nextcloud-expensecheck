@@ -289,42 +289,148 @@
 	font-weight: 700;
 	margin: var(--exp-space-5, 24px) 0 var(--exp-space-2, 8px);
 }
-.exp-toolbar--between {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: var(--exp-space-3, 12px);
-	flex-wrap: wrap;
-}
-.exp-queue {
-	list-style: none;
+
+/* ---------- Onboarding steps (index coach card) ---------- */
+#app-content.exp-app .exp-steps {
 	margin: 0;
-	padding: 0;
+	padding-inline-start: var(--exp-space-5, 24px);
+}
+#app-content.exp-app .exp-steps > li {
+	padding: var(--exp-space-1, 4px) 0;
+}
+
+/* Queue-row icon sizing — IconCatalog renders .exp-icon; the shared
+ * deadline-list styles size text children only, so pin the svg here. */
+#app-content.exp-app .exp-deadline-list__icon {
+	display: inline-flex;
+	flex-shrink: 0;
+	color: var(--exp-muted, var(--color-text-maxcontrast));
+}
+#app-content.exp-app .exp-deadline-list__icon .exp-icon {
+	width: var(--exp-icon-md, 20px);
+	height: var(--exp-icon-md, 20px);
+	stroke-width: var(--exp-icon-stroke, 2);
+}
+
+/* ---------- Claim line panels (new-claim) --------------------
+ * fieldset.exp-line: repeated expense-line groups. Soft fill + border —
+ * distinct from the bare fields without a second heavy frame. */
+#app-content.exp-app fieldset.exp-line {
+	margin: 0 0 var(--exp-space-4, 16px);
+	padding: var(--exp-space-4, 16px);
+	border: 1px solid var(--exp-border, var(--color-border));
+	border-radius: var(--exp-radius-md, 12px);
+	background: var(--exp-bg-soft, var(--color-main-background));
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-3, 12px);
+}
+#app-content.exp-app fieldset.exp-line > legend {
+	padding: 0 var(--exp-space-2, 8px);
+	font-weight: 600;
+	font-size: var(--exp-fs-sm, 0.875rem);
+	color: var(--exp-muted, var(--color-text-maxcontrast));
+	text-align: start;
+}
+/* Field grid: two+ columns when there is room, one under ~400px. */
+#app-content.exp-app .exp-line__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+	gap: var(--exp-space-3, 12px);
+	align-items: start;
+}
+#app-content.exp-app .exp-line__grid .exp-field--wide {
+	grid-column: 1 / -1;
+}
+#app-content.exp-app .exp-line__del {
+	align-self: flex-end;
+}
+#app-content.exp-app .exp-alloc {
 	display: flex;
 	flex-direction: column;
 	gap: var(--exp-space-2, 8px);
 }
-.exp-queue__item {
+#app-content.exp-app .exp-alloc__row {
 	display: flex;
 	align-items: center;
+	gap: var(--exp-space-2, 8px);
+}
+#app-content.exp-app .exp-alloc__cc { flex: 1 1 12rem; min-width: 0; }
+#app-content.exp-app .exp-alloc__pct { flex: 0 0 5.5rem; }
+#app-content.exp-app .exp-alloc__del { flex: 0 0 auto; }
+
+/* ---------- Sibling-app pick rows (new-claim integrations) --- */
+#app-content.exp-app .exp-integrations {
+	display: flex;
+	flex-direction: column;
 	gap: var(--exp-space-3, 12px);
-	padding: var(--exp-space-3, 12px) var(--exp-space-4, 16px);
+	padding: var(--exp-space-4, 16px);
 	border: 1px solid var(--exp-border, var(--color-border));
 	border-radius: var(--exp-radius-md, 12px);
-	color: var(--exp-text, var(--color-main-text));
-	text-decoration: none;
-	min-height: 44px;
+	background: var(--exp-bg-soft, var(--color-main-background));
 }
-.exp-queue__item:hover, .exp-queue__item:focus-visible {
-	background: var(--color-background-hover);
+#app-content.exp-app .exp-integrations__h {
+	margin: 0;
+	font-size: var(--exp-fs-md, 1rem);
 }
-.exp-queue__main { display: flex; gap: var(--exp-space-2, 8px); align-items: baseline; min-width: 0; flex: 1; }
-.exp-queue__meta { color: var(--exp-muted, var(--color-text-maxcontrast)); font-size: var(--exp-fs-sm, 0.875rem); }
-/* Onboarding coach steps are an <ol.exp-queue> — the template sets
- * list-style-position:inside expecting real numbers, but the flex-column
- * marker strip above suppresses them (flex items never render markers).
- * Restore block layout + decimal markers on the ordered variant only. */
-ol.exp-queue { display: block; list-style: decimal inside; }
+#app-content.exp-app .exp-pick {
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-3, 12px);
+	padding: var(--exp-space-4, 16px);
+	border: 1px solid var(--exp-border, var(--color-border));
+	border-radius: var(--exp-radius-md, 12px);
+	background: var(--exp-bg-card, var(--color-main-background));
+}
+#app-content.exp-app .exp-pick + .exp-pick {
+	margin-top: var(--exp-space-3, 12px);
+}
+#app-content.exp-app .exp-pick__head {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: var(--exp-space-2, 8px);
+}
+#app-content.exp-app .exp-pick__meta {
+	margin: 0;
+	font-size: var(--exp-fs-sm, 0.875rem);
+	color: var(--exp-muted, var(--color-text-maxcontrast));
+}
+#app-content.exp-app .exp-pick__fields {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+	gap: var(--exp-space-3, 12px);
+}
+#app-content.exp-app .exp-pick > .exp-btn {
+	align-self: flex-start;
+}
+
+/* ---------- Progressive disclosure (<details> option blocks) - */
+#app-content.exp-app details.exp-more {
+	border: 1px solid var(--exp-border, var(--color-border));
+	border-radius: var(--exp-radius-md, 12px);
+	padding: 0 var(--exp-space-4, 16px);
+}
+#app-content.exp-app .exp-more__summary {
+	display: flex;
+	align-items: center;
+	min-height: var(--exp-touch, 44px);
+	font-weight: 600;
+	cursor: pointer;
+}
+#app-content.exp-app .exp-more__summary:focus-visible {
+	outline: var(--exp-focus, 3px solid var(--color-primary-element));
+	outline-offset: var(--exp-focus-offset, 2px);
+}
+#app-content.exp-app details.exp-more[open] > .exp-more__summary {
+	margin-bottom: var(--exp-space-2, 8px);
+}
+#app-content.exp-app .exp-more__body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--exp-space-3, 12px);
+	padding-bottom: var(--exp-space-4, 16px);
+}
 
 /* ---------- Section chip nav (§9.5 claim-detail) ---------- */
 .exp-chipbar {

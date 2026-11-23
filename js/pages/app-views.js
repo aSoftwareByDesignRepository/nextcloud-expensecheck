@@ -40,7 +40,7 @@
 	var RATE_TYPE_LABEL = { receipt: 'Receipt', mileage: 'Mileage', per_diem: 'Per diem', flat: 'Flat rate' };
 	function rateTypeLabel(r) { return RATE_TYPE_LABEL[r] ? t(RATE_TYPE_LABEL[r]) : (r || ''); }
 	function adminDeleteBtn(confirmText, endpoint, onDone) {
-		var del = el('button', { type: 'button', class: 'exp-btn exp-btn--danger', text: t('Delete') });
+		var del = el('button', { type: 'button', class: 'exp-btn exp-btn--danger exp-btn--sm', text: t('Delete') });
 		del.addEventListener('click', function () {
 			E.confirmDialog(confirmText).then(function (ok) {
 				if (!ok) return;
@@ -52,30 +52,81 @@
 		});
 		return del;
 	}
-	function claimRow(c) {
-		var card = el('article', { class: 'exp-card', role: 'listitem' });
-		card.appendChild(el('div', { class: 'exp-card__head' }, [
-			el('strong', { text: c.claim_no || c.claimNo || ('#' + c.id) }),
-			E.badge(STATUS_VARIANT[c.status] || 'neutral', statusLabel(c.status))
-		]));
-		card.appendChild(el('p', { class: 'exp-card__title', text: c.title || '' }));
-		var meta = [];
-		if (c.reimbursable_total_minor !== undefined) meta.push(money(c.reimbursable_total_minor, c.currency));
-		if (c.service_date) meta.push(fmtDate(c.service_date));
-		if (c.owner_uid && c.owner_uid !== (E.boot && E.boot.uid)) meta.push(c.owner_uid);
-		if (meta.length) card.appendChild(el('p', { class: 'exp-card__meta', text: meta.join(' · ') }));
-		var open = el('a', { class: 'exp-btn exp-btn--secondary exp-card__open', href: '#' });
-		open.textContent = t('Open');
-		open.addEventListener('click', function (ev) {
-			ev.preventDefault();
-			location.href = E.appBase() + '/claims/' + (c.claim && c.claim.id ? c.claim.id : c.id);
+
+	/* ---------- §3.7 list tables (canonical family pattern) ----------
+	 * .exp-table-wrap > table.exp-table.exp-table--cards — a real table on
+	 * desktop that reflows to labeled cards below 768 px (each td carries
+	 * its header back via data-cell). Row actions live in
+	 * td.actions-cell > .exp-table-actions. */
+	function tableWrap(headers, withActions) {
+		var wrap = el('div', { class: 'exp-table-wrap' });
+		var table = el('table', { class: 'exp-table exp-table--cards' });
+		var hr = el('tr');
+		headers.forEach(function (h) {
+			hr.appendChild(el('th', { scope: 'col', text: h }));
 		});
-		card.appendChild(open);
-		return card;
+		if (withActions) {
+			hr.appendChild(el('th', { scope: 'col', class: 'exp-table-actions-col' }, [
+				el('span', { class: 'exp-sr-only', text: t('Actions') })
+			]));
+		}
+		table.appendChild(el('thead', {}, [hr]));
+		var tbody = el('tbody');
+		table.appendChild(tbody);
+		wrap.appendChild(table);
+		return { wrap: wrap, tbody: tbody };
 	}
-	function renderList(host, emptyEl, items) {
+	function tc(label, content) {
+		var cell = el('td', { 'data-cell': label });
+		if (content && content.nodeType) {
+			cell.appendChild(content);
+		} else {
+			cell.textContent = (content === null || content === undefined || content === '') ? '—' : String(content);
+		}
+		return cell;
+	}
+	function actionsCell(buttons) {
+		return el('td', { class: 'actions-cell' }, [
+			el('div', { class: 'exp-table-actions' }, buttons)
+		]);
+	}
+	function claimHref(c) {
+		return E.appBase() + '/claims/' + (c.claim && c.claim.id ? c.claim.id : c.id);
+	}
+	function claimsTable(items, opts) {
+		opts = opts || {};
+		var heads = [];
+		if (opts.selectLabel) heads.push(opts.selectLabel);
+		heads.push(t('Claim'), t('Title'), t('Status'), t('Total'), t('Date'));
+		if (opts.claimant) heads.push(t('Claimant'));
+		var w = tableWrap(heads, true);
+		items.forEach(function (c) {
+			var cells = [];
+			if (opts.selectLabel) {
+				var lab = el('label', { class: 'exp-checkbox exp-table__check' });
+				var cb = el('input', { type: 'checkbox' });
+				cb.addEventListener('change', function () { opts.select(c, cb.checked); });
+				lab.appendChild(cb);
+				lab.appendChild(el('span', {
+					class: 'exp-sr-only',
+					text: t('Select claim {claim}', { claim: c.claim_no || c.claimNo || ('#' + c.id) })
+				}));
+				cells.push(tc(opts.selectLabel, lab));
+			}
+			cells.push(tc(t('Claim'), el('strong', { text: c.claim_no || c.claimNo || ('#' + c.id) })));
+			cells.push(tc(t('Title'), c.title));
+			cells.push(tc(t('Status'), E.badge(STATUS_VARIANT[c.status] || 'neutral', statusLabel(c.status))));
+			cells.push(tc(t('Total'), el('span', { class: 'exp-num', text: money(c.total_minor, c.currency) })));
+			cells.push(tc(t('Date'), fmtDate(c.submitted_at || c.updated_at)));
+			if (opts.claimant) cells.push(tc(t('Claimant'), c.owner));
+			cells.push(actionsCell([el('a', { class: 'exp-btn exp-btn--secondary exp-btn--sm', href: claimHref(c), text: t('Open') })]));
+			w.tbody.appendChild(el('tr', {}, cells));
+		});
+		return w.wrap;
+	}
+	function renderList(host, emptyEl, items, opts) {
 		host.innerHTML = '';
-		items.forEach(function (c) { host.appendChild(claimRow(c)); });
+		if (items.length) host.appendChild(claimsTable(items, opts));
 		if (emptyEl) emptyEl.hidden = items.length > 0;
 	}
 
@@ -97,7 +148,7 @@
 				var cnt = render(data);
 				if (countEl && typeof cnt === 'number') {
 					countEl.textContent = n('1 result', '%n results', cnt);
-					countEl.hidden = false;
+					countEl.hidden = cnt === 0;
 				}
 			},
 			emptyEl: emptyEl,
@@ -128,6 +179,7 @@
 				function (data) { var items = (data && data.claims) || []; renderList(list, empty, items); return items.length; },
 				document.getElementById('exp-claims-count'))();
 		}
+
 		// pillGroup's initial activation already fired the first load via
 		// onSelect; without the pack (missing sync) the bar stays inert —
 		// fall back to an unfiltered load so the list still renders.
@@ -149,8 +201,8 @@
 			var i = seq++;
 			row.appendChild(el('legend', { text: t('Line') + ' ' + (i + 1) }));
 			var grid = el('div', { class: 'exp-line__grid' });
-			function fld(name, label, type, attrs) {
-				var wrap = el('div', { class: 'exp-field' });
+			function fld(name, label, type, attrs, wide) {
+				var wrap = el('div', { class: 'exp-field' + (wide ? ' exp-field--wide' : '') });
 				var id = 'exp-line-' + i + '-' + name;
 				wrap.appendChild(el('label', { class: 'exp-label', 'for': id, text: label }));
 				var input = el('input', Object.assign({ class: 'exp-input', id: id, name: 'lines[' + i + '][' + name + ']', type: type }, attrs || {}));
@@ -167,9 +219,10 @@
 			});
 			typeWrap.appendChild(typeSel);
 			grid.appendChild(typeWrap);
-			fld('description', t('Description'), 'text', { required: 'required', maxlength: '191' });
+			fld('description', t('Description'), 'text', { required: 'required', maxlength: '191' }, true);
 			var occ = fld('occurred_on', t('Date'), 'date', { required: 'required', value: E.todayYmd() });
 			var amt = fld('amount', t('Amount'), 'text', { inputmode: 'decimal', 'aria-describedby': 'exp-line-' + i + '-amt-h' });
+			amt.classList.add('exp-input--amount');
 			var qty = fld('qty', t('Quantity'), 'text', { inputmode: 'decimal' });
 			var rateWrap = el('div', { class: 'exp-field' });
 			var rateId = 'exp-line-' + i + '-rate';
@@ -220,26 +273,26 @@
 			// Category-gated fields (server contract): attendees when the
 			// category demands it, justification above its threshold,
 			// original currency when the receipt was paid in foreign money.
-			var attWrap = el('div', { class: 'exp-field', hidden: 'hidden' });
+			var attWrap = el('div', { class: 'exp-field exp-field--wide', hidden: 'hidden' });
 			var attId = 'exp-line-' + i + '-attendees';
 			attWrap.appendChild(el('label', { class: 'exp-label', 'for': attId, text: t('Attendees') }));
 			var attIn = el('input', { class: 'exp-input', id: attId, name: 'lines[' + i + '][attendees]', maxlength: '2000' });
 			attWrap.appendChild(attIn);
 			attWrap.appendChild(el('p', { class: 'exp-hint', text: t('Names of everyone present — legally required for entertainment expenses.') }));
-			var occWrap = el('div', { class: 'exp-field', hidden: 'hidden' });
+			var occWrap = el('div', { class: 'exp-field exp-field--wide', hidden: 'hidden' });
 			var occId = 'exp-line-' + i + '-occasion';
 			occWrap.appendChild(el('label', { class: 'exp-label', 'for': occId, text: t('Occasion') }));
 			var occIn = el('input', { class: 'exp-input', id: occId, name: 'lines[' + i + '][occasion]', maxlength: '2000' });
 			occWrap.appendChild(occIn);
 			occWrap.appendChild(el('p', { class: 'exp-hint', text: t('The business reason — legally required for entertainment expenses.') }));
-			var justWrap = el('div', { class: 'exp-field', hidden: 'hidden' });
+			var justWrap = el('div', { class: 'exp-field exp-field--wide', hidden: 'hidden' });
 			var justId = 'exp-line-' + i + '-justification';
 			justWrap.appendChild(el('label', { class: 'exp-label', 'for': justId, text: t('Justification') }));
 			var justIn = el('textarea', { class: 'exp-input', id: justId, name: 'lines[' + i + '][justification]', maxlength: '2000', rows: '2' });
 			justWrap.appendChild(justIn);
 			var justHint = el('p', { class: 'exp-hint' });
 			justWrap.appendChild(justHint);
-			var fxWrap = el('div', { class: 'exp-field', hidden: 'hidden' });
+			var fxWrap = el('div', { class: 'exp-field exp-field--wide', hidden: 'hidden' });
 			var fxAmtId = 'exp-line-' + i + '-fxamt';
 			fxWrap.appendChild(el('label', { class: 'exp-label', 'for': fxAmtId, text: t('Foreign receipt? Original amount') }));
 			var fxAmt = el('input', { class: 'exp-input', id: fxAmtId, name: 'lines[' + i + '][foreign_amount]', inputmode: 'decimal' });
@@ -428,20 +481,21 @@
 					box.hidden = false;
 					segs.forEach(function (g) {
 						var ref = String(g.segment_id);
-						var item = el('div', { class: 'exp-card', role: 'listitem' });
+						var item = el('div', { class: 'exp-pick', role: 'listitem' });
 						var title = fmtDate(g.date) + ' · ' + g.distance_km + ' km';
 						var route = (g.from || '') + ' → ' + (g.to || '');
-						item.appendChild(el('strong', { text: title }));
-						item.appendChild(el('p', { class: 'exp-card__meta', text: route + (g.vehicle_label ? ' · ' + g.vehicle_label : '') }));
-						if (claimed[ref]) {
-							item.appendChild(E.badge('info', t('Already in claim {number}', { number: claimed[ref] })));
-						} else {
+						item.appendChild(el('div', { class: 'exp-pick__head' }, [
+							el('strong', { text: title }),
+							claimed[ref] ? E.badge('info', t('Already in claim {number}', { number: claimed[ref] })) : null
+						]));
+						item.appendChild(el('p', { class: 'exp-pick__meta', text: route + (g.vehicle_label ? ' · ' + g.vehicle_label : '') }));
+						if (!claimed[ref]) {
 							var catF = labeled('Category', catsFor('mileage'), 'id', 'name');
 							var rateF = labeled('Rate', rates.filter(function (rt) {
 								return rt.rate_type === 'mileage' && (!rt.effective_from || rt.effective_from <= g.date);
 							}), 'code', 'name');
 							var ccF = labeled('Cost center', ccs, 'id', 'name');
-							item.appendChild(el('div', {}, [catF.wrap, rateF.wrap, ccF.wrap]));
+							item.appendChild(el('div', { class: 'exp-pick__fields' }, [catF.wrap, rateF.wrap, ccF.wrap]));
 							var btn = el('button', { type: 'button', class: 'exp-btn exp-btn--secondary', text: t('Create mileage draft') });
 							btn.addEventListener('click', function () {
 								btn.disabled = true;
@@ -472,15 +526,16 @@
 					box.hidden = false;
 					cbs.forEach(function (cb) {
 						var ref = 'chargeback:' + cb.chargeback_id;
-						var item = el('div', { class: 'exp-card', role: 'listitem' });
-						item.appendChild(el('strong', { text: fmtDate(cb.entry_date) + ' · −' + money(cb.amount_minor, 'EUR') }));
-						item.appendChild(el('p', { class: 'exp-card__meta', text: (cb.vehicle_label || '') + (cb.notes ? ' — ' + cb.notes : '') }));
-						if (claimed[ref]) {
-							item.appendChild(E.badge('info', t('Already in claim {number}', { number: claimed[ref] })));
-						} else {
+						var item = el('div', { class: 'exp-pick', role: 'listitem' });
+						item.appendChild(el('div', { class: 'exp-pick__head' }, [
+							el('strong', { text: fmtDate(cb.entry_date) + ' · −' + money(cb.amount_minor, 'EUR') }),
+							claimed[ref] ? E.badge('info', t('Already in claim {number}', { number: claimed[ref] })) : null
+						]));
+						item.appendChild(el('p', { class: 'exp-pick__meta', text: (cb.vehicle_label || '') + (cb.notes ? ' — ' + cb.notes : '') }));
+						if (!claimed[ref]) {
 							var catF = labeled('Category', catsFor('receipt'), 'id', 'name');
 							var ccF = labeled('Cost center', ccs, 'id', 'name');
-							item.appendChild(el('div', {}, [catF.wrap, ccF.wrap]));
+							item.appendChild(el('div', { class: 'exp-pick__fields' }, [catF.wrap, ccF.wrap]));
 							var btn = el('button', { type: 'button', class: 'exp-btn exp-btn--secondary', text: t('Create deduction draft') });
 							btn.addEventListener('click', function () {
 								btn.disabled = true;
@@ -618,35 +673,47 @@
 		function render(c) {
 			document.getElementById('exp-detail-no').textContent = c.claim_no || ('#' + c.id);
 			body.innerHTML = '';
-			var dl = el('dl', { class: 'exp-detail-dl' });
+			var dl = el('dl', { class: 'exp-dl' });
 			[[t('Status'), statusLabel(c.status)], [t('Title'), c.title], [t('Purpose'), c.purpose],
-			 [t('Reimbursable'), money(c.reimbursable_total_minor, c.currency)],
-			 [t('Non-reimbursable'), money(c.nonreimbursable_total_minor, c.currency)],
-			 [t('Claimant'), c.owner_uid]].forEach(function (p) {
-				dl.appendChild(el('dt', { text: p[0] }));
-				dl.appendChild(el('dd', { text: String(p[1] === null || p[1] === undefined ? '—' : p[1]) }));
+			 [t('Reimbursable'), money(c.reimbursable_minor, c.currency)],
+			 [t('Non-reimbursable'), money(c.nonreimbursable_minor, c.currency)],
+			 [t('Claimant'), c.owner]].forEach(function (p) {
+				dl.appendChild(el('div', { class: 'exp-dl__row' }, [
+					el('dt', { text: p[0] }),
+					el('dd', { text: String(p[1] === null || p[1] === undefined ? '—' : p[1]) })
+				]));
 			});
 			body.appendChild(dl);
 			linesHost.innerHTML = '';
-			(c.lines || []).forEach(function (l) {
-				linesHost.appendChild(el('div', { class: 'exp-card' }, [
-					el('strong', { text: l.description || '' }),
-					el('p', { class: 'exp-card__meta', text: fmtDate(l.service_date) + ' · ' + money(l.amount_minor, l.currency || c.currency) })
-				]));
-			});
+			var lines = c.lines || [];
+			if (lines.length) {
+				var lw = tableWrap([t('Description'), t('Type'), t('Date'), t('Amount')]);
+				lines.forEach(function (l) {
+					lw.tbody.appendChild(el('tr', {}, [
+						tc(t('Description'), l.description),
+						tc(t('Type'), rateTypeLabel(l.line_type)),
+						tc(t('Date'), l.service_date ? fmtDate(l.service_date) : '—'),
+						tc(t('Amount'), el('span', { class: 'exp-num', text: money(l.amount_minor, l.currency || c.currency) }))
+					]));
+				});
+				linesHost.appendChild(lw.wrap);
+			}
 			attachHost.innerHTML = '';
 			var atts = c.attachments || [];
 			if (atts.length === 0) {
 				attachHost.appendChild(el('p', { class: 'exp-empty', text: t('No attachments filed yet.') }));
+			} else {
+				var aw = tableWrap([t('Name'), t('Type'), t('Size'), t('Line')]);
+				atts.forEach(function (a) {
+					aw.tbody.appendChild(el('tr', {}, [
+						tc(t('Name'), el('strong', { text: a.name || ('#' + a.id) })),
+						tc(t('Type'), a.mime || '—'),
+						tc(t('Size'), a.size ? Math.ceil(a.size / 1024) + ' KB' : '—'),
+						tc(t('Line'), a.line_id ? '#' + a.line_id : '—')
+					]));
+				});
+				attachHost.appendChild(aw.wrap);
 			}
-			atts.forEach(function (a) {
-				attachHost.appendChild(el('div', { class: 'exp-card' }, [
-					el('strong', { text: a.name || ('#' + a.id) }),
-					el('p', { class: 'exp-card__meta', text: (a.mime || '') + ' · ' +
-						(a.size ? Math.ceil(a.size / 1024) + ' KB' : '') +
-						(a.line_id ? ' · ' + t('line #{n}', { n: a.line_id }) : '') })
-				]));
-			});
 			decisionsHost.innerHTML = '';
 			var decs = c.decisions || [];
 			if (decs.length === 0) {
@@ -757,7 +824,7 @@
 		var list = document.getElementById('exp-inbox-list');
 		var empty = document.getElementById('exp-inbox-empty');
 		listFetch(list, empty, function () { return api('/inbox'); },
-			function (data) { var items = (data && data.claims) || []; renderList(list, empty, items); return items.length; },
+			function (data) { var items = (data && data.claims) || []; renderList(list, empty, items, { claimant: true }); return items.length; },
 			document.getElementById('exp-inbox-count'))();
 	};
 
@@ -768,13 +835,15 @@
 		function load() {
 			return listFetch(list, empty, function () { return api('/receipts-inbox'); }, function (data) {
 				var items = (data && data.receipts) || [];
+				if (!items.length) return 0;
+				var w = tableWrap([t('Receipt'), t('Captured'), t('Type')], true);
 				items.forEach(function (r) {
 					var dl = el('a', {
-						class: 'exp-btn exp-btn--ghost',
+						class: 'exp-btn exp-btn--ghost exp-btn--sm',
 						href: E.appBase() + (E.boot.apiBase || '/api') + '/receipts-inbox/' + r.id + '/download',
 						text: t('Download')
 					});
-					var del = el('button', { type: 'button', class: 'exp-btn exp-btn--danger', text: t('Delete') });
+					var del = el('button', { type: 'button', class: 'exp-btn exp-btn--danger exp-btn--sm', text: t('Delete') });
 					del.addEventListener('click', function () {
 						E.confirmDialog(t('Delete this receipt? It will not be attached to any claim.')).then(function (ok) {
 							if (!ok) return;
@@ -784,12 +853,14 @@
 							}, E.handleError);
 						});
 					});
-					list.appendChild(el('div', { class: 'exp-card', role: 'listitem' }, [
-						el('strong', { text: r.original_name || ('#' + r.id) }),
-						el('p', { class: 'exp-card__meta', text: fmtDateTime(r.captured_at || r.uploaded_at) + ' · ' + (r.mime || '') }),
-						el('div', { class: 'exp-detail-actions' }, [dl, del])
+					w.tbody.appendChild(el('tr', {}, [
+						tc(t('Receipt'), el('strong', { text: r.original_name || ('#' + r.id) })),
+						tc(t('Captured'), fmtDateTime(r.captured_at || r.uploaded_at)),
+						tc(t('Type'), r.mime || '—'),
+						actionsCell([dl, del])
 					]));
 				});
+				list.appendChild(w.wrap);
 				return items.length;
 			}, document.getElementById('exp-receipts-count'))();
 		}
@@ -817,7 +888,7 @@
 		function load() {
 			var qs = status ? '&status=' + encodeURIComponent(status) : '';
 			return listFetch(list, null, function () { return api('/claims?scope=all' + qs); },
-				function (data) { var items = (data && data.claims) || []; renderList(list, null, items); return items.length; },
+				function (data) { var items = (data && data.claims) || []; renderList(list, null, items, { claimant: true }); return items.length; },
 				document.getElementById('exp-all-count'))();
 		}
 		if (!group || !bar) { load(); }
@@ -830,23 +901,17 @@
 		var selected = {};
 		listFetch(list, null, function () { return api('/settlements'); }, function (data) {
 			var items = (data && data.claims) || [];
-			items.forEach(function (c) {
-				var card = claimRow(c);
-				var cbLabel = el('label', { class: 'exp-checkbox' });
-				var cb = el('input', { type: 'checkbox' });
-				cb.addEventListener('change', function () {
-					if (cb.checked) selected[c.id] = c.version;
-					else delete selected[c.id];
-					form.hidden = Object.keys(selected).length === 0;
-				});
-				cbLabel.appendChild(cb);
-				cbLabel.appendChild(el('span', {
-					class: 'exp-sr-only',
-					text: t('Select claim {claim}', { claim: c.claim_no || c.claimNo || ('#' + c.id) }),
+			if (items.length) {
+				list.appendChild(claimsTable(items, {
+					claimant: true,
+					selectLabel: t('Select'),
+					select: function (c, checked) {
+						if (checked) selected[c.id] = c.version;
+						else delete selected[c.id];
+						form.hidden = Object.keys(selected).length === 0;
+					}
 				}));
-				card.prepend(cbLabel);
-				list.appendChild(card);
-			});
+			}
 			return items.length;
 		}, document.getElementById('exp-settle-count'))();
 		var settleBtn = form.querySelector('button[type="submit"]');
@@ -869,16 +934,23 @@
 			});
 		});
 		listFetch(batches, null, function () { return api('/settlements/batches'); }, function (data) {
-			((data && data.batches) || []).forEach(function (b) {
-				var a = el('a', { class: 'exp-card', href: '#' });
-				a.textContent = '#' + b.id + ' · ' + fmtDateTime(b.created_at)
-					+ ' · ' + n('1 row', '%n rows', b.row_count) + ' · ' + String(b.format || 'csv').toUpperCase();
-				a.addEventListener('click', function (ev) {
-					ev.preventDefault();
-					location.href = E.appBase() + '/settlements/' + b.id;
-				});
-				batches.appendChild(el('div', { role: 'listitem' }, [a]));
+			var bs = (data && data.batches) || [];
+			if (!bs.length) return;
+			var w = tableWrap([t('Batch'), t('Created'), t('Rows'), t('Format')], true);
+			bs.forEach(function (b) {
+				w.tbody.appendChild(el('tr', {}, [
+					tc(t('Batch'), el('strong', { text: '#' + b.id })),
+					tc(t('Created'), fmtDateTime(b.created_at)),
+					tc(t('Rows'), n('1 row', '%n rows', b.row_count)),
+					tc(t('Format'), String(b.format || 'csv').toUpperCase()),
+					actionsCell([el('a', {
+						class: 'exp-btn exp-btn--secondary exp-btn--sm',
+						href: E.appBase() + '/settlements/' + b.id,
+						text: t('Open')
+					})])
+				]));
 			});
+			batches.appendChild(w.wrap);
 		})();
 	};
 
@@ -947,31 +1019,27 @@
 		document.getElementById('exp-export-nonreimb').addEventListener('click', function () { downloadExport('nonreimbursable'); });
 		listFetch(body, null, function () { return api('/settlements/batches/' + id); }, function (d) {
 			var b = (d && d.batch) || {};
-			var dl = el('dl', { class: 'exp-detail-dl' });
+			var dl = el('dl', { class: 'exp-dl' });
 			[[t('Created by'), b.created_by], [t('Created at'), fmtDateTime(b.created_at)],
 			 [t('Rows'), b.row_count], [t('Format'), String(b.format || 'csv').toUpperCase()],
 			 [t('Integrity (SHA-256)'), b.file_hash]].forEach(function (p) {
-				dl.appendChild(el('dt', { text: p[0] }));
-				dl.appendChild(el('dd', { text: String(p[1] === null || p[1] === undefined || p[1] === '' ? '—' : p[1]) }));
+				dl.appendChild(el('div', { class: 'exp-dl__row' }, [
+					el('dt', { text: p[0] }),
+					el('dd', { text: String(p[1] === null || p[1] === undefined || p[1] === '' ? '—' : p[1]) })
+				]));
 			});
 			body.appendChild(dl);
 			var rows = (d && d.rows) || [];
 			if (rows.length) {
-				var table = el('table', { class: 'exp-table exp-table--cards' });
-				var thead = el('thead');
-				thead.appendChild(el('tr', {}, [t('Claim'), t('Payment reference'), t('Paid at')]
-					.map(function (h) { return el('th', { scope: 'col', text: h }); })));
-				table.appendChild(thead);
-				var tb = el('tbody');
+				var w = tableWrap([t('Claim'), t('Payment reference'), t('Paid at')]);
 				rows.forEach(function (row) {
-					tb.appendChild(el('tr', {}, [
-						el('td', { 'data-cell': t('Claim'), text: '#' + row.claim_id }),
-						el('td', { 'data-cell': t('Payment reference'), text: row.paid_ref || '—' }),
-						el('td', { 'data-cell': t('Paid at'), text: fmtDateTime(row.paid_at) })
+					w.tbody.appendChild(el('tr', {}, [
+						tc(t('Claim'), el('strong', { text: '#' + row.claim_id })),
+						tc(t('Payment reference'), row.paid_ref || '—'),
+						tc(t('Paid at'), fmtDateTime(row.paid_at))
 					]));
 				});
-				table.appendChild(tb);
-				body.appendChild(table);
+				body.appendChild(w.wrap);
 			}
 		})();
 	};
@@ -995,14 +1063,9 @@
 			load();
 		});
 		function table(headers, rows) {
-			var table = el('table', { class: 'exp-table exp-table--cards' });
-			var thead = el('thead');
-			thead.appendChild(el('tr', {}, headers.map(function (h) { return el('th', { scope: 'col', text: h }); })));
-			table.appendChild(thead);
-			var tb = el('tbody');
-			rows.forEach(function (r) { tb.appendChild(el('tr', {}, r)); });
-			table.appendChild(tb);
-			return table;
+			var w = tableWrap(headers);
+			rows.forEach(function (r) { w.tbody.appendChild(el('tr', {}, r)); });
+			return w.wrap;
 		}
 		var orgCur = '';
 		function orgMoney(minor) { return money(minor, orgCur || undefined); }
@@ -1070,14 +1133,17 @@
 		var LINE_TYPES = ['receipt', 'mileage', 'per_diem', 'flat'];
 		function alBox(t2) { return document.getElementById('exp-cat-al-' + t2.replace(/_/g, '-')); }
 		function minorToMajor(v) { return v === null || v === undefined ? '' : (v / 100).toFixed(2); }
+		var formH = document.getElementById('exp-cat-form-h');
 		function resetForm() {
 			form.reset();
 			idIn.value = '';
 			LINE_TYPES.forEach(function (t2) { alBox(t2).checked = true; });
 			cancelBtn.hidden = true;
+			if (formH) formH.textContent = t('Add category');
 		}
 		function fillForm(c) {
 			idIn.value = c.id;
+			if (formH) formH.textContent = t('Edit category');
 			document.getElementById('exp-cat-code').value = c.code || '';
 			document.getElementById('exp-cat-name').value = c.name || '';
 			var allowed = String(c.allow_lines || '').split(',');
@@ -1091,6 +1157,13 @@
 			document.getElementById('exp-cat-default-amount').value = minorToMajor(c.default_amount_minor);
 			document.getElementById('exp-cat-sort').value = c.sort || 0;
 			document.getElementById('exp-cat-active').checked = !!c.active;
+			var more = form.querySelector('details.exp-more');
+			if (more && (c.justification_threshold_minor !== null && c.justification_threshold_minor !== undefined
+				|| c.max_amount_minor !== null && c.max_amount_minor !== undefined
+				|| c.default_amount_minor !== null && c.default_amount_minor !== undefined
+				|| (c.sort || 0) !== 0)) {
+				more.open = true;
+			}
 			cancelBtn.hidden = false;
 			form.scrollIntoView({ block: 'nearest' });
 		}
@@ -1108,23 +1181,25 @@
 		}
 		function load() {
 			return listFetch(list, null, function () { return api(ep); }, function (data) {
-				var items = (data && data.categories) || [];
+				var items = ((data && data.categories) || []).filter(function (c) { return !c.deleted; });
+				if (!items.length) return;
+				var w = tableWrap([t('Code'), t('Name'), t('Line types'), t('Rules'), t('Status')], true);
 				items.forEach(function (c) {
-					if (c.deleted) return;
-					var editBtn = el('button', { type: 'button', class: 'exp-btn', text: t('Edit') });
+					var editBtn = el('button', { type: 'button', class: 'exp-btn exp-btn--secondary exp-btn--sm', text: t('Edit') });
 					editBtn.addEventListener('click', function () { fillForm(c); });
-					var meta = (c.active ? t('Active') : t('Inactive')) +
-						' · ' + t('Line types') + ': ' + String(c.allow_lines || '').replace(/,/g, ', ') +
-						(ruleMeta(c) ? ' · ' + ruleMeta(c) : '');
-					list.appendChild(el('div', { class: 'exp-card' }, [
-						el('strong', { text: c.code + ' — ' + c.name }),
-						el('p', { class: 'exp-card__meta', text: meta }),
-						el('div', { class: 'exp-detail-actions' }, [
+					w.tbody.appendChild(el('tr', {}, [
+						tc(t('Code'), el('strong', { text: c.code || '—' })),
+						tc(t('Name'), c.name),
+						tc(t('Line types'), String(c.allow_lines || '').replace(/,/g, ', ')),
+						tc(t('Rules'), ruleMeta(c)),
+						tc(t('Status'), E.badge(c.active ? 'success' : 'neutral', c.active ? t('Active') : t('Inactive'))),
+						actionsCell([
 							editBtn,
 							adminDeleteBtn(t('Delete {name}? It stays visible on existing claims.', { name: c.name }), ep + '/' + c.id, load)
 						])
 					]));
 				});
+				list.appendChild(w.wrap);
 			})();
 		}
 		var submitBtn = form.querySelector('button[type="submit"]');
@@ -1159,17 +1234,20 @@
 		var form = document.getElementById('exp-cc-form');
 		function load() {
 			return listFetch(list, null, function () { return api(ep); }, function (data) {
-				var items = (data && data.cost_centers) || [];
+				var items = ((data && data.cost_centers) || []).filter(function (c) { return !c.deleted; });
+				if (!items.length) return;
+				var w = tableWrap([t('Code'), t('Name'), t('Status')], true);
 				items.forEach(function (c) {
-					if (c.deleted) return;
-					list.appendChild(el('div', { class: 'exp-card' }, [
-						el('strong', { text: c.code + ' — ' + c.name }),
-						el('p', { class: 'exp-card__meta', text: c.active ? t('Active') : t('Inactive') }),
-						el('div', { class: 'exp-detail-actions' }, [
+					w.tbody.appendChild(el('tr', {}, [
+						tc(t('Code'), el('strong', { text: c.code || '—' })),
+						tc(t('Name'), c.name),
+						tc(t('Status'), E.badge(c.active ? 'success' : 'neutral', c.active ? t('Active') : t('Inactive'))),
+						actionsCell([
 							adminDeleteBtn(t('Delete {name}? It stays visible on existing claims.', { name: c.name }), ep + '/' + c.id, load)
 						])
 					]));
 				});
+				list.appendChild(w.wrap);
 			})();
 		}
 		var submitBtn = form.querySelector('button[type="submit"]');
@@ -1190,15 +1268,22 @@
 		var form = document.getElementById('exp-rate-form');
 		function load() {
 			return listFetch(list, null, function () { return api('/admin/rates'); }, function (data) {
-				((data && data.rates) || []).forEach(function (rt) {
-					list.appendChild(el('div', { class: 'exp-card' }, [
-						el('strong', { text: rt.code + ' — ' + rt.name }),
-						el('p', { class: 'exp-card__meta', text: money(rt.rate_minor, rt.currency) + ' · ' + rateTypeLabel(rt.rate_type) + ' · ' + fmtDate(rt.effective_from) }),
-						el('div', { class: 'exp-detail-actions' }, [
+				var items = (data && data.rates) || [];
+				if (!items.length) return;
+				var w = tableWrap([t('Code'), t('Name'), t('Rate'), t('Type'), t('Effective from')], true);
+				items.forEach(function (rt) {
+					w.tbody.appendChild(el('tr', {}, [
+						tc(t('Code'), el('strong', { text: rt.code || '—' })),
+						tc(t('Name'), rt.name),
+						tc(t('Rate'), el('span', { class: 'exp-num', text: money(rt.rate_minor, rt.currency) })),
+						tc(t('Type'), rateTypeLabel(rt.rate_type)),
+						tc(t('Effective from'), rt.effective_from ? fmtDate(rt.effective_from) : '—'),
+						actionsCell([
 							adminDeleteBtn(t('Delete rate {name}?', { name: rt.name }), '/admin/rates/' + rt.id, load)
 						])
 					]));
 				});
+				list.appendChild(w.wrap);
 			})();
 		}
 		var submitBtn = form.querySelector('button[type="submit"]');
@@ -1220,14 +1305,18 @@
 		var list = document.getElementById('exp-chains-list');
 		function load() {
 			return listFetch(list, null, function () { return api('/admin/chains'); }, function (data) {
-				((data && data.chains) || []).forEach(function (ch) {
+				var items = (data && data.chains) || [];
+				if (!items.length) return;
+				var w = tableWrap([t('Chain'), t('Approvers')], true);
+				items.forEach(function (ch) {
 					var del = adminDeleteBtn(t('Delete chain {name}?', { name: ch.name }), '/admin/chains/' + ch.id, load);
-					list.appendChild(el('div', { class: 'exp-card' }, [
-						el('strong', { text: ch.name }),
-						el('p', { class: 'exp-card__meta', text: (ch.steps || []).map(function (s) { return s.approver_uid; }).join(' → ') }),
-						el('div', { class: 'exp-detail-actions' }, [del])
+					w.tbody.appendChild(el('tr', {}, [
+						tc(t('Chain'), el('strong', { text: ch.name })),
+						tc(t('Approvers'), (ch.steps || []).map(function (s) { return s.approver_uid; }).join(' → ')),
+						actionsCell([del])
 					]));
 				});
+				list.appendChild(w.wrap);
 			})();
 		}
 		load();

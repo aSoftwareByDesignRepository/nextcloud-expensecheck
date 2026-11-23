@@ -61,10 +61,10 @@ test.describe('expensecheck route smoke', () => {
 
 	test('claims list reaches a stable state, never blank', async () => {
 		// Six-state contract: after the async fetch the surface must land in
-		// populated (.exp-card), empty (#exp-claims-empty), or inline error
+		// populated (exp-table rows), empty (#exp-claims-empty), or inline error
 		// (.exp-empty-state with retry) — a blank surface is a regression.
 		await page.goto(`${APP}/claims`, { waitUntil: 'domcontentloaded' })
-		const cards = page.locator('#exp-claims-list .exp-card')
+		const cards = page.locator('#exp-claims-list .exp-table tbody tr, #exp-claims-list .exp-card')
 		const empty = page.locator('#exp-claims-empty')
 		const inlineError = page.locator('#exp-claims-list .exp-empty-state')
 		await expect

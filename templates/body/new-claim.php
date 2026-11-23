@@ -13,7 +13,7 @@
 		</div>
 		<div class="exp-field">
 			<label class="exp-label" for="exp-f-currency"><?php p($l->t('Currency')); ?></label>
-			<input class="exp-input" id="exp-f-currency" name="currency" value="EUR" required maxlength="3" pattern="[A-Z]{3}">
+			<input class="exp-input exp-input--currency" id="exp-f-currency" name="currency" value="EUR" required maxlength="3" pattern="[A-Z]{3}">
 			<p class="exp-field-error" data-field-error="currency" hidden></p>
 		</div>
 		<div class="exp-field" id="exp-f-trip-wrap" hidden>

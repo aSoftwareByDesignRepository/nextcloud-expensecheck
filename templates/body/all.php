@@ -10,5 +10,5 @@
 		<button type="button" class="exp-filter" data-value="rejected" aria-pressed="false"><?php p($l->t('Rejected')); ?></button>
 		<button type="button" class="exp-filter" data-value="settled" aria-pressed="false"><?php p($l->t('Settled')); ?></button>
 	</div>
-	<div id="exp-all-list" class="exp-card-list" role="list" aria-live="polite"></div>
+	<div id="exp-all-list" aria-live="polite"></div>
 </section>
