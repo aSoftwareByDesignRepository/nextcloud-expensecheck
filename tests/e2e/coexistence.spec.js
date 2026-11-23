@@ -44,6 +44,12 @@ test.describe('MC coexistence picker (edge 38)', () => {
 		context = await browser.newContext()
 		page = await context.newPage()
 		await login(page, creds)
+		// Self-gating: the whole MC UI surface is unpublished until
+		// MobilityCheck ships (IntegrationsApiController::MC_SURFACE_ENABLED).
+		// Skips reactivate automatically when the flag flips.
+		const summary = await page.request.get(`${APP}/api/integrations/summary`)
+		const mcInstalled = (await summary.json())?.siblings?.mobilitycheck?.installed === true
+		test.skip(!mcInstalled, 'MC surface unpublished (MC_SURFACE_ENABLED) — re-enable when MobilityCheck ships')
 		priorMode = getConfig('mc_coexistence_mode', 'unset')
 		priorMileage = getConfig('enable_mileage_claims', '1')
 	})

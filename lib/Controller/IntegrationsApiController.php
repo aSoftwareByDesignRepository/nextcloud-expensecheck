@@ -39,6 +39,12 @@ use OCP\IRequest;
  */
 class IntegrationsApiController extends AApiController
 {
+	/** Surface gate: MobilityCheck is not yet published — all MC-driven UI
+	 *  (new-claim import pickers, settings coexistence) keys on this flag and
+	 *  stays hidden until the sibling ships. The /api/integrations/mc/*
+	 *  endpoints stay functional for direct consumers. Flip when public. */
+	private const MC_SURFACE_ENABLED = false;
+
 	public function __construct(
 		IRequest $request,
 		AccessControlService $access,
@@ -59,7 +65,7 @@ class IntegrationsApiController extends AApiController
 	#[NoAdminRequired]
 	public function summary(): JSONResponse
 	{
-		$expenseSubmit = $this->mc->expenseSubmitEnabled();
+		$expenseSubmit = self::MC_SURFACE_ENABLED ? $this->mc->expenseSubmitEnabled() : null;
 		return new JSONResponse([
 			'ok' => true,
 			'siblings' => [
@@ -69,7 +75,7 @@ class IntegrationsApiController extends AApiController
 					'trips_list_url' => $this->azc->available() ? $this->azc->tripsListUrl() : null,
 				],
 				'mobilitycheck' => [
-					'installed' => $this->mc->available(),
+					'installed' => self::MC_SURFACE_ENABLED && $this->mc->available(),
 					'expense_submit_enabled' => $expenseSubmit,
 				],
 				'budgetcheck' => ['installed' => $this->isInstalled('budgetcheck')],
