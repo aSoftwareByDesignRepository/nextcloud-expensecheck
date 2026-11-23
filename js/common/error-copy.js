@@ -167,7 +167,7 @@ window.EXPErrorCopy = (function () {
 		'NOT_FOUND', 'ATTACHMENT_NOT_FOUND', 'BATCH_NOT_FOUND',
 		'CATEGORY_NOT_FOUND', 'CHAIN_NOT_FOUND', 'CHARGEBACK_NOT_FOUND',
 		'CLAIM_NOT_FOUND', 'COST_CENTER_NOT_FOUND', 'DELEGATE_NOT_FOUND',
-		'MANAGER_MAP_NOT_FOUND', 'PERIOD_NOT_FOUND', 'SEGMENT_NOT_FOUND'
+		'MANAGER_MAP_NOT_FOUND', 'PERIOD_NOT_FOUND', 'RATE_NOT_FOUND', 'SEGMENT_NOT_FOUND'
 	].forEach(function (code) { MAP[code] = NF; });
 	return {
 		/** @returns {{sentence:string, recovery:string}|null} */
