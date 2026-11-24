@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.0.3 - 2026-11-24
+
+### Changed
+- All views rewired to the Check-family component recipes; section chip bars
+  scroll horizontally instead of overflowing on small screens.
+- MobilityCheck integration surface stays hidden until the sibling app ships;
+  the store description no longer advertises the link.
+
+### Fixed
+- Cataloged the 12 msgids introduced by the view rewire across all locales.
+- Get the App page + MobileAppLinks + Mobile nav group
+- design-system sweep — access-door UI, scope=all, labels, dead ends
+- audit hardening — coexistence picker, sibling-absent + integration e2e, NN-fence/EXIF/golden-vector proofs
+- recipe-B status pills + persona nav/API parity spec
+
+### Changed
+
+- focus-preservation contract spec — ds_chrome lane residue
+- complete App Store package — files, screenshots, schema-valid info.xml
+- fix stale selectors + CSRF-aware persona spec after license-pack/nav changes
+- add get-the-app surface to screenshot-matrix
+- refresh e2e screenshot-matrix
+- update public-routes allowlist for get-the-app
+- Wire canonical license page + Support & us section
+- Server-authoritative can.* affordances, full retention schedule, mobile ETags, glossary
+
 ## 1.0.2 - 2026-11-21
 
 ### Added

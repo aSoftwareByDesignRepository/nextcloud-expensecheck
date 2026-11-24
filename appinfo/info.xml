@@ -414,7 +414,7 @@ ExpenseCheck ведёт возмещение расходов сотрудник
 
 - Nextcloud 32–35 · PHP 8.2–8.5 · MySQL или PostgreSQL
 	]]></description>
-	<version>1.0.2</version>
+	<version>1.0.3</version>
 	<licence>AGPL-3.0-or-later</licence>
 	<author mail="info@software-by-design.de" homepage="https://nextcloud.software-by-design.de">Software by Design GbR</author>
 	<namespace>ExpenseCheck</namespace>
