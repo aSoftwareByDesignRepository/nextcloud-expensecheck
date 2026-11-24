@@ -10,7 +10,7 @@ use Psr\Log\LoggerInterface;
 /**
  * Suite flange F22 — billable-claims read + billed-mark facade.
  *
- * InvoiceCheck learns *which* approved claims are billable to a customer —
+ * the invoicing app learns *which* approved claims are billable to a customer —
  * never the receipt contents. The row shape is deliberately minimal:
  * claim id, customer/project link, money total, currency, generic_label
  * (the claim number). No user id, no merchant, no lines.

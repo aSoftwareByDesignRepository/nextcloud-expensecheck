@@ -239,7 +239,7 @@
   {
    "id": "sibling-import-fields",
    "param": "segment_id|chargeback_id + category_id + cost_center_id (+ rate_code for mileage)",
-   "description": "MC segment/charge-back import requires the sibling ref plus an explicit category and cost-center allocation (mileage additionally a rate_code) — the server re-derives money/dates from MobilityCheck and rejects missing picks with field-level VALIDATION_FAILED; duplicate sources yield ALREADY_CLAIMED.",
+   "description": "MC segment/charge-back import requires the sibling ref plus an explicit category and cost-center allocation (mileage additionally a rate_code) — the server re-derives money/dates from the mobility app and rejects missing picks with field-level VALIDATION_FAILED; duplicate sources yield ALREADY_CLAIMED.",
    "errorCodes": [
     "VALIDATION_FAILED",
     "ALREADY_CLAIMED",

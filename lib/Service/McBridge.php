@@ -8,7 +8,7 @@ use OCP\App\IAppManager;
 use OCP\Server;
 
 /**
- * MobilityCheck bridge (F25/F26, spec §12.4c) — capability-detected access
+ * the mobility app bridge (F25/F26, spec §12.4c) — capability-detected access
  * to the MC public facades. Every call degrades to "sibling absent": a
  * missing app, an older MC without the facade class, or a contract
  * violation all surface as empty/unavailable, never as an exception into
@@ -54,7 +54,7 @@ class McBridge
 	 * F25 — confirmed private-vehicle segments the claimant may settle
 	 * through EXP. Each row: {segment_id, uid, date, from, to, distance_km,
 	 * vehicle_label, claimable}. `claimable=false` rows render as context
-	 * ("settled in MobilityCheck"), never as an action.
+	 * ("settled in the mobility app"), never as an action.
 	 *
 	 * @return list<array<string,mixed>>
 	 */

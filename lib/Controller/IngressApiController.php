@@ -18,7 +18,7 @@ use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
 
 /**
- * Sibling draft-ingress (`check:expense-claims`, spec §15): MobilityCheck
+ * Sibling draft-ingress (`check:expense-claims`, spec §15): the mobility app
  * drive-segments and other Check apps may propose draft lines into a NEW
  * draft claim owned by the calling user. Provenance is recorded on
  * source_app/source_ref; nothing from a sibling is trusted — every field is

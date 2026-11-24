@@ -39,7 +39,7 @@ use OCP\IRequest;
  */
 class IntegrationsApiController extends AApiController
 {
-	/** Surface gate: MobilityCheck is not yet published — all MC-driven UI
+	/** Surface gate: the mobility app is not yet published — all MC-driven UI
 	 *  (new-claim import pickers, settings coexistence) keys on this flag and
 	 *  stays hidden until the sibling ships. The /api/integrations/mc/*
 	 *  endpoints stay functional for direct consumers. Flip when public. */
@@ -124,7 +124,7 @@ class IntegrationsApiController extends AApiController
 			'category_id' => (int)($b['category_id'] ?? 0),
 			'qty' => (string)$segment['distance_km'],
 			'rate_code' => $this->str($b, 'rate_code', 64),
-			'merchant' => 'MobilityCheck',
+			'merchant' => 'the mobility app',
 			'description' => trim($segment['from'] . ' → ' . $segment['to'], ' →')
 				. ($segment['vehicle_label'] !== '' ? ' (' . $segment['vehicle_label'] . ')' : ''),
 			'distance_source' => 'mc_segment',
@@ -171,7 +171,7 @@ class IntegrationsApiController extends AApiController
 			'occurred_on' => $chargeback['entry_date'] !== '' ? $chargeback['entry_date'] : date('Y-m-d'),
 			'category_id' => (int)($b['category_id'] ?? 0),
 			'amount' => number_format(-$chargeback['amount_minor'] / 100, 2, '.', ''),
-			'merchant' => 'MobilityCheck',
+			'merchant' => 'the mobility app',
 			'description' => 'Charge-back #' . $cbId
 				. ($chargeback['vehicle_label'] !== '' ? ' — ' . $chargeback['vehicle_label'] : '')
 				. ($chargeback['notes'] !== '' ? ': ' . $chargeback['notes'] : ''),
@@ -181,7 +181,7 @@ class IntegrationsApiController extends AApiController
 		];
 		$allocations = $this->resolveAllocations($b);
 		return $this->claimLineIntoDraft('deduction', $b, $line, $allocations,
-			'MobilityCheck charge-back #' . $cbId);
+			'the mobility app charge-back #' . $cbId);
 	}
 
 	/**

@@ -9,7 +9,7 @@ use Psr\Log\LoggerInterface;
 /**
  * Suite flange — claimed-source-ref reverse link (spec §12.5 MC chip).
  *
- * MobilityCheck renders a "claimed via ExpenseCheck <claim_no>" chip on
+ * the mobility app renders a "claimed via ExpenseCheck <claim_no>" chip on
  * private-vehicle segment rows by asking which of its own refs an EXP line
  * already consumed. The reverse link is deliberately narrow: source_ref →
  * claim_no for one source app, restricted to one claimant — a segment can

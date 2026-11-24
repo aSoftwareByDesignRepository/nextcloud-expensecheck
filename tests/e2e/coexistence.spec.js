@@ -1,7 +1,7 @@
 // @ts-check
 /**
  * MC coexistence mode picker (edge 38, spec §12.4b):
- * with MobilityCheck installed and mode `unset`, the settings page must
+ * with the mobility app installed and mode `unset`, the settings page must
  * surface the disambiguation callout + Mode A/B picker — never silently
  * configured, never blocked. Applying a mode persists
  * mc_coexistence_mode AND the EXP-side mileage consequence, and re-renders
@@ -45,11 +45,11 @@ test.describe('MC coexistence picker (edge 38)', () => {
 		page = await context.newPage()
 		await login(page, creds)
 		// Self-gating: the whole MC UI surface is unpublished until
-		// MobilityCheck ships (IntegrationsApiController::MC_SURFACE_ENABLED).
+		// the mobility app ships (IntegrationsApiController::MC_SURFACE_ENABLED).
 		// Skips reactivate automatically when the flag flips.
 		const summary = await page.request.get(`${APP}/api/integrations/summary`)
 		const mcInstalled = (await summary.json())?.siblings?.mobilitycheck?.installed === true
-		test.skip(!mcInstalled, 'MC surface unpublished (MC_SURFACE_ENABLED) — re-enable when MobilityCheck ships')
+		test.skip(!mcInstalled, 'MC surface unpublished (MC_SURFACE_ENABLED) — re-enable when the mobility app ships')
 		priorMode = getConfig('mc_coexistence_mode', 'unset')
 		priorMileage = getConfig('enable_mileage_claims', '1')
 	})

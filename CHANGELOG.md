@@ -5,12 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.0.4 - 2026-11-24
+
+### Changed
+
+- Refresh Nextcloud App Store metadata and verify all six public screenshot images.
+- Exclude local release-build output from version control.
+
 ## 1.0.3 - 2026-11-24
 
 ### Changed
 - All views rewired to the Check-family component recipes; section chip bars
   scroll horizontally instead of overflowing on small screens.
-- MobilityCheck integration surface stays hidden until the sibling app ships;
+- the mobility app integration surface stays hidden until the sibling app ships;
   the store description no longer advertises the link.
 
 ### Fixed

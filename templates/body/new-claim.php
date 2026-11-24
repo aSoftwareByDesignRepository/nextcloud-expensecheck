@@ -25,11 +25,11 @@
 		<div id="exp-integrations" class="exp-integrations" hidden>
 			<h3 class="exp-integrations__h"><?php p($l->t('From other apps')); ?></h3>
 			<div id="exp-integrations-seg" hidden>
-				<p class="exp-hint"><?php p($l->t('Trips recorded in MobilityCheck — pick one to create a mileage claim draft.')); ?></p>
+				<p class="exp-hint"><?php p($l->t('Trips recorded in the mobility app — pick one to create a mileage claim draft.')); ?></p>
 				<div id="exp-integrations-seg-list" role="list"></div>
 			</div>
 			<div id="exp-integrations-cb" hidden>
-				<p class="exp-hint"><?php p($l->t('Confirmed MobilityCheck charge-backs — create a deduction claim you still review and submit.')); ?></p>
+				<p class="exp-hint"><?php p($l->t('Confirmed the mobility app charge-backs — create a deduction claim you still review and submit.')); ?></p>
 				<div id="exp-integrations-cb-list" role="list"></div>
 			</div>
 		</div>

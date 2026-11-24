@@ -10,7 +10,7 @@ use OCP\Migration\IOutput;
 use OCP\Migration\SimpleMigrationStep;
 
 /**
- * F22 — billed marker on claims: InvoiceCheck marks an approved,
+ * F22 — billed marker on claims: the invoicing app marks an approved,
  * billable claim as invoiced via ExpBillableReadFacade::markBilled().
  * Nullable; financial state only (ref = IC invoice number, no PII).
  */

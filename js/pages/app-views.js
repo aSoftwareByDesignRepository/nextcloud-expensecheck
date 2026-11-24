@@ -1502,7 +1502,7 @@
 			});
 			body.appendChild(form);
 
-			// Edge 38 / §12.4b: with MobilityCheck installed, an unset
+			// Edge 38 / §12.4b: with the mobility app installed, an unset
 			// coexistence mode is a double-payment surface — the admin must
 			// pick a pipeline explicitly; never auto-configured, never blocked.
 			function renderCoex() {
@@ -1513,7 +1513,7 @@
 				var mode = co.mode || 'unset';
 
 				var section = el('section', { class: 'exp-section', 'aria-labelledby': 'exp-coex-title' });
-				section.appendChild(el('h2', { id: 'exp-coex-title', text: t('MobilityCheck coexistence') }));
+				section.appendChild(el('h2', { id: 'exp-coex-title', text: t('Mobility app coexistence') }));
 
 				var unset = mode === 'unset';
 				var callout = el('aside', {
@@ -1526,16 +1526,16 @@
 					text: unset
 						? t('Two apps can submit vehicle expenses')
 						: (mode === 'a'
-							? t('Mode A — MobilityCheck settles vehicle money')
+							? t('Mode A — the mobility app settles vehicle money')
 							: t('Mode B — ExpenseCheck is the single claims pipeline'))
 				}));
 				cbody.appendChild(el('p', {
 					class: 'exp-license-callout__text',
 					text: unset
-						? t('ExpenseCheck and MobilityCheck are both installed and no coexistence mode is configured. Pick one pipeline so a trip can never be claimed twice — nothing is blocked until you choose.')
+						? t('ExpenseCheck and the mobility app are both installed and no coexistence mode is configured. Pick one pipeline so a trip can never be claimed twice — nothing is blocked until you choose.')
 						: (mode === 'a'
-							? t('Mileage claims are disabled here; drivers claim private-car kilometres in MobilityCheck. Applies to new claims only.')
-							: t('Drivers claim kilometres here, linked to MobilityCheck trips. Disable MobilityCheck’s own expense submit in its settings.'))
+							? t('Mileage claims are disabled here; drivers claim private-car kilometres in the mobility app. Applies to new claims only.')
+							: t('Drivers claim kilometres here, linked to the mobility app trips. Disable the mobility app’s own expense submit in its settings.'))
 				}));
 				var help = el('a', {
 					href: 'https://nextcloud.software-by-design.de/',
@@ -1561,21 +1561,21 @@
 					return label;
 				}
 				cards.appendChild(modeCard('a',
-					t('Mode A — MobilityCheck settles'),
-					t('Mileage claims are turned off here. Drivers submit private-car kilometres in MobilityCheck’s own module.')));
+					t('Mode A — the mobility app settles'),
+					t('Mileage claims are turned off here. Drivers submit private-car kilometres in the mobility app’s own module.')));
 				cards.appendChild(modeCard('b',
 					t('Mode B — ExpenseCheck settles'),
-					t('One approval queue and one settlement for all employee money. Requires MobilityCheck’s own expense submit to be switched off there.')));
+					t('One approval queue and one settlement for all employee money. Requires the mobility app’s own expense submit to be switched off there.')));
 				section.appendChild(cards);
 
 				var mcState = el('p', { class: 'exp-hint' });
 				mcState.appendChild(document.createTextNode(
 					mc.expense_submit_enabled
-						? t('MobilityCheck’s own expense submit is currently ON — switch it off under MobilityCheck → Settings for Mode B.')
-						: t('MobilityCheck’s own expense submit is off.')));
+						? t('The mobility app’s own expense submit is currently ON — switch it off under the mobility app → Settings for Mode B.')
+						: t('The mobility app’s own expense submit is off.')));
 				var mcLink = el('a', {
 					href: (window.OC && OC.generateUrl) ? OC.generateUrl('/apps/mobilitycheck/settings') : '/apps/mobilitycheck/settings',
-					text: t('Open MobilityCheck settings')
+					text: t('Open the mobility app settings')
 				});
 				mcState.appendChild(document.createTextNode(' '));
 				mcState.appendChild(mcLink);

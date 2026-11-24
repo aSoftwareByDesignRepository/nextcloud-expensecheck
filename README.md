@@ -25,7 +25,7 @@ ExpenseCheck runs employee expense reimbursement inside your self-hosted Nextclo
 - **A finance queue that reconciles** — batch settlement with payment references; formula-injection-safe CSV/ODS export
 - **Books that can't be silently rewritten** — settled claims immutable, period close, every decision in a hash-chained journal
 - **Jurisdiction-agnostic** — every rate, category, tax mode and approval rule is admin-configured; no statutory logic shipped
-- **Suite-native** — optional links to ArbeitszeitCheck business trips and MobilityCheck charge-backs when the siblings are installed
+- **Suite-native** — optional links to ArbeitszeitCheck business trips and the mobility app charge-backs when the siblings are installed
 
 ### Clear limits
 
@@ -89,7 +89,7 @@ ExpenseCheck bildet die Spesenabrechnung für Mitarbeitende in Ihrer selbst geho
 - **Eine Finanzqueue, die stimmt** — Auszahlungsläufe mit Zahlungsreferenz; formelsicherer CSV/ODS-Export
 - **Bücher, die nicht still umgeschrieben werden** — ausgezahlte Abrechnungen unveränderlich, Periodenabschluss, jede Entscheidung im hash-verketteten Journal
 - **Jurisdiktionsneutral** — jeder Tarif, jede Kategorie, jeder Steuermodus und jede Genehmigungsregel wird vom Admin konfiguriert; keine gesetzlichen Logiken mitgeliefert
-- **Suite-nativ** — optionale Verknüpfung mit ArbeitszeitCheck-Dienstreisen und MobilityCheck-Rückbelastungen, wenn die Schwester-Apps installiert sind
+- **Suite-nativ** — optionale Verknüpfung mit ArbeitszeitCheck-Dienstreisen und the mobility app-Rückbelastungen, wenn die Schwester-Apps installiert sind
 
 ### Klare Grenzen
 
