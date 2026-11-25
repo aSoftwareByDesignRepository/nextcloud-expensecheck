@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - All views rewired to the Check-family component recipes; section chip bars
   scroll horizontally instead of overflowing on small screens.
-- the mobility app integration surface stays hidden until the sibling app ships;
+- The mobility app integration surface stays hidden until the sibling app ships;
   the store description no longer advertises the link.
 
 ### Fixed
