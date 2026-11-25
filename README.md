@@ -89,7 +89,7 @@ ExpenseCheck bildet die Spesenabrechnung für Mitarbeitende in Ihrer selbst geho
 - **Eine Finanzqueue, die stimmt** — Auszahlungsläufe mit Zahlungsreferenz; formelsicherer CSV/ODS-Export
 - **Bücher, die nicht still umgeschrieben werden** — ausgezahlte Abrechnungen unveränderlich, Periodenabschluss, jede Entscheidung im hash-verketteten Journal
 - **Jurisdiktionsneutral** — jeder Tarif, jede Kategorie, jeder Steuermodus und jede Genehmigungsregel wird vom Admin konfiguriert; keine gesetzlichen Logiken mitgeliefert
-- **Suite-nativ** — optionale Verknüpfung mit ArbeitszeitCheck-Dienstreisen und the mobility app-Rückbelastungen, wenn die Schwester-Apps installiert sind
+- **Suite-nativ** — optionale Verknüpfung mit ArbeitszeitCheck-Dienstreisen und Mobilitäts-App-Rückbelastungen, wenn die Schwester-Apps installiert sind
 
 ### Klare Grenzen
 

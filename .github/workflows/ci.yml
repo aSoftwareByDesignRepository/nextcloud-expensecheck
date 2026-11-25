@@ -33,6 +33,8 @@ jobs:
       - run: find lib tests templates -name '*.php' -print0 | xargs -0 -n1 -P4 php -l
       - name: info.xml parses and version bounds are sane
         run: php -r '$x=simplexml_load_file("appinfo/info.xml") or exit(1); if (!$x->id || !$x->version) exit(2);'
+      - name: l10n key parity across locale catalogs
+        run: php scripts/check-l10n-parity.php
 
   unit:
     runs-on: ubuntu-latest
