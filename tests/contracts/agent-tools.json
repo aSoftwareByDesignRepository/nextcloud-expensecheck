@@ -1,0 +1,276 @@
+{
+  "schemaVersion": 1,
+  "appId": "expensecheck",
+  "agentExposure": "declared",
+  "tools": [
+    {
+      "name": "ec_list_claims",
+      "kind": "read",
+      "riskClass": 0,
+      "route": "mobileApi#listClaims",
+      "method": "GET",
+      "path": "/api/mobile/claims",
+      "scope": "expensecheck:claims:read",
+      "label": "My claims",
+      "description": "List the token owner's expense claims, optionally filtered by status.",
+      "params": {
+        "status": {
+          "type": "string",
+          "required": false,
+          "description": "Claim status filter (e.g. draft, submitted, approved)."
+        }
+      }
+    },
+    {
+      "name": "ec_create_claim",
+      "kind": "write",
+      "riskClass": 1,
+      "route": "mobileApi#createClaim",
+      "method": "POST",
+      "path": "/api/mobile/claims",
+      "idempotency": "clientRequestId",
+      "scope": "expensecheck:claims:write",
+      "label": "Create claim",
+      "description": "Create a draft expense claim for the token owner, optionally with claim lines. Pass request_key to deduplicate retries.",
+      "params": {
+        "title": {
+          "type": "string",
+          "required": true,
+          "description": "Claim title."
+        },
+        "currency": {
+          "type": "string",
+          "required": false,
+          "description": "ISO 4217 currency code (default EUR)."
+        },
+        "request_key": {
+          "type": "string",
+          "required": false,
+          "description": "Idempotency key — a retry with the same key returns the existing claim."
+        },
+        "lines": {
+          "type": "array",
+          "required": false,
+          "description": "Claim lines, same shape as the web create (each with optional allocations)."
+        }
+      }
+    },
+    {
+      "name": "ec_get_claim",
+      "kind": "read",
+      "riskClass": 0,
+      "route": "mobileApi#showClaim",
+      "method": "GET",
+      "path": "/api/mobile/claims/{id}",
+      "scope": "expensecheck:claims:read",
+      "label": "Claim detail",
+      "description": "Show one claim visible to the token owner (own claims plus claims they may approve).",
+      "params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "description": "Path parameter."
+        }
+      }
+    },
+    {
+      "name": "ec_submit_claim",
+      "kind": "write",
+      "riskClass": 2,
+      "confirm": "required",
+      "route": "mobileApi#submitClaim",
+      "method": "POST",
+      "path": "/api/mobile/claims/{id}/submit",
+      "idempotency": "natural",
+      "scope": "expensecheck:claims:write",
+      "label": "Submit claim",
+      "description": "Submit a draft claim for approval (state transition — confirm required). Pass version for optimistic-lock checking.",
+      "params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "description": "Path parameter."
+        },
+        "version": {
+          "type": "integer",
+          "required": false,
+          "description": "Expected claim version — CAS guard against stale-state submits."
+        }
+      }
+    },
+    {
+      "name": "ec_withdraw_claim",
+      "kind": "write",
+      "riskClass": 2,
+      "confirm": "required",
+      "route": "mobileApi#withdrawClaim",
+      "method": "POST",
+      "path": "/api/mobile/claims/{id}/withdraw",
+      "idempotency": "natural",
+      "scope": "expensecheck:claims:write",
+      "label": "Withdraw claim",
+      "description": "Withdraw a submitted claim back to draft (state transition — confirm required).",
+      "params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "description": "Path parameter."
+        },
+        "version": {
+          "type": "integer",
+          "required": false,
+          "description": "Expected claim version — CAS guard against stale-state withdraws."
+        }
+      }
+    },
+    {
+      "name": "ec_decide_claim",
+      "kind": "write",
+      "riskClass": 3,
+      "confirm": "required",
+      "batch": "forbidden",
+      "route": "mobileApi#decide",
+      "method": "POST",
+      "path": "/api/mobile/claims/{id}/decisions",
+      "idempotency": "natural",
+      "scope": "expensecheck:approvals:write",
+      "label": "Decide claim",
+      "description": "Approve or reject a claim waiting on the token owner (money decision — confirm required, never batched).",
+      "params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "description": "Path parameter."
+        },
+        "decision": {
+          "type": "string",
+          "required": true,
+          "description": "Decision value (e.g. approve, reject, request_changes — see lookups)."
+        },
+        "note": {
+          "type": "string",
+          "required": false,
+          "description": "Decision note shown to the claimant."
+        },
+        "version": {
+          "type": "integer",
+          "required": false,
+          "description": "Expected claim version — CAS guard against stale-state decisions."
+        }
+      }
+    },
+    {
+      "name": "ec_list_inbox",
+      "kind": "read",
+      "riskClass": 0,
+      "route": "mobileApi#inbox",
+      "method": "GET",
+      "path": "/api/mobile/inbox",
+      "scope": "expensecheck:approvals:read",
+      "label": "Approval inbox",
+      "description": "List claims currently waiting on the token owner's decision."
+    },
+    {
+      "name": "ec_get_lookups",
+      "kind": "read",
+      "riskClass": 0,
+      "route": "mobileApi#lookups",
+      "method": "GET",
+      "path": "/api/mobile/lookups",
+      "scope": "expensecheck:catalog:read",
+      "label": "Lookups",
+      "description": "Categories, rates, cost centers and other lookup data needed to fill claim lines."
+    },
+    {
+      "name": "ec_list_receipts",
+      "kind": "read",
+      "riskClass": 0,
+      "route": "mobileApi#receiptsInbox",
+      "method": "GET",
+      "path": "/api/mobile/receipts-inbox",
+      "scope": "expensecheck:receipts:read",
+      "label": "Receipt inbox",
+      "description": "List the token owner's unfiled receipt uploads."
+    },
+    {
+      "name": "ec_upload_receipt",
+      "kind": "write",
+      "riskClass": 1,
+      "route": "mobileApi#uploadReceipt",
+      "method": "POST",
+      "path": "/api/mobile/receipts-inbox",
+      "idempotency": "clientRequestId",
+      "scope": "expensecheck:receipts:write",
+      "label": "Upload receipt",
+      "description": "Upload a receipt file into the token owner's inbox. Pass clientRequestId so retries can be correlated in the audit log.",
+      "params": {
+        "file": {
+          "type": "string",
+          "required": true,
+          "description": "Receipt file (multipart upload)."
+        }
+      }
+    },
+    {
+      "name": "ec_file_receipt",
+      "kind": "write",
+      "riskClass": 1,
+      "route": "mobileApi#fileReceipt",
+      "method": "POST",
+      "path": "/api/mobile/receipts-inbox/{id}/file",
+      "idempotency": "natural",
+      "scope": "expensecheck:receipts:write",
+      "label": "File receipt",
+      "description": "Attach an inbox receipt to a claim line.",
+      "params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "description": "Path parameter — inbox attachment id."
+        },
+        "claim_id": {
+          "type": "integer",
+          "required": true,
+          "description": "Target claim id."
+        },
+        "line_id": {
+          "type": "integer",
+          "required": true,
+          "description": "Target claim line id."
+        }
+      }
+    },
+    {
+      "name": "ec_upload_claim_receipt",
+      "kind": "write",
+      "riskClass": 1,
+      "route": "mobileApi#uploadAttachment",
+      "method": "POST",
+      "path": "/api/mobile/claims/{id}/attachments",
+      "idempotency": "clientRequestId",
+      "scope": "expensecheck:receipts:write",
+      "label": "Attach receipt",
+      "description": "Upload a receipt file directly onto an editable claim (own claims only). Pass clientRequestId so retries can be correlated in the audit log.",
+      "params": {
+        "id": {
+          "type": "integer",
+          "required": true,
+          "description": "Path parameter — claim id."
+        },
+        "file": {
+          "type": "string",
+          "required": true,
+          "description": "Receipt file (multipart upload)."
+        },
+        "line_id": {
+          "type": "integer",
+          "required": false,
+          "description": "Attach to this claim line instead of the claim inbox."
+        }
+      }
+    }
+  ],
+  "deny": [
+    "mobileApi#bootstrap"
+  ]
+}

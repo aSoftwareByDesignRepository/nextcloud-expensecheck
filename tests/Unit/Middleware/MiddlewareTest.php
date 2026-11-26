@@ -146,6 +146,17 @@ final class MiddlewareTest extends TestCase
 		$this->assertTrue(true);
 	}
 
+	public function testCsrfSkipsAgentMutation(): void
+	{
+		// Agent tokens are non-ambient credentials — the request must not be
+		// forced to carry a session requesttoken.
+		$mw = $this->csrfMiddleware(
+			$this->requestWith('/apps/expensecheck/api/claims', ['x-expensecheck-agent' => 'ecst_token'], 'POST'),
+			$this->user('u'), false);
+		$mw->beforeController(new \OCA\ExpenseCheck\Controller\StubController(), 'm');
+		$this->assertTrue(true);
+	}
+
 	public function testCsrfRejectsSessionMutationWithoutToken(): void
 	{
 		$mw = $this->csrfMiddleware(
@@ -288,5 +299,18 @@ final class MiddlewareTest extends TestCase
 		$mw = $this->licenseMiddleware('/apps/expensecheck/api/mobile/claims',
 			['authorization' => 'Basic dTpw'], $this->user('u'), $lic);
 		$mw->beforeController(new \stdClass(), 'm');
+	}
+
+	public function testMobileGateSkipsAgentRequests(): void
+	{
+		// X-ExpenseCheck-Agent requests are authenticated + seat-gated by
+		// AgentAuthMiddleware; the Basic/license gate must not claim them.
+		$lic = $this->createMock(LicenseService::class);
+		$lic->expects($this->never())->method('isMobilePlanActive');
+		$lic->expects($this->never())->method('assertMobileAccess');
+		$mw = $this->licenseMiddleware('/apps/expensecheck/api/mobile/claims',
+			['x-expensecheck-agent' => 'ecst_token'], null, $lic);
+		$mw->beforeController(new \stdClass(), 'm');
+		$this->assertTrue(true);
 	}
 }

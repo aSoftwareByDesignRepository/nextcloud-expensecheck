@@ -23,7 +23,7 @@ return [
 		['name' => 'page#chains', 'url' => '/chains', 'verb' => 'GET'],
 		['name' => 'page#settings', 'url' => '/settings', 'verb' => 'GET'],
 		['name' => 'page#settingsSection', 'url' => '/settings/{section}', 'verb' => 'GET',
-			'requirements' => ['section' => 'access|categories|rates|cost-centers|chains|periods|delegates|manager-map|fx-rates|general|diagnostics|license|transfer|support']],
+			'requirements' => ['section' => 'access|categories|rates|cost-centers|chains|periods|delegates|manager-map|fx-rates|general|diagnostics|license|agent|transfer|support']],
 		['name' => 'page#license', 'url' => '/license', 'verb' => 'GET'],
 		['name' => 'page#getTheApp', 'url' => '/get-the-app', 'verb' => 'GET'],
 
@@ -167,6 +167,17 @@ return [
 			'requirements' => ['id' => '\d+']],
 		['name' => 'mobileApi#uploadAttachment', 'url' => '/api/mobile/claims/{id}/attachments', 'verb' => 'POST',
 			'requirements' => ['id' => '\d+']],
+
+		// Agent (AI/MCP) surface. The manifest is readable by any valid
+		// agent token OR a session user; token administration is session+CSRF
+		// only — AgentAuthMiddleware denies agent credentials on these paths.
+		['name' => 'agent_manifest#show', 'url' => '/agent/v1/manifest', 'verb' => 'GET'],
+		['name' => 'agent_token#index', 'url' => '/agent/v1/tokens', 'verb' => 'GET'],
+		['name' => 'agent_token#mint', 'url' => '/agent/v1/tokens', 'verb' => 'POST'],
+		['name' => 'agent_token#audit', 'url' => '/agent/v1/audit', 'verb' => 'GET'],
+		['name' => 'agent_token#updatePolicy', 'url' => '/agent/v1/policy', 'verb' => 'POST'],
+		['name' => 'agent_token#revoke', 'url' => '/agent/v1/tokens/{id}/revoke', 'verb' => 'POST', 'requirements' => ['id' => '\\d+']],
+		['name' => 'agent_token#rotate', 'url' => '/agent/v1/tokens/{id}/rotate', 'verb' => 'POST', 'requirements' => ['id' => '\\d+']],
 
 		// ── F24 sibling draft-ingress (capability-advertised) ───────
 		['name' => 'ingressApi#createDraft', 'url' => '/api/ingress/drafts', 'verb' => 'POST'],

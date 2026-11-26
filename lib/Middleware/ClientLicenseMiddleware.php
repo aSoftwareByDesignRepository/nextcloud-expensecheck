@@ -37,6 +37,12 @@ class ClientLicenseMiddleware extends Middleware
 		if (!str_starts_with($path, '/api/mobile')) {
 			return;
 		}
+		// Scoped agent tokens (X-ExpenseCheck-Agent) are verified and gated by
+		// AgentAuthMiddleware — an invalid token dies there, so skipping the
+		// Basic/seat gate here cannot smuggle an unauthenticated request in.
+		if (trim((string)$this->request->getHeader('X-ExpenseCheck-Agent')) !== '') {
+			return;
+		}
 		if (!$this->usesBasicAppPassword()) {
 			throw CompanionException::licenseRequired();
 		}

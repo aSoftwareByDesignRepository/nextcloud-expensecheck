@@ -21,6 +21,7 @@ use OCA\ExpenseCheck\Service\SettingsService;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\AppFramework\Http\Attribute\NoCSRFRequired;
+use OCP\AppFramework\Http\Attribute\PublicPage;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\IRequest;
 
@@ -106,6 +107,7 @@ class MobileApiController extends AApiController
 	}
 
 	#[NoAdminRequired]
+	#[PublicPage]  // agent tokens never create a session — uid() is the auth gate
 	#[NoCSRFRequired]
 	public function listClaims(): JSONResponse
 	{
@@ -116,6 +118,7 @@ class MobileApiController extends AApiController
 	}
 
 	#[NoAdminRequired]
+	#[PublicPage]  // agent tokens never create a session — uid() is the auth gate
 	#[NoCSRFRequired]
 	public function createClaim(): JSONResponse
 	{
@@ -158,6 +161,7 @@ class MobileApiController extends AApiController
 	}
 
 	#[NoAdminRequired]
+	#[PublicPage]  // agent tokens never create a session — uid() is the auth gate
 	#[NoCSRFRequired]
 	public function showClaim(): JSONResponse
 	{
@@ -167,6 +171,7 @@ class MobileApiController extends AApiController
 	}
 
 	#[NoAdminRequired]
+	#[PublicPage]  // agent tokens never create a session — uid() is the auth gate
 	#[NoCSRFRequired]
 	public function submitClaim(): JSONResponse
 	{
@@ -179,6 +184,7 @@ class MobileApiController extends AApiController
 	}
 
 	#[NoAdminRequired]
+	#[PublicPage]  // agent tokens never create a session — uid() is the auth gate
 	#[NoCSRFRequired]
 	public function withdrawClaim(): JSONResponse
 	{
@@ -190,6 +196,7 @@ class MobileApiController extends AApiController
 	}
 
 	#[NoAdminRequired]
+	#[PublicPage]  // agent tokens never create a session — uid() is the auth gate
 	#[NoCSRFRequired]
 	public function decide(): JSONResponse
 	{
@@ -203,6 +210,7 @@ class MobileApiController extends AApiController
 	}
 
 	#[NoAdminRequired]
+	#[PublicPage]  // agent tokens never create a session — uid() is the auth gate
 	#[NoCSRFRequired]
 	public function inbox(): JSONResponse
 	{
@@ -214,6 +222,7 @@ class MobileApiController extends AApiController
 	}
 
 	#[NoAdminRequired]
+	#[PublicPage]  // agent tokens never create a session — uid() is the auth gate
 	#[NoCSRFRequired]
 	public function lookups(): JSONResponse
 	{
@@ -222,6 +231,7 @@ class MobileApiController extends AApiController
 	}
 
 	#[NoAdminRequired]
+	#[PublicPage]  // agent tokens never create a session — uid() is the auth gate
 	#[NoCSRFRequired]
 	public function receiptsInbox(): JSONResponse
 	{
@@ -250,6 +260,7 @@ class MobileApiController extends AApiController
 	}
 
 	#[NoAdminRequired]
+	#[PublicPage]  // agent tokens never create a session — uid() is the auth gate
 	#[NoCSRFRequired]
 	public function uploadReceipt(): JSONResponse
 	{
@@ -267,6 +278,7 @@ class MobileApiController extends AApiController
 	}
 
 	#[NoAdminRequired]
+	#[PublicPage]  // agent tokens never create a session — uid() is the auth gate
 	#[NoCSRFRequired]
 	public function fileReceipt(): JSONResponse
 	{
@@ -297,6 +309,7 @@ class MobileApiController extends AApiController
 	}
 
 	#[NoAdminRequired]
+	#[PublicPage]  // agent tokens never create a session — uid() is the auth gate
 	#[NoCSRFRequired]
 	public function uploadAttachment(): JSONResponse
 	{

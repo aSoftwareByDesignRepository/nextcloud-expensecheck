@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\ExpenseCheck\Service;
 
+use OCA\ExpenseCheck\Agent\AgentContext;
 use OCA\ExpenseCheck\AppInfo\Application;
 use OCA\ExpenseCheck\Exception\AppAccessDeniedException;
 use OCP\IConfig;
@@ -55,11 +56,18 @@ class AccessControlService
 		private IGroupManager $groupManager,
 		private IUserManager $userManager,
 		private IUserSession $userSession,
+		private ?AgentContext $agentContext = null,
 	) {
 	}
 
 	public function currentUserId(): string
 	{
+		// Scoped agent tokens carry their own uid — AgentAuthMiddleware arms
+		// the context after verifying the token, so an armed context is a
+		// verified identity, not a header claim.
+		if ($this->agentContext !== null && $this->agentContext->isArmed()) {
+			return (string)$this->agentContext->uid();
+		}
 		$user = $this->userSession->getUser();
 		if ($user === null) {
 			throw new \RuntimeException('not_authenticated');

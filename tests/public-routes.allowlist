@@ -25,6 +25,13 @@ adminApi#saveFxRate|POST|/api/admin/fx-rates|
 adminApi#saveManagerMap|POST|/api/admin/manager-map|
 adminApi#saveRate|POST|/api/admin/rates|
 adminApi#verifyJournal|GET|/api/admin/journal/{claimId}/verify|
+agent_manifest#show|GET|/agent/v1/manifest|
+agent_token#audit|GET|/agent/v1/audit|
+agent_token#index|GET|/agent/v1/tokens|
+agent_token#mint|POST|/agent/v1/tokens|
+agent_token#revoke|POST|/agent/v1/tokens/{id}/revoke|
+agent_token#rotate|POST|/agent/v1/tokens/{id}/rotate|
+agent_token#updatePolicy|POST|/agent/v1/policy|
 claimApi#clone|POST|/api/claims/{id}/clone|
 claimApi#create|POST|/api/claims|
 claimApi#decide|POST|/api/claims/{id}/decisions|
@@ -50,9 +57,9 @@ integrationsApi#mcSegments|GET|/api/integrations/mc/segments|
 integrationsApi#summary|GET|/api/integrations/summary|
 license#apply|POST|/api/license|
 license#assignSeat|POST|/api/license/seats|
-license#remove|DELETE|/api/license|
-license#removeSeat|DELETE|/api/license/seats/{uid}|
 license#removeSeatPost|POST|/api/license/seats/remove|
+license#removeSeat|DELETE|/api/license/seats/{uid}|
+license#remove|DELETE|/api/license|
 license#seats|GET|/api/license/seats|
 license#show|GET|/api/license|
 mobileApi#bootstrap|GET|/api/mobile/bootstrap|
@@ -68,6 +75,8 @@ mobileApi#submitClaim|POST|/api/mobile/claims/{id}/submit|
 mobileApi#uploadAttachment|POST|/api/mobile/claims/{id}/attachments|
 mobileApi#uploadReceipt|POST|/api/mobile/receipts-inbox|
 mobileApi#withdrawClaim|POST|/api/mobile/claims/{id}/withdraw|
+onboardingApi#dismiss|POST|/api/onboarding/dismiss|
+onboardingApi#show|GET|/api/onboarding|
 page#allClaims|GET|/all|
 page#categories|GET|/categories|
 page#chains|GET|/chains|
@@ -82,8 +91,8 @@ page#newClaim|GET|/claims/new|
 page#rates|GET|/rates|
 page#receiptsInbox|GET|/receipts|
 page#reports|GET|/reports|
-page#settings|GET|/settings|
 page#settingsSection|GET|/settings/{section}|
+page#settings|GET|/settings|
 page#settlementDetail|GET|/settlements/{batchId}|
 page#settlements|GET|/settlements|
 receiptsApi#delete|DELETE|/api/receipts-inbox/{id}|
@@ -91,6 +100,7 @@ receiptsApi#download|GET|/api/receipts-inbox/{id}/download|
 receiptsApi#file|POST|/api/receipts-inbox/{id}/file|
 receiptsApi#list|GET|/api/receipts-inbox|
 receiptsApi#upload|POST|/api/receipts-inbox|
+reportsApi#summary|GET|/api/reports/summary|
 settingsApi#get|GET|/api/settings|
 settingsApi#save|POST|/api/settings|
 settlementApi#closePeriod|POST|/api/periods/{id}/close|
@@ -109,6 +119,3 @@ transferApi#export|POST|/api/admin/transfer/export|
 transferApi#preview|POST|/api/admin/transfer/preview|
 transferApi#reconcile|POST|/api/admin/transfer/reconcile|
 transferApi#status|GET|/api/admin/transfer/status|
-reportsApi#summary|GET|/api/reports/summary|
-onboardingApi#show|GET|/api/onboarding|
-onboardingApi#dismiss|POST|/api/onboarding/dismiss|

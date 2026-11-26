@@ -26,6 +26,8 @@ $expSectionUrls = (array)($_['settingsSectionUrls'] ?? []);
 	<?php endif; ?>
 	<?php if ($expSection === 'transfer'): ?>
 		<?php include __DIR__ . '/../parts/settings/transfer.php'; ?>
+	<?php elseif ($expSection === 'agent'): ?>
+		<?php include __DIR__ . '/../parts/settings/agent.php'; ?>
 	<?php elseif ($expSection === 'support'): ?>
 		<?php include __DIR__ . '/../parts/settings/support.php'; ?>
 	<?php else: ?>

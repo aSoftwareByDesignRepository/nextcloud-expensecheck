@@ -448,12 +448,15 @@ ExpenseCheck ведёт возмещение расходов сотрудник
 		</pre-migration>
 		<post-migration>
 			<step>OCA\ExpenseCheck\Repair\EnsureExpenseCheckSchema</step>
+			<step>OCA\ExpenseCheck\Repair\EnsureAgentTables</step>
 		</post-migration>
 		<install>
 			<step>OCA\ExpenseCheck\Repair\EnsureExpenseCheckSchema</step>
+			<step>OCA\ExpenseCheck\Repair\EnsureAgentTables</step>
 		</install>
 		<uninstall>
 			<step>OCA\ExpenseCheck\Repair\UninstallDropTables</step>
+			<step>OCA\ExpenseCheck\Repair\UninstallAgentTables</step>
 		</uninstall>
 	</repair-steps>
 	<commands>

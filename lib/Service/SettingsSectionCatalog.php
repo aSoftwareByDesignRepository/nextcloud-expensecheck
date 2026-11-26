@@ -14,7 +14,7 @@ use OCP\IL10N;
  */
 final class SettingsSectionCatalog
 {
-	public const SLUGS = ['general', 'access', 'transfer', 'support'];
+	public const SLUGS = ['general', 'access', 'agent', 'transfer', 'support'];
 
 	/**
 	 * @return array<string,string> slug => localized label
@@ -24,6 +24,7 @@ final class SettingsSectionCatalog
 		return [
 			'general' => $l10n->t('General'),
 			'access' => $l10n->t('Access'),
+			'agent' => $l10n->t('AI access (MCP)'),
 			'transfer' => $l10n->t('Transfer'),
 			'support' => $l10n->t('Support & us'),
 		];

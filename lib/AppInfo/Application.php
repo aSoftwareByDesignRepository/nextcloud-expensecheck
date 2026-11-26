@@ -9,7 +9,9 @@ use OCP\Files\IRootFolder;
 use OCP\App\IAppManager;
 use OCA\ExpenseCheck\Service\UpgradeBackupService;
 use OCA\ExpenseCheck\Repair\BackupBeforeUpdate;
+use OCA\ExpenseCheck\Repair\EnsureAgentTables;
 use OCA\ExpenseCheck\Repair\EnsureExpenseCheckSchema;
+use OCA\ExpenseCheck\Repair\UninstallAgentTables;
 use OCA\ExpenseCheck\Repair\UninstallDropTables;
 use OCA\ExpenseCheck\Middleware\ApiExceptionMiddleware;
 use OCA\ExpenseCheck\Middleware\AppAccessMiddleware;
@@ -39,12 +41,48 @@ class Application extends App implements IBootstrap
 		$context->registerMiddleware(AppAccessMiddleware::class);
 		$context->registerMiddleware(ClientLicenseMiddleware::class);
 
+		// _shared/agent-auth pack — scoped AI-agent tokens (suite MCP contract)
+		$context->registerService(\OCA\ExpenseCheck\Agent\AgentManifest::class, function ($c) {
+			return new \OCA\ExpenseCheck\Agent\AgentManifest(
+				'expensecheck',
+				\dirname(__DIR__, 2) . '/appinfo/agent-manifest.json'
+			);
+		});
+		$context->registerService(\OCA\ExpenseCheck\Agent\AgentSeatGate::class, function ($c) {
+			return new \OCA\ExpenseCheck\Agent\ExpenseCheckAgentSeatGate(
+				$c->get(\OCA\ExpenseCheck\Service\LicenseService::class)
+			);
+		});
+		$context->registerService(\OCA\ExpenseCheck\Agent\AgentAccessGate::class, function ($c) {
+			return new \OCA\ExpenseCheck\Agent\ExpenseCheckAgentAccessGate(
+				$c->get(\OCA\ExpenseCheck\Service\AccessControlService::class),
+				$c->get(\OCP\IGroupManager::class)
+			);
+		});
+		$context->registerService(\OCA\ExpenseCheck\Middleware\AgentAuthMiddleware::class, function ($c) {
+			return new \OCA\ExpenseCheck\Middleware\AgentAuthMiddleware(
+				$c->get(\OCP\IRequest::class),
+				$c->get(\OCA\ExpenseCheck\Agent\AgentContext::class),
+				$c->get(\OCA\ExpenseCheck\Agent\AgentTokenService::class),
+				$c->get(\OCA\ExpenseCheck\Agent\AgentManifest::class),
+				$c->get(\OCA\ExpenseCheck\Agent\AgentSeatGate::class),
+				$c->get(\OCA\ExpenseCheck\Agent\AgentAuditMapper::class),
+				$c->get(\Psr\Log\LoggerInterface::class),
+				'expensecheck'
+			);
+		});
+		$context->registerMiddleware(\OCA\ExpenseCheck\Middleware\AgentAuthMiddleware::class);
+
 		$context->registerCapability(\OCA\ExpenseCheck\Capabilities::class);
 		$context->registerNotifierService(\OCA\ExpenseCheck\Notification\Notifier::class);
 		$context->registerDashboardWidget(\OCA\ExpenseCheck\Dashboard\ExpenseWidget::class);
 		$context->registerEventListener(
 			\OCP\User\Events\UserDeletedEvent::class,
 			\OCA\ExpenseCheck\Listener\UserDeletedListener::class
+		);
+		$context->registerEventListener(
+			\OCP\User\Events\UserDeletedEvent::class,
+			\OCA\ExpenseCheck\Listener\AgentUserDeletedListener::class
 		);
 
 		// ── Config & data transfer (test → production, spec §12.6) ──────
@@ -149,6 +187,18 @@ class Application extends App implements IBootstrap
 				$c->get(\OCP\IDBConnection::class),
 				$c->get(\OCP\IConfig::class),
 				$c->get(IRootFolder::class),
+			);
+		});
+
+		$context->registerService(EnsureAgentTables::class, function ($c): EnsureAgentTables {
+			return new EnsureAgentTables(
+				$c->get(\OCP\IDBConnection::class),
+			);
+		});
+
+		$context->registerService(UninstallAgentTables::class, function ($c): UninstallAgentTables {
+			return new UninstallAgentTables(
+				$c->get(\OCP\IDBConnection::class),
 			);
 		});
 

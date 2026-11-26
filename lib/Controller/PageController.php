@@ -67,6 +67,7 @@ class PageController extends Controller
 		private readonly LicenseService $licenseService,
 		private readonly IUserManager $userManager,
 		private readonly \OCA\ExpenseCheck\Db\SettlementBatchMapper $batches,
+		private readonly ?\OCA\ExpenseCheck\Agent\AgentSettingsPayload $agentSettings = null,
 	) {
 		parent::__construct($appName, $request);
 	}
@@ -456,6 +457,11 @@ class PageController extends Controller
 			return new NotFoundResponse();
 		}
 		$params = ['settingsSection' => $section];
+		if ($section === 'agent' && $this->agentSettings !== null) {
+			$params['agentAccess'] = $this->agentSettings->payload($this->access->currentUserId());
+			Util::addScript(Application::APP_ID, 'agent-access');
+			Util::addStyle(Application::APP_ID, 'agent-access');
+		}
 		if ($section === 'support') {
 			$params['supportUsLinks'] = new \OCA\ExpenseCheck\Support\SupportUsLinks(
 				'ExpenseCheck',

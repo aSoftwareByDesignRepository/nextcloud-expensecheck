@@ -132,9 +132,34 @@ final class NoNoFenceTest extends TestCase
 
 	public function testNn07NoPublicAttachmentSurface(): void
 	{
+		// #[PublicPage] is legitimate exactly on manifest-declared agent
+		// methods: scoped agent tokens never establish a session (NN-10),
+		// so the framework login gate would kill the request before
+		// AgentAuthMiddleware runs. Everywhere else it is forbidden.
+		$allowed = [];
+		$manifest = json_decode(
+			(string)file_get_contents(self::ROOT . '/tests/contracts/agent-tools.json'),
+			true
+		);
+		foreach (($manifest['tools'] ?? []) as $tool) {
+			$allowed[(string)explode('#', (string)$tool['route'])[1]] = true;
+		}
 		foreach (self::files('lib/Controller', '*.php') as $f) {
+			if (str_starts_with(basename($f), 'Agent')) {
+				continue;
+			}
 			$src = (string)file_get_contents($f);
-			$this->assertStringNotContainsString('PublicPage', $src, basename($f));
+			foreach (explode("\n", $src) as $i => $line) {
+				if (!str_contains($line, 'PublicPage') || str_starts_with(ltrim($line), 'use ')) {
+					continue;
+				}
+				// the attribute must sit directly above an agent-declared method
+				$next = $src;
+				$rest = implode("\n", array_slice(explode("\n", $src), $i, 8));
+				$hit = preg_match('/public function (\w+)\(/', $rest, $m) === 1
+					&& isset($allowed[$m[1]]);
+				$this->assertTrue($hit, basename($f) . ": PublicPage on a non-agent method (line " . ($i + 1) . ")");
+			}
 			$this->assertStringNotContainsString('ShareAPI', $src, basename($f));
 		}
 		$routes = (string)file_get_contents(self::ROOT . '/appinfo/routes.php');
