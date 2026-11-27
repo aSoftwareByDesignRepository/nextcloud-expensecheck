@@ -68,7 +68,8 @@ class Application extends App implements IBootstrap
 				$c->get(\OCA\ExpenseCheck\Agent\AgentSeatGate::class),
 				$c->get(\OCA\ExpenseCheck\Agent\AgentAuditMapper::class),
 				$c->get(\Psr\Log\LoggerInterface::class),
-				'expensecheck'
+				'expensecheck',
+				$c->query(\OCA\ExpenseCheck\Agent\AgentWebhookDispatcher::class)
 			);
 		});
 		$context->registerMiddleware(\OCA\ExpenseCheck\Middleware\AgentAuthMiddleware::class);

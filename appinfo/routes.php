@@ -178,6 +178,10 @@ return [
 		['name' => 'agent_token#updatePolicy', 'url' => '/agent/v1/policy', 'verb' => 'POST'],
 		['name' => 'agent_token#revoke', 'url' => '/agent/v1/tokens/{id}/revoke', 'verb' => 'POST', 'requirements' => ['id' => '\\d+']],
 		['name' => 'agent_token#rotate', 'url' => '/agent/v1/tokens/{id}/rotate', 'verb' => 'POST', 'requirements' => ['id' => '\\d+']],
+		['name' => 'agent_webhook#index', 'url' => '/agent/v1/webhooks', 'verb' => 'GET'],
+		['name' => 'agent_webhook#create', 'url' => '/agent/v1/webhooks', 'verb' => 'POST'],
+		['name' => 'agent_webhook#delete', 'url' => '/agent/v1/webhooks/{id}', 'verb' => 'DELETE', 'requirements' => ['id' => '\\d+']],
+		['name' => 'agent_webhook#test', 'url' => '/agent/v1/webhooks/{id}/test', 'verb' => 'POST', 'requirements' => ['id' => '\\d+']],
 
 		// ── F24 sibling draft-ingress (capability-advertised) ───────
 		['name' => 'ingressApi#createDraft', 'url' => '/api/ingress/drafts', 'verb' => 'POST'],
