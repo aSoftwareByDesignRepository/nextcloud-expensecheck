@@ -63,8 +63,7 @@ $exp_tokens = is_array($exp_state['tokens']) ? $exp_state['tokens'] : [];
 			<tbody id="exp-agent-tbody">
 				<?php foreach ($exp_tokens as $exp_tok): ?>
 				<tr data-token-id="<?php p((string)($exp_tok['id'] ?? '')); ?>" data-token-label="<?php p((string)($exp_tok['label'] ?? '')); ?>"<?php if (($exp_tok['state'] ?? '') !== 'active'): ?> class="exp-agent-row--inactive"<?php endif; ?>>
-					<td data-cell="<?php p($l->t('Label')); ?>">
-						<span class="exp-agent-label"><?php p((string)($exp_tok['label'] ?? '')); ?></span>
+					<td data-cell="<?php p($l->t('Label')); ?>" class="exp-agent-label-cell"><span class="exp-agent-labelcell"><span class="exp-agent-label" title="<?php p((string)($exp_tok['label'] ?? '')); ?>"><?php p((string)($exp_tok['label'] ?? '')); ?></span>
 						<?php if (($exp_tok['state'] ?? '') === 'revoked'): ?>
 							<span class="exp-badge exp-badge--neutral"><?php p($l->t('Revoked')); ?></span>
 						<?php elseif (($exp_tok['state'] ?? '') === 'expired'): ?>
@@ -74,9 +73,8 @@ $exp_tokens = is_array($exp_state['tokens']) ? $exp_state['tokens'] : [];
 						<?php endif; ?>
 						<?php if ($exp_state['isAdmin'] && ($exp_tok['userId'] ?? '') !== ''): ?>
 							<span class="exp-agent-owner"><?php p((string)$exp_tok['userId']); ?></span>
-						<?php endif; ?>
-					</td>
-					<td data-cell="<?php p($l->t('Scopes')); ?>">
+						<?php endif; ?></span></td>
+					<td data-cell="<?php p($l->t('Scopes')); ?>" class="exp-agent-scopes-cell">
 						<span class="exp-agent-scopes">
 						<?php foreach (($exp_tok['scopes'] ?? []) as $exp_scope): ?>
 							<span class="exp-badge exp-badge--neutral exp-agent-scope" title="<?php p((string)$exp_scope); ?>"><?php p((string)($exp_state['scopeLabels'][$exp_scope] ?? $exp_scope)); ?></span>
@@ -103,6 +101,25 @@ $exp_tokens = is_array($exp_state['tokens']) ? $exp_state['tokens'] : [];
 		<?php endif; ?>
 	</div>
 	<?php endif; ?>
+
+	<div class="exp-agent-webhooks" id="exp-agent-webhooks">
+		<h3 class="exp-agent-sub-h" id="exp-agent-webhooks-h"><?php p($l->t('Webhook endpoints')); ?></h3>
+		<p class="exp-form-row__hint"><?php p($l->t('Your AI assistant can register endpoints that receive a signed notification whenever it changes something here. They belong to you — test or revoke them any time.')); ?></p>
+		<div class="exp-table-wrap exp-agent-tablewrap" tabindex="0" role="region" aria-labelledby="exp-agent-webhooks-h">
+			<table class="exp-table exp-table--cards exp-agent-table" id="exp-agent-webhook-table">
+				<thead>
+					<tr>
+						<th scope="col"><?php p($l->t('Endpoint')); ?></th>
+						<th scope="col"><?php p($l->t('Events')); ?></th>
+						<th scope="col"><?php p($l->t('State')); ?></th>
+						<th scope="col"><?php p($l->t('Last delivery')); ?></th>
+						<th scope="col"><span class="exp-visually-hidden"><?php p($l->t('Actions')); ?></span></th>
+					</tr>
+				</thead>
+				<tbody id="exp-agent-webhook-tbody"></tbody>
+			</table>
+		</div>
+	</div>
 
 	<?php if ($exp_state['isAdmin']): ?>
 	<div class="exp-form-row exp-agent-selfmint">

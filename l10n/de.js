@@ -796,6 +796,12 @@ OC.L10N.register(
 	"upload" : "upload",
 	"will be skipped" : "wird übersprungen",
 	"{n} pending" : "{n} ausstehend",
-	"… and %n more" : "… und %n weitere"
+	"… and %n more" : "… und %n weitere",
+	"Endpoint" : "Endpunkt",
+	"Events" : "Ereignisse",
+	"Last delivery" : "Letzte Zustellung",
+	"State" : "Status",
+	"Webhook endpoints" : "Webhook-Endpunkte",
+	"Your AI assistant can register endpoints that receive a signed notification whenever it changes something here. They belong to you — test or revoke them any time." : "Ihr KI-Assistent kann Endpunkte registrieren, die eine signierte Benachrichtigung erhalten, wenn er hier etwas ändert. Sie gehören Ihnen — testen oder widerrufen Sie sie jederzeit."
 	}
 );
