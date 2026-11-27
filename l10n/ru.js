@@ -796,6 +796,22 @@ OC.L10N.register(
 	"upload" : "upload",
 	"will be skipped" : "будет пропущено",
 	"{n} pending" : "{n} ",
-	"… and %n more" : "… и ещё %n"
+	"… and %n more" : "… и ещё %n",
+	"Endpoint" : "Конечная точка",
+	"Events" : "События",
+	"Last delivery" : "Последняя доставка",
+	"State" : "Состояние",
+	"Webhook endpoints" : "Конечные точки вебхуков",
+	"Your AI assistant can register endpoints that receive a signed notification whenever it changes something here. They belong to you — test or revoke them any time." : "Ваш ИИ-ассистент может регистрировать конечные точки, которые получают подписанное уведомление всякий раз, когда он что-то здесь меняет. Они принадлежат вам — проверяйте или отзывайте их в любое время.",
+	"All events" : "Все события",
+	"Could not queue the test." : "Не удалось поставить тест в очередь.",
+	"Disabled" : "Отключено",
+	"Endpoint revoked." : "Конечная точка отозвана.",
+	"Endpoints could not be loaded." : "Не удалось загрузить конечные точки.",
+	"No webhook endpoints yet." : "Пока нет конечных точек вебхуков.",
+	"Pending events are dropped — your AI can register a new endpoint any time." : "Ожидающие события удаляются — ваш ИИ может зарегистрировать новую конечную точку в любое время.",
+	"Stop notifications to" : "Остановить уведомления для",
+	"Test" : "Тест",
+	"Test notification queued — check your endpoint." : "Тестовое уведомление поставлено в очередь — проверьте вашу конечную точку."
 	}
 );

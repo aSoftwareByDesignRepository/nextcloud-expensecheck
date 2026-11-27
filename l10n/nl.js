@@ -796,6 +796,22 @@ OC.L10N.register(
 	"upload" : "upload",
 	"will be skipped" : "wordt overgeslagen",
 	"{n} pending" : "{n} in behandeling",
-	"… and %n more" : "… en nog %n"
+	"… and %n more" : "… en nog %n",
+	"Endpoint" : "Eindpunt",
+	"Events" : "Gebeurtenissen",
+	"Last delivery" : "Laatste levering",
+	"State" : "Status",
+	"Webhook endpoints" : "Webhook-eindpunten",
+	"Your AI assistant can register endpoints that receive a signed notification whenever it changes something here. They belong to you — test or revoke them any time." : "Je AI-assistent kan eindpunten registreren die een ondertekende melding ontvangen wanneer hij hier iets wijzigt. Ze zijn van jou — test of herroep ze op elk moment.",
+	"All events" : "Alle gebeurtenissen",
+	"Could not queue the test." : "De test kon niet in de wachtrij worden gezet.",
+	"Disabled" : "Uitgeschakeld",
+	"Endpoint revoked." : "Eindpunt herroepen.",
+	"Endpoints could not be loaded." : "Eindpunten konden niet worden geladen.",
+	"No webhook endpoints yet." : "Nog geen webhook-eindpunten.",
+	"Pending events are dropped — your AI can register a new endpoint any time." : "Gebeurtenissen in behandeling worden verwijderd — je AI kan op elk moment een nieuw eindpunt registreren.",
+	"Stop notifications to" : "Stoppen van meldingen aan",
+	"Test" : "Testen",
+	"Test notification queued — check your endpoint." : "Testmelding in wachtrij — controleer je eindpunt."
 	}
 );

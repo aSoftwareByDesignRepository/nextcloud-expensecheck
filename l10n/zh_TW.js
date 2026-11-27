@@ -796,6 +796,22 @@ OC.L10N.register(
 	"upload" : "upload",
 	"will be skipped" : "將被跳過",
 	"{n} pending" : "{n} 待處理 項",
-	"… and %n more" : "……還有 %n 筆"
+	"… and %n more" : "……還有 %n 筆",
+	"Endpoint" : "端點",
+	"Events" : "事件",
+	"Last delivery" : "上次送達",
+	"State" : "狀態",
+	"Webhook endpoints" : "Webhook 端點",
+	"Your AI assistant can register endpoints that receive a signed notification whenever it changes something here. They belong to you — test or revoke them any time." : "你的 AI 助理可以註冊端點，每當它在此變更內容時，這些端點都會收到簽章通知。它們屬於你——可以隨時測試或撤銷。",
+	"All events" : "所有事件",
+	"Could not queue the test." : "無法將測試加入佇列。",
+	"Disabled" : "已停用",
+	"Endpoint revoked." : "端點已撤銷。",
+	"Endpoints could not be loaded." : "無法載入端點。",
+	"No webhook endpoints yet." : "尚未有 Webhook 端點。",
+	"Pending events are dropped — your AI can register a new endpoint any time." : "待處理的事件將被捨棄——你的 AI 可以隨時註冊新端點。",
+	"Stop notifications to" : "停止向以下位址傳送通知：",
+	"Test" : "測試",
+	"Test notification queued — check your endpoint." : "測試通知已排入佇列——請檢查你的端點。"
 	}
 );

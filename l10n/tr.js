@@ -796,6 +796,22 @@ OC.L10N.register(
 	"upload" : "upload",
 	"will be skipped" : "atlanacak",
 	"{n} pending" : "{n} bekliyor",
-	"… and %n more" : "… ve %n tane daha"
+	"… and %n more" : "… ve %n tane daha",
+	"Endpoint" : "Uç nokta",
+	"Events" : "Olaylar",
+	"Last delivery" : "Son teslimat",
+	"State" : "Durum",
+	"Webhook endpoints" : "Webhook uç noktaları",
+	"Your AI assistant can register endpoints that receive a signed notification whenever it changes something here. They belong to you — test or revoke them any time." : "Yapay zekâ asistanınız, burada bir şeyi değiştirdiğinde imzalı bildirim alan uç noktalar kaydedebilir. Bunlar size aittir — istediğiniz zaman test edin veya iptal edin.",
+	"All events" : "Tüm olaylar",
+	"Could not queue the test." : "Test kuyruğa alınamadı.",
+	"Disabled" : "Devre dışı",
+	"Endpoint revoked." : "Uç nokta iptal edildi.",
+	"Endpoints could not be loaded." : "Uç noktalar yüklenemedi.",
+	"No webhook endpoints yet." : "Henüz webhook uç noktası yok.",
+	"Pending events are dropped — your AI can register a new endpoint any time." : "Bekleyen olaylar atılır — yapay zekânız istediği zaman yeni bir uç nokta kaydedebilir.",
+	"Stop notifications to" : "Bildirimleri durdur:",
+	"Test" : "Test",
+	"Test notification queued — check your endpoint." : "Test bildirimi kuyruğa alındı — uç noktanızı kontrol edin."
 	}
 );

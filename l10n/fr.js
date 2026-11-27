@@ -796,6 +796,22 @@ OC.L10N.register(
 	"upload" : "upload",
 	"will be skipped" : "sera ignoré",
 	"{n} pending" : "{n} en attente",
-	"… and %n more" : "… et %n de plus"
+	"… and %n more" : "… et %n de plus",
+	"Endpoint" : "Point de terminaison",
+	"Events" : "Événements",
+	"Last delivery" : "Dernière remise",
+	"State" : "État",
+	"Webhook endpoints" : "Points de terminaison webhook",
+	"Your AI assistant can register endpoints that receive a signed notification whenever it changes something here. They belong to you — test or revoke them any time." : "Votre assistant IA peut enregistrer des points de terminaison qui reçoivent une notification signée chaque fois qu’il modifie quelque chose ici. Ils vous appartiennent — testez-les ou révoquez-les à tout moment.",
+	"All events" : "Tous les événements",
+	"Could not queue the test." : "Impossible de mettre le test en file.",
+	"Disabled" : "Désactivé",
+	"Endpoint revoked." : "Point de terminaison révoqué.",
+	"Endpoints could not be loaded." : "Les points de terminaison n’ont pas pu être chargés.",
+	"No webhook endpoints yet." : "Pas encore de points de terminaison webhook.",
+	"Pending events are dropped — your AI can register a new endpoint any time." : "Les événements en attente sont abandonnés — votre IA peut enregistrer un nouveau point de terminaison à tout moment.",
+	"Stop notifications to" : "Arrêter les notifications vers",
+	"Test" : "Tester",
+	"Test notification queued — check your endpoint." : "Notification de test mise en file — vérifiez votre point de terminaison."
 	}
 );
