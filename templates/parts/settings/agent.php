@@ -118,7 +118,7 @@ $exp_tokens = is_array($exp_state['tokens']) ? $exp_state['tokens'] : [];
 	<dialog id="exp-agent-mint-dialog" class="exp-dialog exp-agent-mint-dialog" aria-labelledby="exp-agent-mint-h">
 		<div class="exp-dialog__body">
 			<h3 id="exp-agent-mint-h"><?php p($l->t('Connect your AI')); ?></h3>
-			<form id="exp-agent-mint-form" novalidate>
+			<form id="exp-agent-mint-form" class="exp-form-stack" novalidate>
 				<div class="exp-form-row">
 					<label for="exp-agent-label"><?php p($l->t('Label')); ?></label>
 					<input type="text" id="exp-agent-label" name="label" maxlength="190" required autocomplete="off" placeholder="<?php p($l->t('Claude on my laptop')); ?>">
